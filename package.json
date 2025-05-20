@@ -13,10 +13,7 @@
     "format": "prettier --write .",
     "lint": "prettier --check .",
     "test:unit": "vitest",
-    "test": "npm run test:unit -- --run",
-    "db:types": "supabase-type-generator",
-    "predev": "npm run db:types",
-    "prebuild": "npm run db:types"
+    "test": "npm run test:unit -- --run"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.2.12",
