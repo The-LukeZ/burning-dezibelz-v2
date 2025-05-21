@@ -25,6 +25,7 @@ const supabase: Handle = async ({ event, resolve }) => {
     const {
       data: { session },
     } = await event.locals.supabase.auth.getSession();
+    console.log("session1", session);
     if (!session) {
       return { session: null, user: null };
     }
@@ -33,6 +34,7 @@ const supabase: Handle = async ({ event, resolve }) => {
       data: { user },
       error,
     } = await event.locals.supabase.auth.getUser();
+    console.log("user1", user);
     if (error) {
       // JWT validation has failed
       return { session: null, user: null };
@@ -57,7 +59,11 @@ const authGuard: Handle = async ({ event, resolve }) => {
   event.locals.session = session;
   event.locals.user = user;
 
-  if (!event.locals.session && event.url.pathname.startsWith("/dash") && event.url.pathname !== "/dash/login") {
+  if (
+    !event.locals.session &&
+    event.url.pathname.startsWith("/dash") &&
+    event.url.pathname !== "/dash/login"
+  ) {
     redirect(303, "/dash/login");
   }
 

@@ -1,13 +1,12 @@
-import { PUBLIC_SUPABASE_OAUTH_CALLBACK_URL } from "$env/static/public";
-import { supabaseAdmin } from "$lib/server/supabase.js";
 import { fail, redirect } from "@sveltejs/kit";
 
 export const actions = {
-  login: async () => {
-    const { data, error: err } = await supabaseAdmin.auth.signInWithOAuth({
+  login: async ({ url, locals: { supabase } }) => {
+    const { data, error: err } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: PUBLIC_SUPABASE_OAUTH_CALLBACK_URL,
+        redirectTo: `${url.origin}/api/google-auth/callback?next=/dash`,
+        skipBrowserRedirect: true,
       },
     });
 
