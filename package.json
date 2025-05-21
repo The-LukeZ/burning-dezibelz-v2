@@ -23,6 +23,7 @@
     "@tailwindcss/vite": "^4.1.7",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/svelte": "^5.2.4",
+    "@types/pikaday": "^1.7.9",
     "cross-env": "^7.0.3",
     "daisyui": "^5.0.35",
     "jsdom": "^26.0.0",
@@ -38,7 +39,12 @@
     "vitest": "^3.0.0"
   },
   "dependencies": {
+    "@sapphire/snowflake": "^3.5.5",
     "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.49.7"
+    "@supabase/supabase-js": "^2.49.7",
+    "dayjs": "^1.11.13",
+    "ky": "^1.8.1",
+    "pikaday": "^1.8.2",
+    "zod": "^3.25.17"
   }
 }
