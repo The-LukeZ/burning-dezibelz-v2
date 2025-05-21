@@ -26,10 +26,11 @@ declare global {
 
   interface Concert {
     id: string;
-    name: string | null;
-    date: string | null;
-    location_id: string;
-    notes: string[] | null;
+    type: "public" | "closed";
+    timestamp: string;
+    name: string;
+    venue_id: string;
+    notes: string | null;
     tickets:
       | {
           price: number | null;
@@ -51,7 +52,7 @@ declare global {
         };
   }
 
-  interface Location {
+  interface VenueDetails {
     id: string;
     name: string;
     address: string;
