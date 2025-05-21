@@ -1,13 +1,24 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { page } from "$app/state";
+  import { onMount } from "svelte";
 
-  let error = $derived(page.url.searchParams.get("error") ?? null);
+  let error = $state<string | null>(null);
+
+  onMount(() => {
+    const url = new URL(page.url);
+    if (url.searchParams.has("error")) {
+      error = url.searchParams.get("error")!;
+      url.searchParams.delete("error");
+      goto(url, { replaceState: true });
+    }
+  });
 </script>
 
 <!-- Login with Google | Uses @tailwindcss/forms -->
 <div class="flex h-dvh w-dvw flex-col items-center justify-center gap-4">
   {#if error}
-    <div class="dy-alert dy-alert-error w-full max-w-md">
+    <div class="dy-alert dy-alert-error w-xs justify-center px-8">
       <div>
         <strong>Error:</strong>
         {error}

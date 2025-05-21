@@ -1,9 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
+import type { User } from "@supabase/supabase-js";
 
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from "$env/static/public";
-import type { User } from "@supabase/supabase-js";
+
+const devToolsCheck: Handle = async ({ event, resolve }) => {
+  if (event.url.pathname.startsWith("/.well-known/appspecific/com.chrome.devtools")) {
+    console.debug("Serving empty DevTools response");
+    return new Response(null, { status: 204 }); // Return empty response with 204 No Content
+  }
+  return resolve(event);
+};
 
 const supabase: Handle = async ({ event, resolve }) => {
   /**
@@ -61,7 +69,7 @@ const authGuard: Handle = async ({ event, resolve }) => {
   event.locals.user = user;
 
   if (
-    !event.locals.session &&
+    !(event.locals.session && event.locals.user) &&
     event.url.pathname.startsWith("/dash") &&
     event.url.pathname !== "/dash/login"
   ) {
@@ -75,4 +83,4 @@ const authGuard: Handle = async ({ event, resolve }) => {
   return resolve(event);
 };
 
-export const handle = sequence(supabase, authGuard);
+export const handle = sequence(devToolsCheck, supabase, authGuard);
