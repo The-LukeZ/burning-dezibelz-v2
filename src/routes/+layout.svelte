@@ -14,7 +14,7 @@
    * for us during invalidation. Otherwise we'd be
    * initializing a client during every invalidation.
    */
-  let { supabase, session } = $derived(data);
+  let { supabase, session, user } = $derived(data);
 
   onMount(() => {
     const {

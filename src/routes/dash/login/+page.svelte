@@ -4,21 +4,21 @@
   let error = $derived(page.url.searchParams.get("error") ?? null);
 </script>
 
-{#if error}
-  <div class="dy-alert dy-alert-error">
-    <div>
-      <strong>Error:</strong>
-      {error}
-    </div>
-  </div>
-{/if}
-
 <!-- Login with Google | Uses @tailwindcss/forms -->
-<div class="grid h-dvh w-dvw place-items-center">
+<div class="flex h-dvh w-dvw flex-col items-center justify-center gap-4">
+  {#if error}
+    <div class="dy-alert dy-alert-error w-full max-w-md">
+      <div>
+        <strong>Error:</strong>
+        {error}
+      </div>
+    </div>
+  {/if}
+
   <form method="POST" action="?/login">
     <button
       type="submit"
-      class="dy-btn dy-btn-lg gap-2 bg-white px-4 text-black hover:bg-[#222222] hover:text-white"
+      class="dy-btn dy-btn-lg gap-2 bg-white px-4 text-black hover:bg-[#3b3b3b] hover:text-white"
     >
       <svg
         aria-label="Google logo"

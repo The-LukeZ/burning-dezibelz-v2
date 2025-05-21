@@ -3,6 +3,7 @@ import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from "$env/static/public";
+import type { User } from "@supabase/supabase-js";
 
 const supabase: Handle = async ({ event, resolve }) => {
   /**
@@ -25,7 +26,6 @@ const supabase: Handle = async ({ event, resolve }) => {
     const {
       data: { session },
     } = await event.locals.supabase.auth.getSession();
-    console.log("session1", session);
     if (!session) {
       return { session: null, user: null };
     }
@@ -34,13 +34,14 @@ const supabase: Handle = async ({ event, resolve }) => {
       data: { user },
       error,
     } = await event.locals.supabase.auth.getUser();
-    console.log("user1", user);
     if (error) {
       // JWT validation has failed
       return { session: null, user: null };
     }
 
-    return { session, user };
+    delete (session as { user?: User }).user;
+
+    return { user: user, session: Object.assign({}, session, { user }) };
   };
 
   return resolve(event, {
