@@ -114,7 +114,7 @@ export type Database = {
           address: string;
           city: string;
           country: string;
-          id: string;
+          id?: string;
           name: string;
           postal_code: string;
           state: string;
@@ -137,6 +137,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      count_concerts_on_date: {
+        Args: { concert_date: string };
+        Returns: number;
+      };
       get_concert_counts_per_venue: {
         Args: Record<PropertyKey, never>;
         Returns: {
