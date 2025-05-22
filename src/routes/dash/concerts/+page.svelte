@@ -147,8 +147,7 @@
       {#if metadata.concertsLoaded && eventStore.concerts.size > 0}
         {#each serializeConcerts() as concert}
           <tr
-            class="hover:bg-primary/15 cursor-pointer transition-colors duration-75"
-            onclick={() => showConcertDetails(concert)}
+            class="hover:bg-primary/15 transition-colors duration-75"
           >
             <td>{formatGermanDateTime(concert.timestamp)}</td>
             <td

@@ -78,10 +78,7 @@
     <tbody>
       {#if eventStore.venues.size > 0}
         {#each serializeVenues() as venue}
-          <tr
-            class="hover:bg-primary/15 transition-colors duration-75"
-            onclick={() => showVenueDetails(venue)}
-          >
+          <tr class="hover:bg-primary/15 transition-colors duration-75">
             <td>{venue.name}</td>
             <td>{venue.city}, {venue.country}</td>
             <td class="flex flex-col gap-1 sm:flex-row">
