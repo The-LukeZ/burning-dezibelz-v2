@@ -4,9 +4,9 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
-  import { eventStore, serializeConcerts } from "$lib/stores.svelte.js";
+  import { eventStore, metadata, serializeConcerts } from "$lib/stores.svelte.js";
   import type { Database, Tables } from "$lib/supabase.ts";
-  import { getConcertDisplayName, formatGermanDateTime, formatDateTimeLocal } from "$lib/utils/concerts.js";
+  import { formatDateTimeLocal, formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
 
   type Concert = Tables<"concerts">;
 
@@ -144,14 +144,17 @@
       </tr>
     </thead>
     <tbody>
-      {#if eventStore.concerts !== null && eventStore.concerts.size > 0}
+      {#if metadata.concertsLoaded && eventStore.concerts.size > 0}
         {#each serializeConcerts() as concert}
           <tr
             class="hover:bg-primary/15 cursor-pointer transition-colors duration-75"
             onclick={() => showConcertDetails(concert)}
           >
             <td>{formatGermanDateTime(concert.timestamp)}</td>
-            <td colspan={concert.type === "closed" ? 3 : 1} class="dy-glass text-center">
+            <td
+              colspan={concert.type === "closed" ? 3 : 1}
+              class={concert.type === "closed" ? "dy-glass text-center" : ""}
+            >
               <pre>{concert.type}</pre>
             </td>
             {#if concert.type === "public"}
@@ -188,9 +191,15 @@
             </td>
           </tr>
         {/each}
-      {:else if eventStore.concerts !== null && eventStore.concerts.size === 0}
+      {:else if metadata.concertsLoaded && eventStore.concerts.size === 0}
         <tr>
-          <td colspan="4">No concerts found.</td>
+          <td colspan="5" class="text-center">No concerts found.</td>
+        </tr>
+      {:else}
+        <tr>
+          <td colspan="5" class="text-center">
+            <span class="dy-loading dy-loading-dots"></span>
+          </td>
         </tr>
       {/if}
     </tbody>
@@ -198,214 +207,226 @@
 </div>
 
 <Modal bind:open={modalOpen} withXButton={false} class="w-full max-w-3xl sm:min-w-lg">
+  <div class="dy-join mb-4">
+    <button
+      name="details"
+      class="dy-join-item dy-btn dy-btn-secondary"
+      class:dy-btn-active={modalTab === "edit"}
+      onclick={() => (modalTab = "edit")}
+    >
+      Edit
+    </button>
+    <button
+      name="details"
+      class="dy-join-item dy-btn dy-btn-secondary"
+      class:dy-btn-active={modalTab === "raw"}
+      onclick={() => (modalTab = "raw")}
+    >
+      Raw
+    </button>
+  </div>
+
   {#if concert !== null}
-    <div class="dy-tabs gap-2">
-      <input
-        type="radio"
-        name="my_tabs_2"
-        class="dy-tab dy-btn checked:dy-btn-active"
-        aria-label="Edit"
-        checked
-      />
-      <div class="dy-tab-content">
-        <!-- Switch concert type -->
-        <div class="dy-join">
-          <button
-            class="dy-btn dy-btn-soft dy-join-item"
-            class:dy-btn-active={concert.type === "public"}
-            onclick={switchConcertType}>Public Concert</button
-          >
-          <button
-            class="dy-btn dy-btn-soft dy-join-item"
-            class:dy-btn-active={concert.type === "closed"}
-            onclick={switchConcertType}>Closed Concert</button
-          >
-        </div>
+    <div class="flex w-full max-w-md flex-col" class:hidden={modalTab !== "edit"}>
+      <!-- Switch concert type -->
+      <div class="dy-join mb-4">
+        <button
+          class="dy-btn dy-btn-soft dy-join-item"
+          class:dy-btn-active={concert.type === "public"}
+          onclick={switchConcertType}>Public Concert</button
+        >
+        <button
+          class="dy-btn dy-btn-soft dy-join-item"
+          class:dy-btn-active={concert.type === "closed"}
+          onclick={switchConcertType}>Closed Concert</button
+        >
+      </div>
 
-        {#if concert.type === "public"}
-          <fieldset class="dy-fieldset">
-            <legend class="dy-fieldset-legend">Name</legend>
-            <input
-              type="text"
-              bind:value={concert.name}
-              class="dy-input dy-input-warning"
-              placeholder="Using location name if not given"
-            />
-          </fieldset>
-        {/if}
-
+      {#if concert.type === "public"}
         <fieldset class="dy-fieldset">
-          <legend class="dy-fieldset-legend">Date & Time</legend>
+          <legend class="dy-fieldset-legend">Name</legend>
           <input
-            type="datetime-local"
-            bind:value={concert.timestamp}
+            type="text"
+            bind:value={concert.name}
             class="dy-input dy-input-warning"
-            placeholder="Select date and time"
+            placeholder="Using location name if not given"
           />
         </fieldset>
+      {/if}
 
-        {#if concert.type === "public"}
-          <fieldset class="dy-fieldset">
-            <legend class="dy-fieldset-legend">Venue</legend>
-            <SelectVenue
-              bind:show={venueSelector.open}
-              onselect={(venue) => {
-                concert!.venue_id = venue.id;
-                if (concert!.name === "" && venue.name) {
-                  concert!.name = venue.name;
-                }
-                venueSelector.open = false;
-              }}
-              clickoutside={() => {
-                venueSelector.open = false;
-              }}
-              exclude={concert.venue_id ? [concert.venue_id] : []}
-            >
-              <div class="flex flex-row items-center justify-start gap-2">
-                <div class="dy-input dy-input-warning items-center pr-1">
-                  {#key concert.venue_id}
-                    {#if concert.venue_id}
-                      {@const venue = eventStore.venues.get(concert.venue_id)}
-                      {venue ? venue.name : "Venue not found"}
-                    {:else}
-                      Select a venue
-                    {/if}
-                  {/key}
-                </div>
-                <label class="dy-btn dy-btn-circle dy-swap dy-swap-rotate">
-                  <input type="checkbox" bind:checked={venueSelector.open} />
-                  <ChevronDown class="dy-swap-off" />
-                  <XIcon class="dy-swap-on" />
-                </label>
-                {#if concert.venue_id}
-                  <button
-                    class="dy-btn dy-btn-square dy-btn-dash dy-btn-sm"
-                    onclick={() => {
-                      concert!.venue_id = null;
-                    }}
-                  >
-                    <Trashcan class="size-4" />
-                  </button>
-                {/if}
+      <fieldset class="dy-fieldset">
+        <legend class="dy-fieldset-legend">Date & Time</legend>
+        <input
+          type="datetime-local"
+          bind:value={concert.timestamp}
+          class="dy-input dy-input-warning"
+          placeholder="Select date and time"
+        />
+      </fieldset>
+
+      {#if concert.type === "public"}
+        <fieldset class="dy-fieldset">
+          <legend class="dy-fieldset-legend">Venue</legend>
+          <SelectVenue
+            bind:show={venueSelector.open}
+            onselect={(venue) => {
+              concert!.venue_id = venue.id;
+              if (concert && concert?.name) {
+                concert.name = venue.name;
+              }
+              venueSelector.open = false;
+            }}
+            clickoutside={() => {
+              venueSelector.open = false;
+            }}
+            exclude={concert.venue_id ? [concert.venue_id] : []}
+          >
+            <div class="flex flex-row items-center justify-start gap-2">
+              <div class="dy-input dy-input-warning items-center pr-1">
+                {#key concert.venue_id}
+                  {#if concert.venue_id}
+                    {@const venue = eventStore.venues.get(concert.venue_id)}
+                    {venue ? venue.name : "Venue not found"}
+                  {:else}
+                    Select a venue
+                  {/if}
+                {/key}
               </div>
-            </SelectVenue>
-
-            <p class="dy-label">
-              Venue not here? <a href="/dash/venues/new" class="dy-link hover:text-slate-300">
-                Add a new venue
-              </a>
-            </p>
-          </fieldset>
-
-          <fieldset class="dy-fieldset">
-            <legend class="dy-fieldset-legend">Tickets Settings</legend>
-            <div style="grid-template: 1fr auto / 1fr;" class="mb-4">
-              <div class="flex flex-col gap-4 sm:flex-row">
-                <label class="dy-label">
-                  <input
-                    type="checkbox"
-                    checked={ticketModes.online}
-                    class="dy-checkbox"
-                    onclick={() => {
-                      ticketModes.online = !ticketModes.online;
-                      if (!ticketModes.online && !ticketModes.abendkasse) {
-                        concert!.ticket_url = "";
-                        concert!.price = 0;
-                      }
-                    }}
-                    disabled={ticketModes.free}
-                  />
-                  With Ticket URL
-                </label>
-                <label class="dy-label">
-                  <input
-                    type="checkbox"
-                    checked={ticketModes.abendkasse}
-                    class="dy-checkbox"
-                    onclick={() => {
-                      ticketModes.abendkasse = !ticketModes.abendkasse;
-                      if (!ticketModes.online && !ticketModes.abendkasse) {
-                        concert!.ticket_url = "";
-                        concert!.price = 0;
-                      }
-                    }}
-                    disabled={ticketModes.free}
-                  />
-                  Abendkasse
-                </label>
-                <label class="dy-label">
-                  <input
-                    type="checkbox"
-                    checked={ticketModes.free}
-                    class="dy-checkbox"
-                    onclick={() => {
-                      ticketModes.free = !ticketModes.free;
-                      if (ticketModes.free) {
-                        concert!.price = 0;
-                        ticketModes.online = false;
-                        ticketModes.abendkasse = false;
-                      }
-                    }}
-                    disabled={ticketModes.online || ticketModes.abendkasse}
-                  />
-                  Free Entry
-                </label>
-              </div>
+              <label class="dy-btn dy-btn-circle dy-swap dy-swap-rotate">
+                <input type="checkbox" bind:checked={venueSelector.open} />
+                <ChevronDown class="dy-swap-off" />
+                <XIcon class="dy-swap-on" />
+              </label>
+              {#if concert.venue_id}
+                <button
+                  class="dy-btn dy-btn-square dy-btn-dash dy-btn-sm"
+                  onclick={() => {
+                    concert!.venue_id = null;
+                  }}
+                >
+                  <Trashcan class="size-4" />
+                </button>
+              {/if}
             </div>
+          </SelectVenue>
 
-            {#if ticketModes.online || ticketModes.abendkasse}
-              <!-- Price -->
-              <label class="dy-floating-label">
-                <span>Price</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="Price"
-                  class="dy-input dy-input-md"
-                  bind:value={concert.price}
-                />
-              </label>
-            {/if}
-
-            {#if ticketModes.online}
-              <!-- URL -->
-              <label class="dy-floating-label">
-                <span>Ticket URL</span>
-                <input
-                  type="url"
-                  placeholder="Ticket URL"
-                  class="dy-input dy-input-md"
-                  bind:value={concert.ticket_url}
-                  required
-                />
-              </label>
-            {/if}
-          </fieldset>
-        {:else}
-          <fieldset class="dy-fieldset">
-            <legend class="dy-fieldset-legend">Private Concert</legend>
-            <p class="dy-label">This concert is private and not open to the public.</p>
-          </fieldset>
-        {/if}
-
-        <fieldset class="dy-fieldset w-full max-w-xs">
-          <legend class="dy-fieldset-legend">Notes</legend>
-          <textarea
-            bind:value={concert.notes}
-            class="dy-textarea field-sizing-content max-h-50 w-full"
-            placeholder="Additional notes for the concert"
-            rows="3"
-          ></textarea>
+          <p class="dy-label">
+            Venue not here? <a href="/dash/venues/new" class="dy-link hover:text-slate-300">
+              Add a new venue
+            </a>
+          </p>
         </fieldset>
-      </div>
 
-      <input type="radio" name="my_tabs_2" class="dy-tab dy-btn checked:dy-btn-active" aria-label="Raw" />
-      <div class="dy-tab-content bg-base-200 mt-3 w-auto max-w-md overflow-x-auto rounded-md p-2 text-sm">
-        <pre>{JSON.stringify(concert, null, 2)}</pre>
-      </div>
+        <fieldset class="dy-fieldset">
+          <legend class="dy-fieldset-legend">Tickets Settings</legend>
+          <div style="grid-template: 1fr auto / 1fr;" class="mb-4">
+            <div class="flex flex-col gap-4 sm:flex-row">
+              <label class="dy-label">
+                <input
+                  type="checkbox"
+                  checked={ticketModes.online}
+                  class="dy-checkbox"
+                  onclick={() => {
+                    ticketModes.online = !ticketModes.online;
+                    if (!ticketModes.online && !ticketModes.abendkasse) {
+                      concert!.ticket_url = "";
+                      concert!.price = 0;
+                    }
+                  }}
+                  disabled={ticketModes.free}
+                />
+                With Ticket URL
+              </label>
+              <label class="dy-label">
+                <input
+                  type="checkbox"
+                  checked={ticketModes.abendkasse}
+                  class="dy-checkbox"
+                  onclick={() => {
+                    ticketModes.abendkasse = !ticketModes.abendkasse;
+                    if (!ticketModes.online && !ticketModes.abendkasse) {
+                      concert!.ticket_url = "";
+                      concert!.price = 0;
+                    }
+                  }}
+                  disabled={ticketModes.free}
+                />
+                Abendkasse
+              </label>
+              <label class="dy-label">
+                <input
+                  type="checkbox"
+                  checked={ticketModes.free}
+                  class="dy-checkbox"
+                  onclick={() => {
+                    ticketModes.free = !ticketModes.free;
+                    if (ticketModes.free) {
+                      concert!.price = 0;
+                      ticketModes.online = false;
+                      ticketModes.abendkasse = false;
+                    }
+                  }}
+                  disabled={ticketModes.online || ticketModes.abendkasse}
+                />
+                Free Entry
+              </label>
+            </div>
+          </div>
+
+          {#if ticketModes.online || ticketModes.abendkasse}
+            <!-- Price -->
+            <label class="dy-floating-label">
+              <span>Price</span>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Price"
+                class="dy-input dy-input-md"
+                bind:value={concert.price}
+              />
+            </label>
+          {/if}
+
+          {#if ticketModes.online}
+            <!-- URL -->
+            <label class="dy-floating-label">
+              <span>Ticket URL</span>
+              <input
+                type="url"
+                placeholder="Ticket URL"
+                class="dy-input dy-input-md"
+                bind:value={concert.ticket_url}
+                required
+              />
+            </label>
+          {/if}
+        </fieldset>
+      {:else}
+        <fieldset class="dy-fieldset">
+          <legend class="dy-fieldset-legend">Private Concert</legend>
+          <p class="dy-label">This concert is private and not open to the public.</p>
+        </fieldset>
+      {/if}
+
+      <fieldset class="dy-fieldset w-full max-w-xs">
+        <legend class="dy-fieldset-legend">Notes</legend>
+        <textarea
+          bind:value={concert.notes}
+          class="dy-textarea field-sizing-content max-h-50 w-full"
+          placeholder="Additional notes for the concert"
+          rows="3"
+        ></textarea>
+      </fieldset>
     </div>
 
-    <div class="mt-2 flex flex-row justify-center gap-4">
+    <div
+      class="bg-base-200 mt-3 w-auto max-w-md overflow-x-auto rounded-md p-2 text-sm"
+      class:hidden={modalTab !== "raw"}
+    >
+      <pre>{JSON.stringify(concert, null, 2)}</pre>
+    </div>
+
+    <div class="mt-6 flex flex-row justify-center gap-4">
       <button class="dy-btn dy-btn-error" onclick={closeDialog}>Cancel</button>
       <button class="dy-btn dy-btn-primary" disabled={loading} onclick={() => handleEdit(concert!.id)}>
         {loading ? "Saving..." : "Save"}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import Modal from "$lib/components/Modal.svelte";
-  import { eventStore, serializeVenues } from "$lib/stores.svelte.js";
+  import { eventStore, metadata, serializeVenues } from "$lib/stores.svelte.js";
 
   let selectedVenue = $state<VenueDetails | null>(null);
   let modalOpen = $state(false);
@@ -110,9 +110,15 @@
             </td>
           </tr>
         {/each}
-      {:else if eventStore.venues !== null && eventStore.venues.size === 0}
+      {:else if metadata.venuesLoaded && eventStore.venues.size === 0}
         <tr>
-          <td colspan="3">No venues found.</td>
+          <td colspan="5" class="text-center">No venues found.</td>
+        </tr>
+      {:else}
+        <tr>
+          <td colspan="5" class="text-center">
+            <span class="dy-loading dy-loading-dots"></span>
+          </td>
         </tr>
       {/if}
     </tbody>
@@ -123,7 +129,7 @@
   <div class="dy-join mb-4">
     <button
       name="details"
-      class="dy-join-item dy-btn dy-btn-soft"
+      class="dy-join-item dy-btn dy-btn-secondary"
       class:dy-btn-active={modalTab === "edit"}
       onclick={() => (modalTab = "edit")}
     >
@@ -131,7 +137,7 @@
     </button>
     <button
       name="details"
-      class="dy-join-item dy-btn dy-btn-soft"
+      class="dy-join-item dy-btn dy-btn-secondary"
       class:dy-btn-active={modalTab === "raw"}
       onclick={() => (modalTab = "raw")}
     >
