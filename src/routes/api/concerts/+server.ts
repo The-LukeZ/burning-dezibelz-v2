@@ -34,10 +34,10 @@ export async function GET({ url, locals: { supabase } }) {
 
   // Apply filters based on query parameters
   if (before) {
-    request.lt("timestamp", new Date(before));
+    request.lt("timestamp", new Date(before).toISOString());
   }
   if (after) {
-    request.gt("timestamp", new Date(after));
+    request.gt("timestamp", new Date(after).toISOString());
   }
 
   if (venueId) {
