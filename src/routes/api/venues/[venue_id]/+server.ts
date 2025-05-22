@@ -36,3 +36,16 @@ export async function PUT({ params: { venue_id }, request, locals: { supabase } 
 
   return Response.json(data);
 }
+
+export async function DELETE({ params: { venue_id }, locals: { supabase } }) {
+  const { error } = await supabase.from("venues").delete().eq("id", venue_id);
+
+  if (error) {
+    console.error("Error deleting venue:", error);
+    return Response.json({ error }, { status: 500 });
+  }
+
+  console.log("Deleted venue with ID:", venue_id);
+
+  return new Response(null, { status: 204 });
+}
