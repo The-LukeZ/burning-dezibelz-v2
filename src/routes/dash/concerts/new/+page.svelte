@@ -51,11 +51,14 @@
 
     // Validate required fields
     if (
+      !concert ||
       concert.timestamp === "" ||
-      (concert.type === "public" && !concert.name) ||
-      (concert.type === "public" && !concert.venue_id) ||
-      (ticketModes.online && !concert.ticket_url) ||
-      (ticketModes.online && concert.price && concert.price <= 0)
+      (concert.type === "public" &&
+        !(
+          concert.name &&
+          concert.venue_id &&
+          (ticketModes.online || ticketModes.abendkasse || ticketModes.free)
+        ))
     ) {
       error = "Please fill in all required fields.";
       loading = false;
