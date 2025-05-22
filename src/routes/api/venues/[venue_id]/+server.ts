@@ -8,3 +8,31 @@ export async function GET({ params: { venue_id }, locals: { supabase } }) {
 
   return Response.json(data);
 }
+
+export async function PUT({ params: { venue_id }, request, locals: { supabase } }) {
+  const { name, address, city, postal_code, state, country, ...rest } = await request.json();
+
+  let url = rest.url as string | undefined;
+  if (url?.endsWith("/")) {
+    url = url.replace(/\/+$/, "");
+  }
+
+  console.log("Updating venue with ID:", venue_id);
+  console.log("Request body:", { name, address, city, postal_code, state, country, url });
+
+  const { data, error } = await supabase
+    .from("venues")
+    .update({ name, address, city, postal_code, state, country, url })
+    .eq("id", venue_id)
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("Error updating venue:", error);
+    return Response.json({ error }, { status: 500 });
+  }
+
+  console.log("Updated venue data:", data);
+
+  return Response.json(data);
+}
