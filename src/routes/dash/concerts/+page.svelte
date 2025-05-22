@@ -16,24 +16,29 @@
     abendkasse: false,
     free: false,
   });
-  let modalOpen = $state(false);
-  let modalTab = $state<"edit" | "raw">("edit");
-  let venueSelector = $state({ open: false });
+  let modalState = $state<{
+    open: boolean;
+    tab: "edit" | "raw";
+    venueSelectorOpen: boolean;
+  }>({
+    open: false,
+    tab: "edit",
+    venueSelectorOpen: false,
+  });
   let loading = $state(false);
 
   function showConcertDetails(_concert: Concert) {
     concert = { ..._concert, timestamp: formatDateTimeLocal(_concert.timestamp) }; // Create a copy for editing
-    ticketModes = {
-      online: !!_concert.ticket_url,
-      abendkasse: _concert.abendkasse,
-      free: _concert.free,
-    };
-    modalTab = "edit";
-    modalOpen = true;
+    ticketModes.online = !!_concert.ticket_url;
+    ticketModes.abendkasse = _concert.abendkasse;
+    ticketModes.free = _concert.free;
+    modalState.venueSelectorOpen = false;
+    modalState.tab = "edit";
+    modalState.open = true;
   }
 
   function closeDialog() {
-    modalOpen = false;
+    modalState.open = false;
     setTimeout(() => {
       concert = null;
       ticketModes = {
@@ -44,14 +49,25 @@
     }, 150);
   }
 
-  function switchConcertType() {
+  function switchConcertType(newType: "public" | "closed") {
+    return () => {
+      if (!concert) return;
+      concert.type = newType;
+      if (concert.type === "closed") {
+        concert.venue_id = "";
+        concert.ticket_url = "";
+        concert.price = 0;
+      }
+    };
+  }
+
+  function setConcertVenue(venue: { id: string; name: string }) {
     if (!concert) return;
-    concert.type = concert.type === "public" ? "closed" : "public";
-    if (concert.type === "closed") {
-      concert.venue_id = "";
-      concert.ticket_url = "";
-      concert.price = 0;
+    concert.venue_id = venue.id;
+    if (concert.name === "") {
+      concert.name = venue.name;
     }
+    modalState.venueSelectorOpen = false;
   }
 
   async function handleDelete(concertId: string) {
@@ -74,30 +90,44 @@
     loading = true;
 
     // Validate required fields
-    if (
-      !concert ||
-      concert.timestamp === "" ||
-      (concert.type === "public" && !concert.name) ||
-      (concert.type === "public" && !concert.venue_id) ||
-      (ticketModes.online && !concert.ticket_url) ||
-      (ticketModes.online && concert.price && concert.price <= 0)
-    ) {
-      alert("Please fill in all required fields.");
+
+    const _concert = $state.snapshot(concert);
+    const _ticketModes = $state.snapshot(ticketModes);
+
+    let error: string = "";
+    if (_concert && !_concert.timestamp) error += "\n- Date and time are required.";
+    if (_concert?.type === "public") {
+      if (!_concert.name) error += "\n- Name is required.";
+      if (!_concert.venue_id) error += "\n- Venue is required.";
+      if (!_ticketModes.online && !_ticketModes.abendkasse && !_ticketModes.free)
+        error += "\n- At least one ticket mode is required.";
+      if (_ticketModes.online && !_concert.ticket_url) error += "\n- Ticket URL is required.";
+      if ((_ticketModes.online || _ticketModes.abendkasse) && _concert.price === 0)
+        error += "\n- Price is required (must be positive).";
+    }
+
+    // error is always given when there is no concert, this is just for the type check
+    if (error || _concert === null) {
+      alert("Please fill all required fields!" + error);
       loading = false;
       return;
     }
+
+    console.log("Concert", _concert);
+    console.log("Ticket Modes", _ticketModes);
+
     try {
       // Convert datetime-local to ISO string
       const concertData: Database["public"]["Tables"]["concerts"]["Update"] = {
-        name: concert.name,
-        type: concert.type,
-        venue_id: concert.venue_id,
-        notes: concert.notes,
-        timestamp: new Date(concert.timestamp).toISOString(),
-        abendkasse: ticketModes.abendkasse,
-        free: ticketModes.free,
-        price: ticketModes.free ? null : concert.price,
-        ticket_url: ticketModes.online ? concert.ticket_url : null,
+        name: _concert.name,
+        type: _concert.type,
+        venue_id: _concert.venue_id,
+        notes: _concert.notes,
+        timestamp: new Date(_concert.timestamp).toISOString(),
+        abendkasse: _ticketModes.abendkasse,
+        free: _ticketModes.free,
+        price: _ticketModes.free ? null : _concert.price,
+        ticket_url: _ticketModes.online ? _concert.ticket_url : null,
       };
 
       console.log("Concert Data", concertData);
@@ -146,9 +176,7 @@
     <tbody>
       {#if metadata.concertsLoaded && eventStore.concerts.size > 0}
         {#each serializeConcerts() as concert}
-          <tr
-            class="hover:bg-primary/15 transition-colors duration-75"
-          >
+          <tr class="hover:bg-primary/15 transition-colors duration-75">
             <td>{formatGermanDateTime(concert.timestamp)}</td>
             <td
               colspan={concert.type === "closed" ? 3 : 1}
@@ -205,39 +233,39 @@
   </table>
 </div>
 
-<Modal bind:open={modalOpen} withXButton={false} class="w-full max-w-3xl sm:min-w-lg">
+<Modal bind:open={modalState.open} withXButton={false} class="w-full max-w-3xl sm:min-w-lg">
   <div class="dy-join mb-4">
     <button
       name="details"
       class="dy-join-item dy-btn dy-btn-secondary"
-      class:dy-btn-active={modalTab === "edit"}
-      onclick={() => (modalTab = "edit")}
+      class:dy-btn-active={modalState.tab === "edit"}
+      onclick={() => (modalState.tab = "edit")}
     >
       Edit
     </button>
     <button
       name="details"
       class="dy-join-item dy-btn dy-btn-secondary"
-      class:dy-btn-active={modalTab === "raw"}
-      onclick={() => (modalTab = "raw")}
+      class:dy-btn-active={modalState.tab === "raw"}
+      onclick={() => (modalState.tab = "raw")}
     >
       Raw
     </button>
   </div>
 
   {#if concert !== null}
-    <div class="flex w-full max-w-md flex-col" class:hidden={modalTab !== "edit"}>
+    <div class="flex w-full max-w-md flex-col" class:hidden={modalState.tab !== "edit"}>
       <!-- Switch concert type -->
       <div class="dy-join mb-4">
         <button
           class="dy-btn dy-btn-soft dy-join-item"
           class:dy-btn-active={concert.type === "public"}
-          onclick={switchConcertType}>Public Concert</button
+          onclick={switchConcertType("public")}>Public Concert</button
         >
         <button
           class="dy-btn dy-btn-soft dy-join-item"
           class:dy-btn-active={concert.type === "closed"}
-          onclick={switchConcertType}>Closed Concert</button
+          onclick={switchConcertType("closed")}>Closed Concert</button
         >
       </div>
 
@@ -267,16 +295,10 @@
         <fieldset class="dy-fieldset">
           <legend class="dy-fieldset-legend">Venue</legend>
           <SelectVenue
-            bind:show={venueSelector.open}
-            onselect={(venue) => {
-              concert!.venue_id = venue.id;
-              if (concert && concert?.name) {
-                concert.name = venue.name;
-              }
-              venueSelector.open = false;
-            }}
+            bind:show={modalState.venueSelectorOpen}
+            onselect={setConcertVenue}
             clickoutside={() => {
-              venueSelector.open = false;
+              modalState.venueSelectorOpen = false;
             }}
             exclude={concert.venue_id ? [concert.venue_id] : []}
           >
@@ -292,7 +314,7 @@
                 {/key}
               </div>
               <label class="dy-btn dy-btn-circle dy-swap dy-swap-rotate">
-                <input type="checkbox" bind:checked={venueSelector.open} />
+                <input type="checkbox" bind:checked={modalState.venueSelectorOpen} />
                 <ChevronDown class="dy-swap-off" />
                 <XIcon class="dy-swap-on" />
               </label>
@@ -327,6 +349,7 @@
                   class="dy-checkbox"
                   onclick={() => {
                     ticketModes.online = !ticketModes.online;
+                    console.log("Online Ticket changed", ticketModes.online);
                     if (!ticketModes.online && !ticketModes.abendkasse) {
                       concert!.ticket_url = "";
                       concert!.price = 0;
@@ -343,6 +366,7 @@
                   class="dy-checkbox"
                   onclick={() => {
                     ticketModes.abendkasse = !ticketModes.abendkasse;
+                    console.log("Abendkasse changed", ticketModes.abendkasse);
                     if (!ticketModes.online && !ticketModes.abendkasse) {
                       concert!.ticket_url = "";
                       concert!.price = 0;
@@ -359,6 +383,7 @@
                   class="dy-checkbox"
                   onclick={() => {
                     ticketModes.free = !ticketModes.free;
+                    console.log("Free Entry changed", ticketModes.free);
                     if (ticketModes.free) {
                       concert!.price = 0;
                       ticketModes.online = false;
@@ -420,7 +445,7 @@
 
     <div
       class="bg-base-200 mt-3 w-auto max-w-md overflow-x-auto rounded-md p-2 text-sm"
-      class:hidden={modalTab !== "raw"}
+      class:hidden={modalState.tab !== "raw"}
     >
       <pre>{JSON.stringify(concert, null, 2)}</pre>
     </div>
