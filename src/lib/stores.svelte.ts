@@ -2,6 +2,7 @@ import { SvelteMap } from "svelte/reactivity";
 import { API_URL } from "./constants";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase";
+import { filterConcerts } from "./utils/concerts";
 
 interface EventStoreState {
   /**
@@ -25,7 +26,10 @@ export const metadata = $state({
 });
 
 export function serializeConcerts(): Concert[] {
-  return Array.from(eventStore.concerts.values());
+  return filterConcerts(Array.from(eventStore.concerts.values()), {
+    sort: "timestamp",
+    order: "newestFirst",
+  });
 }
 
 export function serializeVenues(): VenueDetails[] {
@@ -67,7 +71,7 @@ export async function fetchConcerts(options: FetchConcertOptions = {}) {
   }
 
   if (options.order) {
-    const _order = options.order === "newestFirst" || options.order === "desc" ? "desc" : "asc";
+    const _order = options.order === "newestFirst" || options.order === "asc" ? "asc" : "desc";
     params.append("order", _order);
   }
 

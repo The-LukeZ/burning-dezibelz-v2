@@ -1,4 +1,4 @@
-import type { Database } from "$lib/server/supabase.js";
+import type { Database } from "$lib/supabase.js";
 
 export async function GET({ locals: { supabase } }) {
   const { data, error } = await supabase.from("venues").select("*").order("id", { ascending: false });

@@ -1,8 +1,6 @@
 import type { Tables } from "$lib/supabase.ts";
 import { eventStore } from "$lib/stores.svelte.js";
 
-type Concert = Tables<"concerts">;
-
 export function getConcertDisplayName(concert: Concert): string {
   if (concert.name) {
     return concert.name;
@@ -66,7 +64,7 @@ export function filterConcerts(concerts: Concert[], options: FetchConcertOptions
     filteredConcerts = filteredConcerts.filter((concert) => concert.venue_id === options.venueId);
   }
 
-  const _order = options.order === "newestFirst" || options.order === "desc" ? "desc" : "asc";
+  const _order = options.order === "newestFirst" || options.order === "asc" ? "asc" : "desc";
 
   if (options.sort || _order === "asc") {
     filteredConcerts = filteredConcerts.sort((a, b) => {
