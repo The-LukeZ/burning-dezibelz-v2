@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { ClassValue } from "svelte/elements";
+
   type Props = {
     class?: ClassValue;
   };
@@ -19,5 +20,5 @@
   stroke-linejoin="round"
   class={className}
 >
-  <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+  <path d="m6 9 6 6 6-6" />
 </svg>
