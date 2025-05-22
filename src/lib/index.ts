@@ -1,5 +1,3 @@
-import { Snowflake } from "@sapphire/snowflake";
-
 interface FetchConcertOptions {
   before?: Date;
   after?: Date;
@@ -52,10 +50,4 @@ export function filterConcerts(concerts: Concert[], options: FetchConcertOptions
   }
 
   return filteredConcerts;
-}
-
-export class BDSnowflake extends Snowflake {
-  constructor() {
-    super(new Date("2021-01-01T00:00:00.000Z"));
-  }
 }

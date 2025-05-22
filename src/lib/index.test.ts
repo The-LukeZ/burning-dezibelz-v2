@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, expect, test } from "vitest";
 import dayjs from "dayjs";
-import { filterConcerts, BDSnowflake } from "./index";
+import { filterConcerts } from "./index";
 
 describe("filterConcerts", () => {
   const mockConcerts = [
@@ -104,49 +104,5 @@ describe("filterConcerts", () => {
   test("uses 'oldestFirst' as alias for 'asc'", () => {
     const result = filterConcerts(mockConcerts, { order: "oldestFirst" });
     expect(result[0].timestamp).toBe("2023-01-15");
-  });
-});
-
-// Snowflake test
-describe("bd-snowflake", () => {
-  test("generates a valid snowflake ID", () => {
-    const snowflake = new BDSnowflake();
-    const id = snowflake.generate();
-    expect(id.toString()).toMatch(/^\d{17,19}$/); // Snowflake IDs are typically 17-19 digits long
-  });
-
-  test("generates unique snowflake IDs", () => {
-    const snowflake = new BDSnowflake();
-    const ids = new Set();
-    for (let i = 0; i < 1000; i++) {
-      ids.add(snowflake.generate());
-    }
-    expect(ids.size).toBe(1000); // All IDs should be unique
-  });
-
-  test("generates snowflake IDs in a reasonable time", () => {
-    const snowflake = new BDSnowflake();
-    const start = Date.now();
-    for (let i = 0; i < 1000; i++) {
-      snowflake.generate();
-    }
-    const end = Date.now();
-    expect(end - start).toBeLessThan(100); // Should take less than 100ms
-  });
-
-  test("parse a snowflake ID correctly", () => {
-    const snowflake = new BDSnowflake();
-    const id = BigInt("1161042531153085444");
-    const deconstructed = snowflake.deconstruct(id);
-    expect(deconstructed).toHaveProperty("timestamp");
-    // Convert the timestamp to milliseconds since epoch and create a Date
-    const timestamp = deconstructed.timestamp + deconstructed.epoch;
-    const date = dayjs(timestamp.toString()).toDate();
-    console.log("Parsed date:", date);
-
-    // Check that the timestamp is valid and recent
-    expect(deconstructed.timestamp).toBeTruthy();
-    expect(date).toBeInstanceOf(Date);
-    expect(date.getTime()).toBeGreaterThan(new Date("2021-01-01").getTime());
   });
 });
