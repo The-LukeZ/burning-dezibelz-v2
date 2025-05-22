@@ -182,7 +182,7 @@
               colspan={concert.type === "closed" ? 3 : 1}
               class={concert.type === "closed" ? "dy-glass text-center" : ""}
             >
-              <pre>{concert.type}</pre>
+              <pre>{concert.type === "closed" ? "Geschlossen" : "Öffentlich"}</pre>
             </td>
             {#if concert.type === "public"}
               <td>{getConcertDisplayName(concert)}</td>
