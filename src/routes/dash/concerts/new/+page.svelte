@@ -51,8 +51,8 @@
 
     // Validate required fields
     if (
-      !concert.name ||
       concert.timestamp === "" ||
+      (concert.type === "public" && !concert.name) ||
       (concert.type === "public" && !concert.venue_id) ||
       (ticketModes.online && !concert.ticket_url) ||
       (ticketModes.online && concert.price && concert.price <= 0)
