@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { eventStore, fetchConcerts, fetchVenues } from "$lib/stores.svelte";
+  import { eventStore, fetchConcerts, fetchVenues, metadata } from "$lib/stores.svelte";
   import { onMount } from "svelte";
 
   let { children } = $props();
 
   onMount(async () => {
-    if (eventStore.concerts === null) {
-      await fetchConcerts({});
+    if (metadata.concertsLoaded === false) {
+      await fetchConcerts();
     }
-    if (eventStore.venues === null) {
+    if (metadata.venuesLoaded === false) {
       await fetchVenues();
     }
   });
