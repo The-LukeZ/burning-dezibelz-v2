@@ -1,7 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, expect, test } from "vitest";
-import dayjs from "dayjs";
-import { filterConcerts } from "./index";
+import { filterConcerts } from "./utils/concerts.js";
 
 describe("filterConcerts", () => {
   const mockConcerts = [
