@@ -4,14 +4,13 @@
   import Trashcan from "$lib/assets/Trashcan.svelte";
   import XIcon from "$lib/assets/XIcon.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
-  import { eventStore, serializeVenues } from "$lib/stores.svelte";
-  import type { Database } from "$lib/supabase";
+  import { eventStore } from "$lib/stores.svelte";
+  import type { Database, Tables } from "$lib/supabase";
   import { fade } from "svelte/transition";
 
-  let concert = $state<Omit<Concert, "id" | "timestamp"> & { date: string; time: string }>({
-    date: "",
+  let concert = $state<Omit<Database["public"]["Tables"]["concerts"]["Insert"], "id">>({
+    timestamp: "",
     type: "public",
-    time: "20:00",
     venue_id: "",
     name: "",
     notes: "",
@@ -33,10 +32,15 @@
   function switchConcertType() {
     concert.type = concert.type === "public" ? "closed" : "public";
     if (concert.type === "closed") {
-      concert.ticket_url = "";
+      concert.ticket_url = null;
       concert.free = false;
-      concert.price = 0;
+      concert.price = null;
       concert.abendkasse = false;
+      concert.venue_id = null;
+      concert.name = "";
+    } else {
+      concert.name = "";
+      concert.price = 0;
     }
   }
 
@@ -48,9 +52,8 @@
     // Validate required fields
     if (
       !concert.name ||
-      !concert.venue_id ||
-      concert.date === "" ||
-      concert.time === "" ||
+      concert.timestamp === "" ||
+      (concert.type === "public" && !concert.venue_id) ||
       (ticketModes.online && !concert.ticket_url) ||
       (ticketModes.online && concert.price && concert.price <= 0)
     ) {
@@ -63,13 +66,13 @@
     }
 
     try {
-      // Combine timestamp and time
+      // Convert datetime-local to ISO string
       const concertData: Omit<Database["public"]["Tables"]["concerts"]["Insert"], "id"> = {
         name: concert.name,
         type: concert.type,
         venue_id: concert.venue_id,
         notes: concert.notes,
-        timestamp: new Date(`${concert.date}T${concert.time}`).toISOString(),
+        timestamp: new Date(concert.timestamp).toISOString(),
         abendkasse: ticketModes.abendkasse,
         free: ticketModes.free,
         price: ticketModes.free ? null : concert.price,
@@ -112,29 +115,6 @@
     </div>
   {/if}
 
-  <fieldset class="dy-fieldset">
-    <legend class="dy-fieldset-legend">Name</legend>
-    <input
-      type="text"
-      bind:value={concert.name}
-      class="dy-input dy-input-warning"
-      placeholder="Using location name if not given"
-    />
-  </fieldset>
-
-  <fieldset class="dy-fieldset">
-    <legend class="dy-fieldset-legend">Date & Time</legend>
-    <div class="flex flex-col gap-2 sm:flex-row">
-      <input type="date" bind:value={concert.date} class="dy-input dy-input-warning" placeholder="Date" />
-      <input
-        type="time"
-        bind:value={concert.time}
-        class="dy-input dy-input-warning sm:max-w-30"
-        placeholder="Time"
-      />
-    </div>
-  </fieldset>
-
   <!-- Switch concert type -->
   <div class="dy-join">
     <button
@@ -148,6 +128,28 @@
       onclick={switchConcertType}>Closed Concert</button
     >
   </div>
+
+  {#if concert.type === "public"}
+    <fieldset class="dy-fieldset">
+      <legend class="dy-fieldset-legend">Name</legend>
+      <input
+        type="text"
+        bind:value={concert.name}
+        class="dy-input dy-input-warning"
+        placeholder="Using location name if not given"
+      />
+    </fieldset>
+  {/if}
+
+  <fieldset class="dy-fieldset">
+    <legend class="dy-fieldset-legend">Date & Time</legend>
+    <input
+      type="datetime-local"
+      bind:value={concert.timestamp}
+      class="dy-input dy-input-warning"
+      placeholder="Select date and time"
+    />
+  </fieldset>
 
   {#if concert.type === "public"}
     <fieldset class="dy-fieldset">
@@ -295,7 +297,7 @@
     <legend class="dy-fieldset-legend">Notes</legend>
     <textarea
       bind:value={concert.notes}
-      class="dy-textarea field-sizing-content max-h-50 w-xl"
+      class="dy-textarea field-sizing-content max-h-50 w-full max-w-xs"
       placeholder="Additional notes for the concert"
       rows="3"
     ></textarea>
