@@ -119,5 +119,6 @@ export async function fetchConcertCounts(supabase: SupabaseClient<Database>) {
     console.error("Error calling function:", error);
   } else {
     console.log("Concert counts per venue:", data);
+    return data;
   }
 }
