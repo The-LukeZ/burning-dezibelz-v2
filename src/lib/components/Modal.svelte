@@ -24,13 +24,13 @@
     onOpenChange = $bindable(() => {}),
     withXButton = true,
     closeOnBackdropClick = true,
-    class: _class = "",
+    class: className = "",
     children,
   }: Props = $props();
 
   $effect(() => {
-    if (!_class.includes("max-w")) {
-      _class = `${_class} max-w-[32rem]`;
+    if (!className.includes("max-w")) {
+      className = `${className} max-w-[32rem]`;
     }
   });
 
@@ -64,7 +64,7 @@
 >
   {#if open}
     <div
-      class="modal-box shadow-xl"
+      class="modal-box shadow-xl {className}"
       class:hidden={!open}
       transition:scale={{ duration: 150 }}
       onclick={(e) => e.stopPropagation()}
@@ -101,6 +101,8 @@
     overflow-x: clip;
     overflow-y: auto;
     overscroll-behavior: contain;
+    width: 98%;
+    max-height: 100dvh;
   }
 
   .x-button {
