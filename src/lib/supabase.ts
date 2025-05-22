@@ -57,37 +57,37 @@ export type Database = {
           abendkasse: boolean;
           free: boolean;
           id: string;
-          name: string;
+          name: string | null;
           notes: string | null;
           price: number | null;
           ticket_url: string | null;
           timestamp: string;
           type: Database["public"]["Enums"]["ConcertType"];
-          venue_id: string;
+          venue_id: string | null;
         };
         Insert: {
           abendkasse?: boolean;
           free?: boolean;
           id: string;
-          name: string;
+          name?: string | null;
           notes?: string | null;
           price?: number | null;
           ticket_url?: string | null;
           timestamp: string;
           type?: Database["public"]["Enums"]["ConcertType"];
-          venue_id: string;
+          venue_id?: string | null;
         };
         Update: {
           abendkasse?: boolean;
           free?: boolean;
           id?: string;
-          name?: string;
+          name?: string | null;
           notes?: string | null;
           price?: number | null;
           ticket_url?: string | null;
           timestamp?: string;
           type?: Database["public"]["Enums"]["ConcertType"];
-          venue_id?: string;
+          venue_id?: string | null;
         };
         Relationships: [
           {
