@@ -1,3 +1,5 @@
+import { BDSnowflake } from "$lib/snowflake.js";
+
 /*
 Available query parameters:
  - before?: Date;
@@ -8,7 +10,6 @@ Available query parameters:
  - order?: "newestFirst" | "oldestFirst" | "asc" | "desc";
  - sort_col?: "timestamp";
  */
-
 export async function GET({ url, locals: { supabase } }) {
   const searchParams = url.searchParams;
 
@@ -53,10 +54,27 @@ export async function GET({ url, locals: { supabase } }) {
   return Response.json(data);
 }
 
+const snowflake = new BDSnowflake();
+
 export async function POST({ request, locals: { supabase } }) {
   const body = await request.json();
-  const { name, venue_id, ...rest } = body;
-  const { data, error } = await supabase.from("concerts").insert([body]).select().single();
+
+  // Construct the thing
+  const { name, venue_id, abendkasse, free, notes, price, ticket_url, type, timestamp } = body as Concert;
+  const concert: Concert = {
+    id: snowflake.generate().toString(),
+    name,
+    venue_id,
+    abendkasse,
+    free,
+    notes,
+    price,
+    ticket_url,
+    type,
+    timestamp: new Date(timestamp).toISOString(),
+  };
+
+  const { data, error } = await supabase.from("concerts").insert([concert]).select().single();
 
   if (error) {
     console.error("Error inserting concert:", error);
