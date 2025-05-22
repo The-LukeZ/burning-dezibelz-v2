@@ -77,7 +77,7 @@
     });
 
     if (res.ok) {
-      eventStore.concerts?.delete(concertId);
+      eventStore.concerts.delete(concertId);
     } else {
       const error = await res.json();
       console.error("Error deleting concert:", error);
@@ -142,7 +142,7 @@
 
       if (res.ok) {
         const updatedConcert = await res.json();
-        eventStore.concerts?.set(concertId, updatedConcert);
+        eventStore.concerts.set(concertId, updatedConcert);
         console.log("Updated concert:", updatedConcert);
       } else {
         const error = await res.json();
