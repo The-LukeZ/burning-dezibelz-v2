@@ -1,4 +1,4 @@
-import type { Database } from "$lib/server/supabase";
+import type { Database } from "$lib/supabase";
 import { generateConcertId } from "$lib/server/utils.js";
 
 /*
