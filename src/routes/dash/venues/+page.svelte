@@ -141,7 +141,6 @@
 
   {#if selectedVenue}
     <div class="flex w-full max-w-md flex-col" class:hidden={modalTab !== "edit"}>
-      <h3 class="mb-2 text-lg font-bold">{selectedVenue.name}</h3>
       <p class="py-1"><b>ID:</b> {selectedVenue.id}</p>
       <fieldset class="dy-fieldset">
         <legend class="dy-fieldset-legend">Name</legend>
