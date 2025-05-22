@@ -36,6 +36,12 @@ export async function PUT({ request, locals: { supabase }, params: { concert_id 
     concertData.price = null;
     concertData.name = "";
   } else if (cleanedData.type === "public") {
+    if (!cleanedData.name || cleanedData.name.length === 0) {
+      return Response.json({ error: "Name is required for public concerts." }, { status: 400 });
+    }
+
+    concertData.name = cleanedData.name;
+
     if (typeof cleanedData.venue_id === "string" && cleanedData.venue_id.length > 0) {
       concertData.venue_id = cleanedData.venue_id;
     }
