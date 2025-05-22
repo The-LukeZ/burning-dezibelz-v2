@@ -1,4 +1,5 @@
-import { BDSnowflake } from "$lib/snowflake.js";
+import type { Database } from "$lib/server/supabase";
+import { generateConcertId } from "$lib/server/utils.js";
 
 /*
 Available query parameters:
@@ -54,15 +55,14 @@ export async function GET({ url, locals: { supabase } }) {
   return Response.json(data);
 }
 
-const snowflake = new BDSnowflake();
-
 export async function POST({ request, locals: { supabase } }) {
   const body = await request.json();
 
   // Construct the thing
   const { name, venue_id, abendkasse, free, notes, price, ticket_url, type, timestamp } = body as Concert;
-  const concert: Concert = {
-    id: snowflake.generate().toString(),
+
+  const concert: Database["public"]["Tables"]["concerts"]["Insert"] = {
+    id: "",
     name,
     venue_id,
     abendkasse,
@@ -73,6 +73,9 @@ export async function POST({ request, locals: { supabase } }) {
     type,
     timestamp: new Date(timestamp).toISOString(),
   };
+
+  const id = await generateConcertId(concert.timestamp, supabase);
+  concert.id = id;
 
   const { data, error } = await supabase.from("concerts").insert([concert]).select().single();
 
