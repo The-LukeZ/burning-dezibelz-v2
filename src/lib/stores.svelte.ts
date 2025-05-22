@@ -1,19 +1,15 @@
 import { SvelteMap } from "svelte/reactivity";
 import { API_URL } from "./constants";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "./server/supabase";
+import type { Database } from "./supabase";
 
 interface EventStoreState {
   /**
    * Concerts that are currently fetched.
-   *
-   * Is `null` if not fetched yet. Empty array if no concerts are available.
    */
   concerts: SvelteMap<string, Concert>;
   /**
    * Locations that are currently fetched.
-   *
-   * Is `null` if not fetched yet. Empty array if no locations are available.
    */
   venues: SvelteMap<string, VenueDetails>;
 }

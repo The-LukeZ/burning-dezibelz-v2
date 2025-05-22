@@ -1,4 +1,4 @@
-import type { Database } from "$lib/server/supabase.js";
+import type { Database } from "$lib/supabase";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 
 // for information about these interfaces
