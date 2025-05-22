@@ -1,20 +1,24 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import ChevronDown from "$lib/assets/ChevronDown.svelte";
+  import Trashcan from "$lib/assets/Trashcan.svelte";
+  import XIcon from "$lib/assets/XIcon.svelte";
+  import SelectVenue from "$lib/components/SelectVenue.svelte";
   import { eventStore, serializeVenues } from "$lib/stores.svelte";
+  import type { Database } from "$lib/supabase";
+  import { fade } from "svelte/transition";
 
-  let concert = $state<any>({
+  let concert = $state<Omit<Concert, "id" | "timestamp"> & { date: string; time: string }>({
     date: "",
     type: "public",
     time: "20:00",
     venue_id: "",
     name: "",
     notes: "",
-    tickets: {
-      price: 0,
-      abendkasse: false,
-      free: false,
-      url: "",
-    },
+    abendkasse: false,
+    free: false,
+    price: 0,
+    ticket_url: "",
   });
 
   let ticketModes = $state({
@@ -22,18 +26,17 @@
     abendkasse: false,
     free: false,
   });
+  let venueSelector = $state({ open: false });
   let loading = $state(false);
-  let error = $state(null);
+  let error = $state<string | null>(null);
 
   function switchConcertType() {
     concert.type = concert.type === "public" ? "closed" : "public";
     if (concert.type === "closed") {
-      concert.tickets = {
-        price: 0,
-        abendkasse: false,
-        free: false,
-        url: "",
-      };
+      concert.ticket_url = "";
+      concert.free = false;
+      concert.price = 0;
+      concert.abendkasse = false;
     }
   }
 
@@ -42,24 +45,38 @@
     loading = true;
     error = null;
 
+    // Validate required fields
+    if (
+      !concert.name ||
+      !concert.venue_id ||
+      concert.date === "" ||
+      concert.time === "" ||
+      (ticketModes.online && !concert.ticket_url) ||
+      (ticketModes.online && concert.price && concert.price <= 0)
+    ) {
+      error = "Please fill in all required fields.";
+      loading = false;
+      setTimeout(() => {
+        error = null;
+      }, 3000);
+      return;
+    }
+
     try {
       // Combine timestamp and time
-      const concertData: Omit<Concert, "id"> = {
+      const concertData: Omit<Database["public"]["Tables"]["concerts"]["Insert"], "id"> = {
         name: concert.name,
         type: concert.type,
         venue_id: concert.venue_id,
         notes: concert.notes,
         timestamp: new Date(`${concert.date}T${concert.time}`).toISOString(),
-        tickets: {
-          price: concert.tickets.price,
-          abendkasse: concert.tickets.abendkasse,
-          free: concert.tickets.free,
-          url: concert.tickets.url,
-        },
+        abendkasse: ticketModes.abendkasse,
+        free: ticketModes.free,
+        price: ticketModes.free ? null : concert.price,
+        ticket_url: ticketModes.online ? concert.ticket_url : null,
       };
 
-      console.log("Concert Data:", concertData);
-      return;
+      console.log("Concert Data", concertData);
 
       const response = await fetch("/api/concerts", {
         method: "POST",
@@ -84,12 +101,14 @@
   }
 </script>
 
-<div class="container mx-auto flex h-full max-w-xl flex-col gap-4">
+<div class="container mx-auto flex h-full max-w-xl flex-col gap-3">
   <h1 class="text-2xl font-bold">Add New Concert</h1>
 
   {#if error}
-    <div class="dy-alert dy-alert-error">
-      <span>{error}</span>
+    <div class="dy-toast dy-toast-top dy-toast-center mt-14" transition:fade>
+      <div class="dy-alert dy-alert-error">
+        <span>{error}</span>
+      </div>
     </div>
   {/if}
 
@@ -98,7 +117,7 @@
     <input
       type="text"
       bind:value={concert.name}
-      class="dy-input"
+      class="dy-input dy-input-warning"
       placeholder="Using location name if not given"
     />
   </fieldset>
@@ -106,32 +125,14 @@
   <fieldset class="dy-fieldset">
     <legend class="dy-fieldset-legend">Date & Time</legend>
     <div class="flex flex-col gap-2 sm:flex-row">
-      <input type="date" bind:value={concert.date} class="dy-input" placeholder="Date" />
-      <input type="time" bind:value={concert.time} class="dy-input sm:max-w-30" placeholder="Time" />
+      <input type="date" bind:value={concert.date} class="dy-input dy-input-warning" placeholder="Date" />
+      <input
+        type="time"
+        bind:value={concert.time}
+        class="dy-input dy-input-warning sm:max-w-30"
+        placeholder="Time"
+      />
     </div>
-  </fieldset>
-
-  <fieldset class="dy-fieldset">
-    <legend class="dy-fieldset-legend">Venue</legend>
-    <select bind:value={concert.venue_id} class="dy-select">
-      <option value="" disabled selected>Select a venue</option>
-      {#each serializeVenues() as location}
-        <option value={location.id}>{location.name}</option>
-      {/each}
-    </select>
-    <p class="dy-label">
-      Venue not here? <a href="/dash/venues/new" class="dy-link hover:text-slate-300"> Add a new venue </a>
-    </p>
-  </fieldset>
-
-  <fieldset class="dy-fieldset">
-    <legend class="dy-fieldset-legend">Notes</legend>
-    <textarea
-      bind:value={concert.notes}
-      class="dy-textarea field-sizing-content max-h-50 w-xl"
-      placeholder="Additional notes for the concert"
-      rows="3"
-    ></textarea>
   </fieldset>
 
   <!-- Switch concert type -->
@@ -150,6 +151,56 @@
 
   {#if concert.type === "public"}
     <fieldset class="dy-fieldset">
+      <legend class="dy-fieldset-legend">Venue</legend>
+      <SelectVenue
+        bind:show={venueSelector.open}
+        onselect={(venue) => {
+          concert.venue_id = venue.id;
+          if (concert.name === "" && venue.name) {
+            concert.name = venue.name;
+          }
+          venueSelector.open = false;
+        }}
+        clickoutside={() => {
+          venueSelector.open = false;
+        }}
+        exclude={concert.venue_id ? [concert.venue_id] : []}
+      >
+        <div class="flex flex-row items-center justify-start gap-2">
+          <div class="dy-input dy-input-warning items-center pr-1">
+            {#key concert.venue_id}
+              {#if concert.venue_id}
+                {@const venue = eventStore.venues.get(concert.venue_id)}
+                {venue ? venue.name : "Venue not found"}
+              {:else}
+                Select a venue
+              {/if}
+            {/key}
+          </div>
+          <label class="dy-btn dy-btn-circle dy-swap dy-swap-rotate">
+            <input type="checkbox" bind:checked={venueSelector.open} />
+            <ChevronDown class="dy-swap-off" />
+            <XIcon class="dy-swap-on" />
+          </label>
+          {#if concert.venue_id}
+            <button
+              class="dy-btn dy-btn-square dy-btn-dash dy-btn-sm"
+              onclick={() => {
+                concert.venue_id = "";
+              }}
+            >
+              <Trashcan class="size-4" />
+            </button>
+          {/if}
+        </div>
+      </SelectVenue>
+
+      <p class="dy-label">
+        Venue not here? <a href="/dash/venues/new" class="dy-link hover:text-slate-300"> Add a new venue </a>
+      </p>
+    </fieldset>
+
+    <fieldset class="dy-fieldset">
       <legend class="dy-fieldset-legend">Tickets Settings</legend>
       <div style="grid-template: 1fr auto / 1fr;" class="mb-4">
         <div class="flex flex-col gap-4 sm:flex-row">
@@ -161,8 +212,8 @@
               onclick={() => {
                 ticketModes.online = !ticketModes.online;
                 if (!ticketModes.online && !ticketModes.abendkasse) {
-                  concert.tickets.url = "";
-                  concert.tickets.price = 0;
+                  concert.ticket_url = "";
+                  concert.price = 0;
                 }
               }}
               disabled={ticketModes.free}
@@ -177,8 +228,8 @@
               onclick={() => {
                 ticketModes.abendkasse = !ticketModes.abendkasse;
                 if (!ticketModes.online && !ticketModes.abendkasse) {
-                  concert.tickets.url = "";
-                  concert.tickets.price = 0;
+                  concert.ticket_url = "";
+                  concert.price = 0;
                 }
               }}
               disabled={ticketModes.free}
@@ -193,7 +244,7 @@
               onclick={() => {
                 ticketModes.free = !ticketModes.free;
                 if (ticketModes.free) {
-                  concert.tickets.price = 0;
+                  concert.price = 0;
                   ticketModes.online = false;
                   ticketModes.abendkasse = false;
                 }
@@ -214,7 +265,7 @@
             step="0.01"
             placeholder="Price"
             class="dy-input dy-input-md"
-            bind:value={concert.tickets.price}
+            bind:value={concert.price}
           />
         </label>
       {/if}
@@ -227,7 +278,7 @@
             type="url"
             placeholder="Ticket URL"
             class="dy-input dy-input-md"
-            bind:value={concert.tickets.url}
+            bind:value={concert.ticket_url}
             required
           />
         </label>
@@ -239,6 +290,16 @@
       <p class="dy-label">This concert is private and not open to the public.</p>
     </fieldset>
   {/if}
+
+  <fieldset class="dy-fieldset">
+    <legend class="dy-fieldset-legend">Notes</legend>
+    <textarea
+      bind:value={concert.notes}
+      class="dy-textarea field-sizing-content max-h-50 w-xl"
+      placeholder="Additional notes for the concert"
+      rows="3"
+    ></textarea>
+  </fieldset>
 
   <div class="mt-2 flex flex-row justify-end gap-4">
     <button class="dy-btn dy-btn-error" onclick={() => goto("/dash/concerts")}>Cancel</button>
