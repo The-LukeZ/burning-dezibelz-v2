@@ -97,6 +97,9 @@
         throw new Error(errorData.error?.message || "Failed to create concert");
       }
 
+      const newConcert = (await response.json()) as Concert;
+      eventStore.concerts.set(newConcert.id, newConcert);
+
       // Navigate back to concerts list on success
       goto("/dash/concerts");
     } catch (err: any) {
