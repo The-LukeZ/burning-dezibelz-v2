@@ -1,3 +1,4 @@
+import { SvelteMap } from "svelte/reactivity";
 import { API_URL } from "./constants";
 
 interface EventStoreState {
@@ -6,32 +7,31 @@ interface EventStoreState {
    *
    * Is `null` if not fetched yet. Empty array if no concerts are available.
    */
-  concerts: Map<string, Concert> | null;
+  concerts: SvelteMap<string, Concert>;
   /**
    * Locations that are currently fetched.
    *
    * Is `null` if not fetched yet. Empty array if no locations are available.
    */
-  venues: Map<string, VenueDetails> | null;
+  venues: SvelteMap<string, VenueDetails>;
 }
 
-export const eventStore = $state<EventStoreState>({
-  concerts: null,
-  venues: null,
+export const eventStore = {
+  concerts: new SvelteMap(),
+  venues: new SvelteMap(),
+} as EventStoreState;
+
+export const metadata = $state({
+  concertsLoaded: false,
+  venuesLoaded: false,
 });
 
 export function serializeConcerts(): Concert[] {
-  if (eventStore.concerts !== null) {
-    return Array.from(eventStore.concerts.values());
-  }
-  return [];
+  return Array.from(eventStore.concerts.values());
 }
 
 export function serializeVenues(): VenueDetails[] {
-  if (eventStore.venues !== null) {
-    return Array.from(eventStore.venues.values());
-  }
-  return [];
+  return Array.from(eventStore.venues.values());
 }
 
 interface FetchConcertOptions {
@@ -87,12 +87,11 @@ export async function fetchConcerts(options: FetchConcertOptions = {}) {
   }
 
   const concerts = (await response.json()) as Concert[];
-  if (eventStore.concerts === null) {
-    eventStore.concerts = new Map();
-  }
   for (const concert of concerts) {
     eventStore.concerts.set(concert.id, concert);
   }
+  console.log("Fetched concerts:", eventStore.concerts);
+  metadata.concertsLoaded = true;
 }
 
 export async function fetchVenues() {
@@ -104,10 +103,9 @@ export async function fetchVenues() {
   }
 
   const venues = (await response.json()) as VenueDetails[];
-  if (eventStore.venues === null) {
-    eventStore.venues = new Map();
-  }
   for (const venue of venues) {
     eventStore.venues.set(venue.id, venue);
   }
+  console.log("Fetched venues:", eventStore.venues);
+  metadata.venuesLoaded = true;
 }
