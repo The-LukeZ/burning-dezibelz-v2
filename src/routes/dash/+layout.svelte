@@ -6,7 +6,9 @@
 
   onMount(async () => {
     if (metadata.concertsLoaded === false) {
-      await fetchConcerts();
+      await fetchConcerts({
+        after: new Date(),
+      });
     }
     if (metadata.venuesLoaded === false) {
       await fetchVenues();
