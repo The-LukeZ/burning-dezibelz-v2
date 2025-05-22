@@ -1,3 +1,5 @@
+import type { Database } from "$lib/server/supabase.js";
+
 export async function GET({ params: { concert_id }, locals: { supabase } }) {
   // Fetch a single concert by ID
   const { data, error } = await supabase.from("concerts").select("*").eq("id", concert_id).single();
@@ -14,8 +16,13 @@ export async function GET({ params: { concert_id }, locals: { supabase } }) {
 
 export async function PUT({ request, locals: { supabase }, params: { concert_id } }) {
   // Update a concert by replacing the entire object (except the id)
-  const { venue_id, type, timestamp, name, notes, price, ticket_url, abendkasse, free } =
-    await request.json();
+  const body = await request.json();
+  const cleanedData = Object.keys(body).map((key) =>
+    typeof body[key] === "string" ? body[key].trim() : body[key],
+  );
+
+  const { name, venue_id, abendkasse, free, notes, price, ticket_url, type, timestamp } =
+    cleanedData as Database["public"]["Tables"]["concerts"]["Update"];
 
   const { data, error } = await supabase
     .from("concerts")
