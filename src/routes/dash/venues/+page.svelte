@@ -1,33 +1,63 @@
 <script lang="ts">
-  import { page } from "$app/state";
-  import { eventStore } from "$lib/stores.svelte.js";
-  import { svelte } from "@sveltejs/vite-plugin-svelte";
-
-  let { data } = $props();
+  import Modal from "$lib/components/Modal.svelte";
+  import { eventStore, serializeVenues } from "$lib/stores.svelte.js";
 
   let selectedVenue = $state<VenueDetails | null>(null);
-  let dialogElement = $state<HTMLDialogElement>();
+  let modalOpen = $state(false);
+  let modalTab = $state<"edit" | "raw">("edit");
+  let loading = $state(false);
 
   function showVenueDetails(venue: VenueDetails) {
     selectedVenue = venue;
-    dialogElement?.showModal();
+    modalTab = "edit";
+    modalOpen = true;
   }
 
   function closeDialog() {
-    dialogElement?.close();
+    modalOpen = false;
     setTimeout(() => {
       selectedVenue = null;
-    }, 100);
+    }, 150);
+  }
+
+  async function handleDelete(venueId: string) {
+    loading = true;
+    const res = await fetch(`/api/venues/${venueId}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      eventStore.venues?.delete(venueId);
+    } else {
+      const error = await res.json();
+      console.error("Error deleting venue:", error);
+    }
+    loading = false;
+  }
+
+  async function handleEdit(venueId: string) {
+    loading = true;
+    const res = await fetch(`/api/venues/${venueId}`, {
+      method: "PUT",
+      body: JSON.stringify(selectedVenue),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (res.ok) {
+      const updatedVenue = await res.json();
+      eventStore.venues?.set(venueId, updatedVenue);
+      console.log("Updated venue:", updatedVenue);
+    } else {
+      const error = await res.json();
+      console.error("Error updating venue:", error);
+    }
+    loading = false;
   }
 </script>
 
 <!-- TODO
-- Make Modal.svelte
-- Exchange with <dialog> element
-- Add form controls to edit venue details
-- Add "Save" button to save changes
-- Add "Delete" button to delete venue
-- Add "Cancel" button to close modal without saving
 - Add hover animation for each row
 -->
 
@@ -46,20 +76,36 @@
       </tr>
     </thead>
     <tbody>
-      {#if eventStore.venues !== null && eventStore.venues.size > 0}
-        {#each Array.from(eventStore.venues.entries()) as [venueId, venue]}
-          <tr class="dy-hover" onclick={() => showVenueDetails(venue)}>
+      {#if eventStore.venues.size > 0}
+        {#each serializeVenues() as venue}
+          <tr
+            class="hover:bg-primary/15 transition-colors duration-75"
+            onclick={() => showVenueDetails(venue)}
+          >
             <td>{venue.name}</td>
             <td>{venue.city}, {venue.country}</td>
-            <td>
+            <td class="flex flex-col gap-1 sm:flex-row">
               <button
-                class="dy-btn dy-btn-sm dy-btn-outline"
+                class="dy-btn dy-btn-primary dy-btn-sm dy-btn-outline w-full sm:w-auto"
+                disabled={loading}
                 onclick={(e) => {
                   e.stopPropagation();
                   showVenueDetails(venue);
                 }}
               >
-                View Details
+                Details
+              </button>
+              <button
+                class="dy-btn dy-btn-sm dy-btn-error dy-btn-outline w-full sm:w-auto"
+                disabled={loading}
+                onclick={async (e) => {
+                  e.stopPropagation();
+                  if (confirm("Are you sure you want to delete this venue?\nID: " + venue.id)) {
+                    await handleDelete(venue.id);
+                  }
+                }}
+              >
+                Delete
               </button>
             </td>
           </tr>
@@ -73,36 +119,128 @@
   </table>
 </div>
 
-<dialog bind:this={dialogElement} class="dy-modal">
-  <div class="dy-modal-box w-11/12 max-w-2xl">
-    {#if selectedVenue}
-      <h3 class="mb-2 text-lg font-bold">{selectedVenue.name}</h3>
-      <p class="py-1"><strong>ID:</strong> {selectedVenue.id}</p>
-      <div class="py-1">
-        <strong>Address:</strong>
-        <p>{selectedVenue.address}</p>
-        <p>{selectedVenue.postal_code} {selectedVenue.city}</p>
-        <p>{selectedVenue.country}</p>
-      </div>
-      {#if selectedVenue.url}
-        <p class="py-1">
-          <strong>URL:</strong>
-          <a href={selectedVenue.url} target="_blank" class="dy-link">{selectedVenue.url}</a>
-        </p>
-      {/if}
-
-      <pre class="bg-base-200 mt-2 overflow-x-auto rounded-md p-2 text-xs">{JSON.stringify(
-          selectedVenue,
-          null,
-          2,
-        )}
-       </pre>
-    {/if}
-    <div class="dy-modal-action">
-      <button class="dy-btn dy-btn-primary" onclick={closeDialog}>Close</button>
-    </div>
+<Modal bind:open={modalOpen} class="max-w-3xl">
+  <div class="dy-join mb-4">
+    <button
+      name="details"
+      class="dy-join-item dy-btn dy-btn-soft"
+      class:dy-btn-active={modalTab === "edit"}
+      onclick={() => (modalTab = "edit")}
+    >
+      Edit
+    </button>
+    <button
+      name="details"
+      class="dy-join-item dy-btn dy-btn-soft"
+      class:dy-btn-active={modalTab === "raw"}
+      onclick={() => (modalTab = "raw")}
+    >
+      Raw
+    </button>
   </div>
-  <form method="dialog" class="dy-modal-backdrop">
-    <button onclick={closeDialog}>close</button>
-  </form>
-</dialog>
+
+  {#if selectedVenue}
+    <div class="flex w-full max-w-md flex-col" class:hidden={modalTab !== "edit"}>
+      <h3 class="mb-2 text-lg font-bold">{selectedVenue.name}</h3>
+      <p class="py-1"><b>ID:</b> {selectedVenue.id}</p>
+      <fieldset class="dy-fieldset">
+        <legend class="dy-fieldset-legend">Name</legend>
+        <input
+          type="text"
+          name="name"
+          bind:value={selectedVenue.name}
+          class="dy-input"
+          placeholder="Venue Name"
+        />
+      </fieldset>
+
+      <fieldset class="dy-fieldset">
+        <legend class="dy-fieldset-legend">Address</legend>
+        <input
+          type="text"
+          name="address"
+          bind:value={selectedVenue.address}
+          class="dy-input"
+          placeholder="Example Straße 31"
+        />
+      </fieldset>
+
+      <fieldset class="dy-fieldset">
+        <legend class="dy-fieldset-legend">City</legend>
+        <div class="flex flex-row gap-2">
+          <input
+            type="text"
+            name="postal_code"
+            bind:value={selectedVenue.postal_code}
+            class="dy-input w-28"
+            placeholder="12345"
+          />
+          <input
+            type="text"
+            name="city"
+            bind:value={selectedVenue.city}
+            class="dy-input grow"
+            placeholder="Zwickau"
+          />
+        </div>
+      </fieldset>
+
+      <fieldset class="dy-fieldset">
+        <legend class="dy-fieldset-legend">State</legend>
+        <input
+          type="text"
+          name="state"
+          bind:value={selectedVenue.state}
+          class="dy-input"
+          placeholder="Sachsen"
+        />
+      </fieldset>
+
+      <fieldset class="dy-fieldset">
+        <legend class="dy-fieldset-legend">Country</legend>
+        <input
+          type="text"
+          name="country"
+          bind:value={selectedVenue.country}
+          class="dy-input"
+          placeholder="Deutschland"
+        />
+        <p class="dy-label dy-label-info">Edit this if you know what you're doing.</p>
+      </fieldset>
+
+      <fieldset class="dy-fieldset">
+        <legend class="dy-fieldset-legend">Venue URL</legend>
+        <input
+          type="text"
+          name="url"
+          bind:value={selectedVenue.url}
+          class="dy-input"
+          placeholder="https://example.com"
+        />
+        <p class="dy-label dy-label-info">Leave blank to remove it. Trailing slashes will be removed.</p>
+      </fieldset>
+    </div>
+
+    <div
+      class="bg-base-200 mt-3 w-auto max-w-md overflow-x-auto rounded-md p-2 text-sm"
+      class:hidden={modalTab !== "raw"}
+    >
+      <pre>{JSON.stringify(selectedVenue, null, 2)}</pre>
+    </div>
+  {/if}
+
+  <div class="mt-6 flex justify-center gap-3">
+    <button
+      class="dy-btn dy-btn-primary dy-btn-wide"
+      disabled={loading}
+      onclick={async () => {
+        if (selectedVenue) {
+          await handleEdit(selectedVenue.id);
+          closeDialog();
+        }
+      }}
+    >
+      Save
+    </button>
+  </div>
+</Modal>
