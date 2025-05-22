@@ -1,7 +1,6 @@
-import { BDSnowflake } from "$lib/snowflake";
+import type { Database } from "$lib/server/supabase.js";
 
-export async function GET({ url, locals: { supabase } }) {
-  const searchParams = url.searchParams;
+export async function GET({ locals: { supabase } }) {
   const { data, error } = await supabase.from("venues").select("*").order("id", { ascending: false });
 
   if (error) {
@@ -12,15 +11,12 @@ export async function GET({ url, locals: { supabase } }) {
   return Response.json(data, { status: 200 });
 }
 
-const snowflake = new BDSnowflake();
-
 export async function POST({ request, locals: { supabase } }) {
   const body = await request.json();
 
   // Construct the thing
   const { name, address, city, state, postal_code, country, url } = body as VenueDetails;
-  const venue: VenueDetails = {
-    id: snowflake.generate().toString(),
+  const venue: Database["public"]["Tables"]["venues"]["Insert"] = {
     name,
     address,
     city,
