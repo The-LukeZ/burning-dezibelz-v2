@@ -14,11 +14,12 @@ export async function GET({ params: { concert_id }, locals: { supabase } }) {
 
 export async function PUT({ request, locals: { supabase }, params: { concert_id } }) {
   // Update a concert by replacing the entire object (except the id)
-  const body = await request.json();
+  const { venue_id, type, timestamp, name, notes, price, ticket_url, abendkasse, free } =
+    await request.json();
 
   const { data, error } = await supabase
     .from("concerts")
-    .update({ ...body })
+    .update({ venue_id, type, timestamp, name, notes, price, ticket_url, abendkasse, free })
     .eq("id", concert_id)
     .select()
     .single();
