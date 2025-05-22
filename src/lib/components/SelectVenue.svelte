@@ -139,6 +139,7 @@
     height: 100%;
     overflow-y: hidden;
     padding: 4px;
+    z-index: 1000;
   }
 
   .backdrop {
