@@ -1,5 +1,5 @@
+import type { Database } from "$lib/server/supabase.js";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
-import type { Database } from "./database.types.ts"; // import generated types
 
 // for information about these interfaces
 declare global {
@@ -24,44 +24,9 @@ declare global {
     // interface Platform {}
   }
 
-  interface Concert {
-    id: string;
-    type: "public" | "closed";
-    timestamp: string;
-    name: string;
-    venue_id: string;
-    notes: string | null;
-    tickets:
-      | {
-          price: number | null;
-          url: string | null;
-          abendkasse: boolean;
-          free: boolean;
-        }
-      | {
-          price: null;
-          url: null;
-          abendkasse: false;
-          free: true;
-        }
-      | {
-          price: number;
-          url: string | null;
-          abendkasse: true;
-          free: false;
-        };
-  }
+  type Concert = Database["public"]["Tables"]["concerts"]["Row"];
 
-  interface VenueDetails {
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-    postal_code: string;
-    state: string;
-    country: string;
-    url: string;
-  }
+  type VenueDetails = Database["public"]["Tables"]["venues"]["Row"];
 }
 
 export {};
