@@ -54,7 +54,8 @@ export async function GET({ url, locals: { supabase } }) {
 }
 
 export async function POST({ request, locals: { supabase } }) {
-  const body: Concert = await request.json();
+  const body = await request.json();
+  const { name, venue_id, ...rest } = body;
   const { data, error } = await supabase.from("concerts").insert([body]).select().single();
 
   if (error) {

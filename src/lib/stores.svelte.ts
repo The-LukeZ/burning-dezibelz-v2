@@ -1,5 +1,7 @@
 import { SvelteMap } from "svelte/reactivity";
 import { API_URL } from "./constants";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./server/supabase";
 
 interface EventStoreState {
   /**
@@ -108,4 +110,14 @@ export async function fetchVenues() {
   }
   console.log("Fetched venues:", eventStore.venues);
   metadata.venuesLoaded = true;
+}
+
+export async function fetchConcertCounts(supabase: SupabaseClient<Database>) {
+  const { data, error } = await supabase.rpc("get_concert_counts_per_venue");
+
+  if (error) {
+    console.error("Error calling function:", error);
+  } else {
+    console.log("Concert counts per venue:", data);
+  }
 }
