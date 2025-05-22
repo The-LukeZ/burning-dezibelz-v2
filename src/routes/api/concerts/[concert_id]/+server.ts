@@ -31,18 +31,27 @@ export async function PUT({ request, locals: { supabase }, params: { concert_id 
 
   // Only provide the fields that are allowed to be updated based on type
   if (cleanedData.type === "closed") {
-    concertData.type = cleanedData.type;
-    concertData.timestamp = cleanedData.timestamp;
     concertData.venue_id = null;
     concertData.ticket_url = null;
     concertData.price = null;
     concertData.name = "";
-  } else if (
-    cleanedData.type === "public" &&
-    typeof cleanedData.venue_id === "string" &&
-    cleanedData.venue_id.length > 0
-  ) {
-    concertData.venue_id = cleanedData.venue_id;
+  } else if (cleanedData.type === "public") {
+    if (typeof cleanedData.venue_id === "string" && cleanedData.venue_id.length > 0) {
+      concertData.venue_id = cleanedData.venue_id;
+    }
+    concertData.abendkasse = cleanedData.abendkasse ?? false;
+    concertData.ticket_url = cleanedData.ticket_url ?? null;
+
+    if (typeof cleanedData.price === "number") {
+      if (cleanedData.free) {
+        return Response.json({ error: "Price cannot be set when the concert is free." }, { status: 400 });
+      }
+      concertData.price = cleanedData.price;
+    }
+    if (cleanedData.free) {
+      concertData.price = null;
+      concertData.free = true;
+    }
   }
 
   const { data, error } = await supabase
