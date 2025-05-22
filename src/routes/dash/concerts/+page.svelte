@@ -405,7 +405,7 @@
                 type="number"
                 step="0.01"
                 placeholder="Price"
-                class="dy-input dy-input-md"
+                class="dy-input dy-input-md max-w-40"
                 bind:value={concert.price}
               />
             </label>
