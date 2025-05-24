@@ -1,8 +1,9 @@
 import { SvelteMap } from "svelte/reactivity";
-import { API_URL } from "./constants";
+import { API_URL, UnknownVenue } from "./constants";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase";
 import { filterConcerts } from "./utils/concerts";
+import { onMount } from "svelte";
 
 interface EventStoreState {
   /**
@@ -13,23 +14,37 @@ interface EventStoreState {
    * Locations that are currently fetched.
    */
   venues: SvelteMap<string, VenueDetails>;
+  metadata: {
+    concertsLoaded: boolean;
+    venuesLoaded: boolean;
+  };
 }
 
 export const eventStore = {
   concerts: new SvelteMap(),
   venues: new SvelteMap(),
+  metadata: {
+    concertsLoaded: false,
+    venuesLoaded: false,
+  },
 } as EventStoreState;
-
-export const metadata = $state({
-  concertsLoaded: false,
-  venuesLoaded: false,
-});
 
 export function serializeConcerts(): Concert[] {
   return filterConcerts(Array.from(eventStore.concerts.values()), {
     sort: "timestamp",
     order: "newestFirst",
   });
+}
+
+export function getVenueById(id: string | null, withFallback: true): VenueDetails;
+export function getVenueById(id: string | null, withFallback?: boolean): VenueDetails | null;
+
+export function getVenueById(id: string | null, withFallback = false): VenueDetails | null {
+  if (!id) {
+    return withFallback ? UnknownVenue : null;
+  }
+  const venue = eventStore.venues.get(id);
+  return withFallback ? (venue ?? UnknownVenue) : null;
 }
 
 export function serializeVenues(): VenueDetails[] {
@@ -93,7 +108,7 @@ export async function fetchConcerts(options: FetchConcertOptions = {}) {
     eventStore.concerts.set(concert.id, concert);
   }
   console.log("Fetched concerts:", eventStore.concerts);
-  metadata.concertsLoaded = true;
+  eventStore.metadata.concertsLoaded = true;
 }
 
 export async function fetchVenues() {
@@ -109,7 +124,7 @@ export async function fetchVenues() {
     eventStore.venues.set(venue.id, venue);
   }
   console.log("Fetched venues:", eventStore.venues);
-  metadata.venuesLoaded = true;
+  eventStore.metadata.venuesLoaded = true;
 }
 
 export async function fetchConcertCounts(supabase: SupabaseClient<Database>) {
