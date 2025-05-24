@@ -2,19 +2,14 @@
   import "../app.css";
   import { goto, invalidateAll } from "$app/navigation";
   import { onMount } from "svelte";
+  import { page } from "$app/state";
+  import Navbar from "$lib/components/Navbar.svelte";
+  import "$lib/stores.svelte.js";
+  import { eventStore, fetchConcerts, fetchVenues } from "$lib/stores.svelte.js";
+  import LoadData from "$lib/components/LoadData.svelte";
 
   let { data, children } = $props();
-  /**
-   * We use the $derived rune so that
-   * `supabase` and `session` are updated
-   * during invalidation. $state doesn't do this.
-   *
-   * An updated supabase client isn't typically needed,
-   * but the ssr libary returns a cached client
-   * for us during invalidation. Otherwise we'd be
-   * initializing a client during every invalidation.
-   */
-  let { supabase, session, user } = $derived(data);
+  let { supabase, session } = $derived(data);
 
   onMount(() => {
     const {
@@ -46,4 +41,10 @@
   });
 </script>
 
+{#if !page.url.pathname.startsWith("/dash")}
+  <Navbar />
+{/if}
+
 {@render children()}
+
+<LoadData />
