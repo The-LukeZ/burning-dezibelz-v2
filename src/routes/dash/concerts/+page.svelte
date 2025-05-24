@@ -4,7 +4,7 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
-  import { eventStore, metadata, serializeConcerts } from "$lib/stores.svelte.js";
+  import { eventStore, serializeConcerts } from "$lib/stores.svelte.js";
   import type { Database, Tables } from "$lib/supabase.ts";
   import { formatDateTimeLocal, formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
 
@@ -174,7 +174,7 @@
       </tr>
     </thead>
     <tbody>
-      {#if metadata.concertsLoaded && eventStore.concerts.size > 0}
+      {#if eventStore.metadata.concertsLoaded && eventStore.concerts.size > 0}
         {#each serializeConcerts() as concert}
           <tr class="hover:bg-primary/15 transition-colors duration-75">
             <td>{formatGermanDateTime(concert.timestamp)}</td>
@@ -218,7 +218,7 @@
             </td>
           </tr>
         {/each}
-      {:else if metadata.concertsLoaded && eventStore.concerts.size === 0}
+      {:else if eventStore.metadata.concertsLoaded && eventStore.concerts.size === 0}
         <tr>
           <td colspan="5" class="text-center">No concerts found.</td>
         </tr>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import Modal from "$lib/components/Modal.svelte";
-  import { eventStore, metadata, serializeVenues } from "$lib/stores.svelte.js";
+  import { eventStore, serializeVenues } from "$lib/stores.svelte.js";
 
   let selectedVenue = $state<VenueDetails | null>(null);
   let modalOpen = $state(false);
@@ -107,7 +107,7 @@
             </td>
           </tr>
         {/each}
-      {:else if metadata.venuesLoaded && eventStore.venues.size === 0}
+      {:else if eventStore.metadata.venuesLoaded && eventStore.venues.size === 0}
         <tr>
           <td colspan="5" class="text-center">No venues found.</td>
         </tr>

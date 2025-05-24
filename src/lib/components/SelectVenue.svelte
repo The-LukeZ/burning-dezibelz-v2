@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { eventStore, metadata } from "$lib/stores.svelte";
+  import { eventStore } from "$lib/stores.svelte";
   import type { Snippet } from "svelte";
   import type { ClassValue } from "svelte/elements";
   import { scale } from "svelte/transition";
@@ -38,7 +38,7 @@
 
   let search = $state("");
   let filteredVenues = $derived.by(() => {
-    if (!metadata.venuesLoaded) return null;
+    if (!eventStore.metadata.venuesLoaded) return null;
     const venueMap = $state.snapshot(eventStore.venues);
     const filtered = venueMap.values().filter((venue) => {
       if (exclude.includes(venue.id)) return false;
