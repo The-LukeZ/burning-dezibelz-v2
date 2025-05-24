@@ -28,10 +28,12 @@ export function formatGermanDateTime(dateString: string): string {
   }
 }
 
+/**
+ * Convert to local timezone and format for datetime-local input.
+ */
 export function formatDateTimeLocal(dateString: string): string {
   try {
     const date = new Date(dateString);
-    // Convert to local timezone and format for datetime-local input
     const offset = date.getTimezoneOffset() * 60000;
     const localDate = new Date(date.getTime() - offset);
     return localDate.toISOString().slice(0, 16);
