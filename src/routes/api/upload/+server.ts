@@ -21,7 +21,7 @@ export async function POST({ request, url }) {
   await mkdir(uploadDir, { recursive: true });
 
   // Save file
-  const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-").replace(".", "-").toLowerCase()}`;
+  const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-").toLowerCase()}`;
   const filepath = join(uploadDir, filename);
   await writeFile(filepath, buffer);
 
