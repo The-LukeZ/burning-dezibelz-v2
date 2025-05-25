@@ -5,7 +5,6 @@
   import { page } from "$app/state";
   import Navbar from "$lib/components/Navbar.svelte";
   import "$lib/stores.svelte.js";
-  import { eventStore, fetchConcerts, fetchVenues } from "$lib/stores.svelte.js";
   import LoadData from "$lib/components/LoadData.svelte";
 
   let { data, children } = $props();
