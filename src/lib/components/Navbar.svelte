@@ -9,7 +9,9 @@
   ];
 </script>
 
-<div class="dy-navbar fixed top-0 right-0 left-0 z-50 h-16 bg-transparent shadow-sm backdrop-blur-2xl">
+<div
+  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-transparent shadow-sm backdrop-blur-2xl"
+>
   <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between">
     <div class="navbar-branding md:w-1/2">
       <a href="/" class="branding hover:bg-primary/20 rounded px-2 py-1.5 transition hover:text-orange-50">
@@ -27,10 +29,10 @@
     {/snippet}
 
     <div class="dy-navbar-end dy-dropdown-end w-fit">
-      <ul class="dy-menu dy-menu-horizontal hidden gap-1 px-1 text-lg font-semibold md:flex">
+      <ul class="dy-menu dy-menu-horizontal hidden gap-1 px-1 text-lg font-semibold sm:flex">
         {@render navbarLinks()}
       </ul>
-      <div class="dy-dropdown">
+      <div class="dy-dropdown flex sm:hidden">
         <div tabindex="0" role="button" class="dy-btn dy-btn-primary dy-btn-soft dy-btn-square">
           <svg
             xmlns="http://www.w3.org/2000/svg"
