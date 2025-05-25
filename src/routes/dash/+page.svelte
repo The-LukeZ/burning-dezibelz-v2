@@ -55,5 +55,3 @@
     {/each}
   {/if}
 </section>
-
-<button class="dy-btn dy-btn-error dy-btn-dash border-2" onclick={() => goto("/dash/logout")}>Logout</button>
