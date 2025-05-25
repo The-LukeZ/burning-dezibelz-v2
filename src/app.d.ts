@@ -27,6 +27,8 @@ declare global {
   type Concert = Database["public"]["Tables"]["concerts"]["Row"];
 
   type VenueDetails = Database["public"]["Tables"]["venues"]["Row"];
+
+  type Song = Database["public"]["Tables"]["songs"]["Row"];
 }
 
 export {};
