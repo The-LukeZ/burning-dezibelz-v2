@@ -43,6 +43,12 @@
 @layer base {
   :root {
     --color-light-base-100: color-mix(in oklab, var(--color-base-100) 95%, white);
+    --navbar-height: 64px;
+    --footer-height: 320px;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }
 
