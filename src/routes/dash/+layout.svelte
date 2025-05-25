@@ -14,6 +14,7 @@
     { href: "/dash", label: "Dash Home" },
     { href: "/dash/concerts", label: "Concerts" },
     { href: "/dash/venues", label: "Venues" },
+    { href: "/dash/songs", label: "Songs" },
   ];
 
   onMount(async () => {
