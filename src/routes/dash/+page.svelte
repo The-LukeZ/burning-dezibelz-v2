@@ -17,7 +17,7 @@
   });
 </script>
 
-<h1>Moin {page.data.user?.user_metadata.name}</h1>
+<h1 class="mx-auto mb-4 w-fit">Moin {page.data.user?.user_metadata.name}</h1>
 
 <section class="flex flex-col items-center justify-center gap-4">
   <!-- Fileupload test -->
@@ -50,8 +50,8 @@
   </button>
 
   {#if uploadedResults.length > 0}
-    {#each uploadedResults as result}
-      <img src={result} alt="Uploaded Image" class="size-fit object-cover" />
+    {#each uploadedResults as result, i}
+      <img src={result} alt="Uploaded Image, {i}" class="size-fit object-cover" />
     {/each}
   {/if}
 </section>
