@@ -34,21 +34,21 @@ export type Database = {
           created_by: string | null;
           email: string;
           notes: string | null;
-          role: Database["public"]["Enums"]["UserRole"] | null;
+          role: Database["public"]["Enums"]["UserRole"];
         };
         Insert: {
           created_at?: string | null;
           created_by?: string | null;
           email: string;
           notes?: string | null;
-          role?: Database["public"]["Enums"]["UserRole"] | null;
+          role: Database["public"]["Enums"]["UserRole"];
         };
         Update: {
           created_at?: string | null;
           created_by?: string | null;
           email?: string;
           notes?: string | null;
-          role?: Database["public"]["Enums"]["UserRole"] | null;
+          role?: Database["public"]["Enums"]["UserRole"];
         };
         Relationships: [];
       };
