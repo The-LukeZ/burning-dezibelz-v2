@@ -99,6 +99,24 @@ export type Database = {
           },
         ];
       };
+      songs: {
+        Row: {
+          artist: string;
+          id: number;
+          title: string;
+        };
+        Insert: {
+          artist: string;
+          id?: number;
+          title: string;
+        };
+        Update: {
+          artist?: string;
+          id?: number;
+          title?: string;
+        };
+        Relationships: [];
+      };
       venues: {
         Row: {
           address: string;
