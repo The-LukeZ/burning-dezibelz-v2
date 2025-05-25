@@ -1,5 +1,11 @@
 // src/routes/api/google-auth/callback/+server.ts
+import type { Database } from "$lib/supabase.js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "@sveltejs/kit";
+
+async function deleteUser(supabase: SupabaseClient<Database>, id: string) {
+  await supabase.auth.admin.deleteUser(id, true);
+}
 
 export const GET = async ({ url, locals: { supabase } }) => {
   const code = url.searchParams.get("code") as string;
@@ -26,6 +32,7 @@ export const GET = async ({ url, locals: { supabase } }) => {
         if (queryError || !allowedUser) {
           // Email not in allowed list - sign them out and redirect to error page
           await supabase.auth.signOut({ scope: "global" });
+          await deleteUser(supabase, user.id);
           redirect(303, "/dash/login?error=Email+not+authorized");
         }
 
