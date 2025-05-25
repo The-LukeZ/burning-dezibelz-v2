@@ -6,6 +6,7 @@
   import Navbar from "$lib/components/Navbar.svelte";
   import "$lib/stores.svelte.js";
   import LoadData from "$lib/components/LoadData.svelte";
+  import Footer from "$lib/components/Footer.svelte";
 
   let { data, children } = $props();
   let { supabase, session } = $derived(data);
@@ -44,8 +45,19 @@
   <Navbar />
 {/if}
 
-<div class:mt-16={page.url.pathname !== "/"}>
+<div class="page-container" class:mt-16={page.url.pathname !== "/" && !page.url.pathname.startsWith("/dash")}>
   {@render children()}
 </div>
 
 <LoadData />
+
+{#if !page.url.pathname.startsWith("/dash")}
+  <Footer />
+{/if}
+
+<style>
+  .page-container {
+    min-height: calc(100vh - var(--navbar-height));
+    width: 100%;
+  }
+</style>
