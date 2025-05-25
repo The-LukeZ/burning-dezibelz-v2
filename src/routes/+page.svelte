@@ -92,15 +92,10 @@
                     <h3 class="dy-card-title text-xl">Private Veranstaltung</h3>
                   {/if}
                   <div class="mt-2 flex cursor-default items-center gap-2">
-                    <span class="dy-badge switch-colors-primary"
-                      >{formatGermanDateTime(concert.timestamp)}</span
-                    >
+                    <span class="dy-badge switch-colors-primary">
+                      {formatGermanDateTime(concert.timestamp)}
+                    </span>
                   </div>
-                  {#if concert.notes}
-                    <p class="mt-4">
-                      {concert.notes}
-                    </p>
-                  {/if}
                   {#if concert.ticket_url}
                     <p class="mt-4">
                       <button
@@ -129,15 +124,24 @@
 
     <section class="px-4 py-16 md:px-8">
       {@render heading("ueber", "Über uns")}
-      <div class="dy-card sm:dy-card-side bg-base-100 container mx-auto shadow-sm">
-        <figure class="sm:max-w-1/2">
-          <img src="/ringkeller_1748128961.png" alt="Album" />
+      <div class="dy-card sm:dy-card-side bg-base-100 container mx-auto max-w-[1000px] shadow-sm">
+        <figure class=" sm:max-w-1/2">
+          <img src="/ringkeller_1748128961.png" alt="Im Ringkeller, März 2025" />
         </figure>
-        <div class="dy-card-body">
-          <h2 class="dy-card-title">New album is released!</h2>
-          <p>Click the button to listen on Spotiwhy app.</p>
-          <div class="dy-card-actions justify-end">
-            <button class="dy-btn dy-btn-primary">Listen</button>
+        <div class="dy-card-body short-about justify-around sm:text-lg">
+          <h2 class="dy-card-title block text-2xl font-bold text-balance">
+            Wir sind die <strong>Burning Dezibelz</strong>!
+          </h2>
+          <p>
+            Eine junge Band aus dem schönen <span class="font-bold">Zwickau</span>, wobei sich "jung" nur auf
+            das Alter der Band bezieht, denn uns gibt es erst seit <strong>2023</strong>.<br />
+            Jan und Micha sorgen an den Gitarren für die Melodien, Robert am Bass und Luca am Schlagzeug für den
+            Groove.<br />
+            Musikalisch sind wir zu Hause zwischen <strong>Rock</strong> und <strong>Metal</strong>, mit
+            Ausflügen in alles, was dazwischen spielt.
+          </p>
+          <div class="dy-card-actions mt-3 justify-end">
+            <a href="/ueber-uns" class="dy-btn dy-btn-primary">Erfahre mehr über uns</a>
           </div>
         </div>
       </div>
