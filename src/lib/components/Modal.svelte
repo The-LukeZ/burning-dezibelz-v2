@@ -103,6 +103,7 @@
     overscroll-behavior: contain;
     width: 98%;
     max-height: 100dvh;
+    height: fit-content;
   }
 
   .x-button {
