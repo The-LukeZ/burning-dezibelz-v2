@@ -4,6 +4,6 @@ export async function load({ locals, cookies }) {
     session: session,
     user: user,
     cookies: cookies.getAll(),
-    currentDate: new Date(),
+    currentISODate: new Date().toISOString(),
   };
 }
