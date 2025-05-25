@@ -1,4 +1,3 @@
-import type { Tables } from "$lib/supabase.ts";
 import { eventStore } from "$lib/stores.svelte.js";
 
 export function getConcertDisplayName(concert: Concert): string {
@@ -12,7 +11,11 @@ export function getConcertDisplayName(concert: Concert): string {
   return displayName;
 }
 
-export function formatGermanDateTime(dateString: string): string {
+export function formatGermanDateTime(dateString: string | null): string {
+  if (!dateString) {
+    return "Invalid Date";
+  }
+
   try {
     const timestamp = new Date(dateString);
     return timestamp.toLocaleString("de-DE", {
