@@ -3,7 +3,8 @@ import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import type { User } from "@supabase/supabase-js";
 
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from "$env/static/public";
+import { PUBLIC_SUPABASE_URL } from "$env/static/public";
+import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 
 const devToolsCheck: Handle = async ({ event, resolve }) => {
   if (event.url.pathname.startsWith("/.well-known/appspecific/com.chrome.devtools")) {
@@ -19,7 +20,7 @@ const supabase: Handle = async ({ event, resolve }) => {
    *
    * The Supabase client gets the Auth token from the request cookies.
    */
-  event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+  event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     cookies: {
       getAll: () => event.cookies.getAll(),
       setAll: (cookiesToSet) => {
@@ -83,4 +84,27 @@ const authGuard: Handle = async ({ event, resolve }) => {
   return resolve(event);
 };
 
-export const handle = sequence(devToolsCheck, supabase, authGuard);
+const authUserMiddleware: Handle = async ({ event, resolve }) => {
+  // Authorize user role for specific routes
+  const isUsersApiRoute = event.url.pathname.startsWith("/api/users");
+  const isUsersDashRoute = event.url.pathname === "/dash/users";
+  const isAdminRoute = isUsersApiRoute || isUsersDashRoute;
+
+  if (event.locals.user && isAdminRoute) {
+    const { data: users } = await event.locals.supabase.from("allowed_users").select("*");
+
+    const allowedUser = users?.find((u) => u.email === event.locals.user!.email) ?? null;
+    if (!allowedUser || allowedUser.role !== "admin") {
+      if (isUsersApiRoute) {
+        return Response.json({ error: "No Permission" }, { status: 403 });
+      }
+      if (isUsersDashRoute) {
+        redirect(303, "/dash");
+      }
+    }
+  }
+
+  return resolve(event);
+};
+
+export const handle = sequence(devToolsCheck, supabase, authGuard, authUserMiddleware);
