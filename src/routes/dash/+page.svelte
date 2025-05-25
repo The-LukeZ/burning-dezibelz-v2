@@ -51,7 +51,7 @@
 
   {#if uploadedResults.length > 0}
     {#each uploadedResults as result}
-      <img src={result} alt="Uploaded Image" class="object-cover" />
+      <img src={result} alt="Uploaded Image" class="size-fit object-cover" />
     {/each}
   {/if}
 </section>
