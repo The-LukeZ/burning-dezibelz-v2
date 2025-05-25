@@ -44,6 +44,8 @@
   <Navbar />
 {/if}
 
-{@render children()}
+<div class:mt-16={page.url.pathname !== "/"}>
+  {@render children()}
+</div>
 
 <LoadData />
