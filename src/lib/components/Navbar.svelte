@@ -50,7 +50,7 @@
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <ul
           tabindex="0"
-          class="dy-menu dy-menu-xl dy-dropdown-content bg-base-100 rounded-box mobile-menu z-1 mt-3 p-2 shadow"
+          class="dy-menu dy-menu-xl dy-dropdown-content bg-base-200 rounded-box mobile-menu z-1 mt-3 p-2 drop-shadow-lg"
         >
           {@render navbarLinks()}
         </ul>
