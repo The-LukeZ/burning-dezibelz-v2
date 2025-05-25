@@ -17,6 +17,10 @@
      * Additional classes to apply to the modal box.
      */
     class?: ClassValue;
+    /**
+     * Optional title for the modal.
+     */
+    title?: string;
   };
 
   let {
@@ -26,6 +30,7 @@
     closeOnBackdropClick = true,
     class: className = "",
     children,
+    title = "",
   }: Props = $props();
 
   $effect(() => {
@@ -69,6 +74,9 @@
       transition:scale={{ duration: 150 }}
       onclick={(e) => e.stopPropagation()}
     >
+      {#if title}
+        <h2 class="mb-4 text-xl font-semibold">{title}</h2>
+      {/if}
       {#if withXButton}
         <button
           class="dy-btn dy-btn-circle dy-btn-ghost x-button"
