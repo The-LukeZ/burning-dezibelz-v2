@@ -16,7 +16,7 @@ declare global {
     interface PageData {
       session: Session | null;
       user: User | null;
-      currentDate: Date;
+      currentISODate: string;
     }
 
     // interface PageState {}
@@ -29,6 +29,8 @@ declare global {
   type VenueDetails = Database["public"]["Tables"]["venues"]["Row"];
 
   type Song = Database["public"]["Tables"]["songs"]["Row"];
+
+  type AllowedUser = Database["public"]["Tables"]["allowed_users"]["Row"];
 }
 
 export {};
