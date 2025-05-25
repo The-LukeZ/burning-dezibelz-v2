@@ -13,8 +13,8 @@
   // Handle scroll animation for banner
   function handleScroll() {
     if (banner && firstSection) {
-      const firstSectionTop = firstSection.offsetTop - 80; // Adjust for some padding
-      const opacity = 1 - Math.min(1, scrollY / (firstSectionTop ?? 500));
+      const firstSectionTop = firstSection.offsetTop - 100; // Adjust for some padding
+      const opacity = 1 - Math.min(1, scrollY / firstSectionTop);
       const translateY = scrollY * 0.5;
       banner.style.opacity = opacity.toString();
       banner.style.transform = `translateY(${translateY}px)`;
@@ -59,9 +59,14 @@
         class="mx-auto max-h-screen w-full object-contain"
       />
       <div class="absolute inset-0 flex items-end justify-center bg-transparent py-10">
-        <div class="bg-primary/40 border-primary text-primary block animate-bounce rounded-full">
+        <button
+          class="bg-primary/0 border-primary text-primary hover:bg-primary/40 block animate-bounce cursor-pointer rounded-full transition duration-150"
+          onclick={() => {
+            firstSection?.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
           <ChevronDown class="hidden size-18 rounded-full drop-shadow-md drop-shadow-black lg:block" />
-        </div>
+        </button>
       </div>
     </div>
 
@@ -151,7 +156,7 @@
 
 <style>
   #banner-image {
-    max-height: calc(100vh - 80px);
+    max-height: 100vh;
   }
 
   .concert-grid {
