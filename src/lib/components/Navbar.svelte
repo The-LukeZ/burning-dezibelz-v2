@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { page } from "$app/state";
   import { isCurrentPage } from "$lib";
 
@@ -6,7 +6,7 @@
     { href: "/konzerte", label: "Konzerte" },
     { href: "/ueber-uns", label: "Über uns" },
     { href: "/kontakt", label: "Kontakt" },
-  ];
+  ] as const;
 </script>
 
 <div
@@ -20,19 +20,17 @@
       </a>
     </div>
 
-    {#snippet navbarLinks()}
-      {#each navItems as item}
-        <li>
-          <a href={item.href} class:dy-menu-active={isCurrentPage(item.href, page.url)}>{item.label}</a>
-        </li>
-      {/each}
-    {/snippet}
-
     <div class="dy-navbar-end dy-dropdown-end w-fit">
-      <ul class="dy-menu dy-menu-horizontal hidden gap-1 px-1 text-lg font-semibold sm:flex">
-        {@render navbarLinks()}
+      <ul class="dy-menu dy-menu-horizontal hidden items-center gap-1 px-1 text-lg font-semibold sm:flex">
+        {#each navItems as item}
+          <li>
+            <a href={item.href} class="nav-btn" class:active-link={isCurrentPage(item.href, page.url)}>
+              {item.label}
+            </a>
+          </li>
+        {/each}
       </ul>
-      <div class="dy-dropdown flex sm:hidden">
+      <div class="dy-dropdown dy-dropdown-end block sm:hidden">
         <div tabindex="0" role="button" class="dy-btn dy-btn-primary dy-btn-soft dy-btn-square">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -52,9 +50,15 @@
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <ul
           tabindex="0"
-          class="dy-menu dy-menu-xl dy-dropdown-content bg-base-200 rounded-box mobile-menu z-1 mt-3 p-2 drop-shadow-lg"
+          class="dy-dropdown-content dy-menu dy-menu-xl bg-base-200 rounded-box mobile-menu z-1 mt-3 p-2 drop-shadow-lg"
         >
-          {@render navbarLinks()}
+          {#each navItems as item}
+            <li>
+              <a href={item.href} class="nav-btn" class:active-link={isCurrentPage(item.href, page.url)}>
+                {item.label}
+              </a>
+            </li>
+          {/each}
         </ul>
       </div>
     </div>
@@ -78,10 +82,33 @@
   }
 
   .mobile-menu {
-    width: calc(100vw - (11 / 12) * 100%);
+    width: calc(100vw - ((11 / 12) * 100%));
+    gap: 0.5rem;
+
+    li:not(:last-child) {
+      padding-bottom: 5px;
+    }
+
     a {
       justify-content: center;
       width: 100%;
+    }
+  }
+
+  ul {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .nav-btn {
+    color: var(--color-base-content);
+    &:hover,
+    &.active-link {
+      color: color-mix(in oklab, var(--color-neutral-content) 30%, white);
+      background-color: color-mix(in oklab, var(--color-primary) 20%, transparent);
+    }
+
+    &:active {
+      transform: translateY(1px);
     }
   }
 </style>
