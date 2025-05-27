@@ -13,6 +13,7 @@
      */
     withXButton?: boolean;
     closeOnBackdropClick?: boolean;
+    closeOnEscape?: boolean;
     /**
      * Additional classes to apply to the modal box.
      */
@@ -28,6 +29,7 @@
     onOpenChange = $bindable(() => {}),
     withXButton = true,
     closeOnBackdropClick = true,
+    closeOnEscape = true,
     class: className = "",
     children,
     title = "",
@@ -54,6 +56,15 @@
     }
   });
 </script>
+
+<svelte:window
+  onkeydown={(e) => {
+    if (e.key === "Escape" && open && closeOnEscape) {
+      open = false;
+      onOpenChange(false);
+    }
+  }}
+/>
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div
