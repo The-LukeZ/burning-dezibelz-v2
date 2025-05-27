@@ -103,16 +103,19 @@ export type Database = {
         Row: {
           artist: string;
           id: number;
+          is_own: boolean;
           title: string;
         };
         Insert: {
           artist: string;
           id?: number;
+          is_own?: boolean;
           title: string;
         };
         Update: {
           artist?: string;
           id?: number;
+          is_own?: boolean;
           title?: string;
         };
         Relationships: [];
