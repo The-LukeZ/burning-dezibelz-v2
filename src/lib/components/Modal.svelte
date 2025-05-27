@@ -118,7 +118,6 @@
     padding-block: calc(var(--spacing) * 6);
     max-height: 100dvh;
     overflow-x: clip;
-    overflow-y: auto;
     overscroll-behavior: contain;
     width: 98%;
     max-height: 100dvh;
