@@ -7,9 +7,11 @@ export const actions = {
 
     const title = formData.get("title")?.toString();
     const artist = formData.get("artist")?.toString();
+    const is_own_song = formData.get("is_own") === "on";
     const song = {
       title,
       artist,
+      is_own: is_own_song,
     } as Database["public"]["Tables"]["songs"]["Insert"];
 
     if (!title || !artist) {
