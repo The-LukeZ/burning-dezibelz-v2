@@ -188,7 +188,7 @@
   {/if}
 </ul>
 
-<div class="absolute right-0 bottom-0 left-0 flex w-full justify-end gap-2 p-4">
+<div class="fixed right-0 bottom-0 left-0 flex w-full justify-end gap-2 p-4">
   <button class="dy-btn dy-btn-secondary" onclick={revertChanges} disabled={loading}>Revert Changes</button>
   <button class="dy-btn dy-btn-primary" onclick={saveSongs} disabled={loading}>Save Changes</button>
 </div>
@@ -279,3 +279,9 @@
     <button type="submit" class="dy-btn dy-btn-primary px-10" disabled={loading}>Add Song</button>
   </form>
 </Modal>
+
+<style>
+  ul > *:not(:last-child) {
+    border-bottom: 1px solid var(--color-neutral-content);
+  }
+</style>
