@@ -32,10 +32,6 @@
         <tr>
           <td colspan="3" class="text-center">Laden...</td>
         </tr>
-      {:else if error}
-        <tr>
-          <td colspan="3" class="text-red-500">{error}</td>
-        </tr>
       {:else if songs.length === 0}
         <tr>
           <td colspan="3" class="bg-info text-info-content rounded-b text-center">Keine Songs gefunden.</td>
@@ -65,5 +61,6 @@
 <style>
   thead tr {
     border-bottom: 1px solid var(--color-primary);
+    font-size: var(--text-lg);
   }
 </style>
