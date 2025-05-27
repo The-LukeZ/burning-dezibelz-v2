@@ -20,6 +20,18 @@ export async function POST({ request, locals: { supabase } }) {
   const payload = (await request.json()) as SongBatchPayload;
 
   try {
+    // Validate that all songs have non-empty artist and title
+    const allSongs = [...(payload.create || []), ...(payload.update || [])];
+
+    for (const song of allSongs) {
+      if (!song.artist?.trim() || !song.title?.trim()) {
+        return Response.json(
+          { error: "All songs must have non-empty artist and title fields" },
+          { status: 400 },
+        );
+      }
+    }
+
     // Delete songs
     if (payload.delete && payload.delete.length > 0) {
       const { error: deleteError } = await supabase.from("songs").delete().in("id", payload.delete);
