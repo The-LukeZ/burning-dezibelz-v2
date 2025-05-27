@@ -17,8 +17,6 @@
   let filteredArtists = $state<string[]>([]);
   let focusedSongId = $state<number | null>(null);
 
-  $effect(() => console.log("Songs length", $state.snapshot(songs).length));
-
   $effect(() => {
     if (showArtistDropdown && artistInputValue.trim()) {
       filteredArtists = uniqueArtists
@@ -221,6 +219,7 @@
         await update({ reset: true, invalidateAll: false });
         if (result.type === "success" && result.data?.song) {
           songs.push(result.data.song as Song);
+          songs.sort((a, b) => a.title.localeCompare(b.title));
         }
         loading = false;
       };
