@@ -19,34 +19,51 @@
 </script>
 
 <div class="mx-auto max-w-[800px] overflow-x-auto">
-  <table class="dy-table">
-    <thead class="bg-base-200">
+  <table class="dy-table dy-table-zebra min-w-[400px]">
+    <thead class="bg-primary/20 text-neutral-content">
       <tr>
         <th class="w-1/2">Titel</th>
         <th class="w-1/2">Interpret</th>
+        <th aria-details="Eigener Song Indikator"></th>
       </tr>
     </thead>
     <tbody>
       {#if loading}
         <tr>
-          <td colspan="2" class="text-center">Laden...</td>
+          <td colspan="3" class="text-center">Laden...</td>
         </tr>
       {:else if error}
         <tr>
-          <td colspan="2" class="text-red-500">{error}</td>
+          <td colspan="3" class="text-red-500">{error}</td>
         </tr>
       {:else if songs.length === 0}
         <tr>
-          <td colspan="2" class="bg-info text-info-content rounded-b text-center">Keine Songs gefunden.</td>
+          <td colspan="3" class="bg-info text-info-content rounded-b text-center">Keine Songs gefunden.</td>
         </tr>
       {:else}
         {#each songs as song}
           <tr class="transition duration-75 hover:bg-(--color-light-base-100)">
             <td>{song.title}</td>
             <td>{song.artist}</td>
+            <td class="size-4">
+              {#if song.is_own}
+                <div class="dy-tooltip dy-tooltip-left flex h-full items-center">
+                  <div class="dy-tooltip-content">
+                    <span>Eigner Song!</span>
+                  </div>
+                  <div class="bg-primary size-4 rounded-full"></div>
+                </div>
+              {/if}
+            </td>
           </tr>
         {/each}
       {/if}
     </tbody>
   </table>
 </div>
+
+<style>
+  thead tr {
+    border-bottom: 1px solid var(--color-primary);
+  }
+</style>
