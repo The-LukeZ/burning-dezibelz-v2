@@ -50,6 +50,7 @@
 
   async function saveSongs() {
     loading = true;
+    error = null;
 
     const _songs = $state.snapshot(songs);
 
@@ -107,9 +108,9 @@
 </button>
 
 {#if error}
-  <div class="dy-alert dy-alert-error max-w-[750px]">
+  <div class="dy-alert dy-alert-soft dy-alert-error mx-auto my-4 max-w-[750px]">
     <span>{error}</span>
-    <button class="dy-btn dy-btn-square dy-btn-soft dy-btn-error" onclick={() => (error = null)}>
+    <button class="dy-btn dy-btn-square dy-btn-dash dy-btn-error ml-auto" onclick={() => (error = null)}>
       <Trashcan />
     </button>
   </div>
