@@ -18,7 +18,7 @@
   });
 </script>
 
-<div class="mx-auto max-w-[800px] overflow-x-auto">
+<div class="mx-auto mb-10 max-w-[800px] overflow-x-auto">
   <table class="dy-table dy-table-zebra min-w-[400px]">
     <thead class="bg-primary/20 text-neutral-content">
       <tr>
