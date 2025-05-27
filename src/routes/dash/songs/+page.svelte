@@ -17,6 +17,8 @@
   let filteredArtists = $state<string[]>([]);
   let focusedSongId = $state<number | null>(null);
 
+  $effect(() => console.log("Songs length", $state.snapshot(songs).length));
+
   $effect(() => {
     if (showArtistDropdown && artistInputValue.trim()) {
       filteredArtists = uniqueArtists
@@ -69,12 +71,14 @@
 
     if (response.ok) {
       const data = (await response.json()) as Song[];
-      oldSongs = structuredClone(data);
-      songs = data;
+      const sortedData = [...data];
+      sortedData.sort((a, b) => a.title.localeCompare(b.title));
+      oldSongs = structuredClone(sortedData);
+      songs = sortedData;
       loading = false;
     } else {
       const data = await response.json();
-      error = `Failed to save songs: ${data.error || response.statusText}`;
+      error = `Failed to save songs: ${data?.error || response.statusText}`;
       oldSongs = structuredClone(data);
       console.error(error);
       loading = false;
@@ -83,9 +87,10 @@
   }
 
   function revertChanges() {
-    songs = structuredClone(oldSongs);
+    songs = [...oldSongs];
+    deletedSongs.length = 0; // Clear deleted songs
     updateUniqueArtists();
-    console.log("Reverted changes to old songs:", songs);
+    console.log("Reverted changes to old songs:", $state.snapshot(songs));
   }
 
   onMount(async () => {
@@ -96,7 +101,7 @@
       songs = data;
       loading = false;
       updateUniqueArtists();
-      console.log("Fetched songs:", songs);
+      console.log("Fetched songs:", $state.snapshot(songs));
     } else {
       console.error("Failed to fetch songs:", response.statusText);
     }
@@ -126,7 +131,7 @@
       <span>No songs found. Please add some songs.</span>
     </div>
   {:else}
-    {#each songs.filter((s) => !deletedSongs.includes(s.id)) as song}
+    {#each songs.filter((song) => !deletedSongs.includes(song.id)) as song}
       <li
         class="flex items-center gap-1 rounded-2xl p-4 transition duration-75 hover:bg-(--color-light-base-100)"
       >
