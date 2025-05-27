@@ -106,7 +106,7 @@
   });
 </script>
 
-<button class="dy-btn dy-btn-primary mx-auto flex w-xs" onclick={() => (showAddSongModal = true)}>
+<button class="dy-btn dy-btn-primary mx-auto flex w-full max-w-xs" onclick={() => (showAddSongModal = true)}>
   Add Song
 </button>
 
@@ -131,7 +131,7 @@
   {:else}
     {#each songs.filter((song) => !deletedSongs.includes(song.id)) as song}
       <li
-        class="flex items-center gap-1 rounded-2xl p-4 transition duration-75 hover:bg-(--color-light-base-100)"
+        class="flex items-center gap-2 rounded-2xl p-4 transition duration-75 hover:bg-(--color-light-base-100)"
       >
         <div class="flex h-full grow flex-col gap-3 sm:flex-row">
           <input type="text" value={song.id} class="hidden" />
@@ -176,7 +176,7 @@
           </label>
         </div>
         <button
-          class="dy-btn dy-btn-square dy-btn-soft dy-btn-warning"
+          class="dy-btn dy-btn-square dy-btn-dash dy-btn-warning"
           onclick={() => {
             deletedSongs.push(song.id);
           }}
@@ -203,7 +203,7 @@
     }
   }}
   closeOnEscape={true}
-  class="w-full max-w-lg"
+  class="w-full max-w-lg overflow-y-visible"
   withXButton={false}
 >
   <form
@@ -241,6 +241,7 @@
           onfocusin={() => (showArtistDropdown = true)}
           onblur={() => setTimeout(() => (showArtistDropdown = false), 150)}
           required
+          autocomplete="off"
         />
       </label>
       {#if showArtistDropdown}
@@ -279,9 +280,3 @@
     <button type="submit" class="dy-btn dy-btn-primary px-10" disabled={loading}>Add Song</button>
   </form>
 </Modal>
-
-<style>
-  ul > *:not(:last-child) {
-    border-bottom: 1px solid var(--color-neutral-content);
-  }
-</style>
