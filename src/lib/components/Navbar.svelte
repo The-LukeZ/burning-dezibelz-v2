@@ -10,7 +10,7 @@
 </script>
 
 <div
-  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-transparent shadow-sm backdrop-blur-2xl"
+  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15 shadow-sm backdrop-blur-2xl"
 >
   <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between">
     <div class="navbar-branding md:w-1/2">
