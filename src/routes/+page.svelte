@@ -130,7 +130,7 @@
     <section class="px-4 py-16 md:px-8">
       {@render heading("ueber", "Über uns")}
       <div class="dy-card sm:dy-card-side bg-base-100 container mx-auto max-w-[1000px] shadow-sm">
-        <figure class=" sm:max-w-1/2">
+        <figure class="sm:max-w-1/2">
           <img src="/ringkeller_1748128961.png" alt="Im Ringkeller, März 2025" />
         </figure>
         <div class="dy-card-body short-about justify-around sm:text-lg">
