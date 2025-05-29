@@ -6,9 +6,20 @@
   import { onMount } from "svelte";
   import { getItemsForPath } from "$lib/data/navigationData";
   import { goto } from "$app/navigation";
+  import equal from "fast-deep-equal";
 
   let isDashboard = $derived(page.url.pathname.startsWith("/dash"));
-  let navItems = $derived(getItemsForPath(page.url.pathname));
+  let oldItems: NavItem[] = [];
+  let navItems = $state<NavItem[]>([]);
+
+  // To prevent unnecessary re-renders, we only update navItems if the items for the current path change
+  $effect(() => {
+    if (!equal(oldItems, getItemsForPath(page.url.pathname))) {
+      oldItems = getItemsForPath(page.url.pathname);
+      navItems = [...oldItems];
+      console.log("Updated nav items:", navItems);
+    }
+  });
 
   onMount(async () => {
     if (eventStore.metadata.concertsLoaded === false) {
@@ -61,7 +72,7 @@
 {/snippet}
 
 <nav
-  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15 shadow-sm backdrop-blur-sm"
+  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15 shadow-sm backdrop-blur-md"
   class:hidden={page.url.pathname === "/dash/login"}
 >
   <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between">
@@ -161,8 +172,8 @@
     color: var(--color-base-content);
     &:hover,
     &.active-link {
-      color: color-mix(in oklab, var(--color-neutral-content) 30%, white);
-      background-color: color-mix(in oklab, var(--color-primary) 20%, transparent);
+      color: var(--color-slate-100);
+      background-color: color-mix(in oklab, var(--color-primary) 50%, var(--color-base-200));
     }
 
     &:active {
