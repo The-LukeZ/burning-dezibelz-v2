@@ -5,7 +5,6 @@
   import { page } from "$app/state";
   import Navbar from "$lib/components/Navbar.svelte";
   import "$lib/stores.svelte.js";
-  import LoadData from "$lib/components/LoadData.svelte";
   import Footer from "$lib/components/Footer.svelte";
 
   let { data, children } = $props();
@@ -41,15 +40,11 @@
   });
 </script>
 
-{#if !page.url.pathname.startsWith("/dash")}
-  <Navbar />
-{/if}
+<Navbar />
 
-<div class="page-container" class:mt-16={page.url.pathname !== "/" && !page.url.pathname.startsWith("/dash")}>
+<div class="page-container" class:with-margin={page.url.pathname !== "/"}>
   {@render children()}
 </div>
-
-<LoadData />
 
 {#if !page.url.pathname.startsWith("/dash")}
   <Footer />
@@ -60,5 +55,10 @@
     min-height: calc(100vh - var(--navbar-height));
     width: 100%;
     overflow: hidden;
+    margin-top: 0;
+
+    &.with-margin {
+      margin-top: var(--navbar-height);
+    }
   }
 </style>
