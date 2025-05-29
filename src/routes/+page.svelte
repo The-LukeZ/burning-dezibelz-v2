@@ -8,7 +8,6 @@
   let banner = $state<HTMLDivElement>();
   let firstSection = $state<HTMLElement>();
   let scrollY = $state<number>(0);
-  let innerWidth = $state<number>(720);
 
   // Handle scroll animation for banner
   function handleScroll() {
@@ -24,7 +23,7 @@
   $effect(handleScroll);
 </script>
 
-<svelte:window bind:scrollY bind:innerWidth />
+<svelte:window bind:scrollY />
 
 {#snippet heading(id: string, title: string, href: string | null = null)}
   <h1 {id} class="mb-4 text-center text-3xl font-bold">
