@@ -102,6 +102,10 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
         redirect(303, "/dash");
       }
     }
+
+    event.locals.isAdmin = allowedUser?.role === "admin";
+  } else {
+    event.locals.isAdmin = false;
   }
 
   return resolve(event);
