@@ -77,7 +77,7 @@
 
           <!-- Member Info -->
           <div class="dy-card-body p-6">
-            <h2 class="dy-card-title text-primary mb-2 text-2xl font-bold">
+            <h2 class="dy-card-title text-primary mb-2 text-lg font-bold">
               {member.name}
             </h2>
 
