@@ -21,16 +21,7 @@
     }
   }
 
-  onMount(() => {
-    window.addEventListener("scroll", () => {
-      scrollY = window.scrollY;
-      handleScroll();
-    });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  });
+  $effect(handleScroll);
 </script>
 
 <svelte:window bind:scrollY bind:innerWidth />
@@ -50,8 +41,9 @@
 {/snippet}
 
 <div id="gradient-start-point" class="bg-base-300 relative w-full">
-  <main class="z-10 mt-8 min-h-screen">
+  <main class="z-10 min-h-screen">
     <div bind:this={banner} class="relative max-w-[100%] bg-black">
+      <span class="h-8 w-full bg-black"></span>
       <img
         id="banner-image"
         src="/burningdezibelz-banner.png"
