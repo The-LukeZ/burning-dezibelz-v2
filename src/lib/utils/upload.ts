@@ -8,7 +8,7 @@ export function create_upload() {
   return {
     subscribe,
 
-    start({ file, url, headers = {} }: { file: File; url: string; headers: Record<string, string> }) {
+    start({ file, url, filename }: { file: File; url: string; filename: string }) {
       return new Promise((resolve, rej) => {
         xhr = new XMLHttpRequest();
 
@@ -36,9 +36,7 @@ export function create_upload() {
 
         xhr.open("POST", url);
 
-        for (const [name, value] of Object.entries(headers)) {
-          xhr.setRequestHeader(name, value);
-        }
+        xhr.setRequestHeader("x-file-name", filename);
 
         xhr.send(file);
       });
