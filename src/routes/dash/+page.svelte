@@ -1,57 +1,46 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
   import { page } from "$app/state";
-
-  let files = $state<FileList>();
-  let uploadedResults = $state<string[]>([]);
-
-  $effect(() => {
-    if (files) {
-      const fileList = $state.snapshot(files);
-      console.log(fileList);
-
-      for (const file of fileList) {
-        console.log(`${file.name}: ${file.size} bytes`);
-      }
-    }
-  });
+  import { formatGermanDateTime } from "$lib/utils/concerts";
+  import { navItems as _navitems } from "$lib/data/navigationData";
+  import { goto } from "$app/navigation";
+  const navItems = _navitems.private;
 </script>
 
-<h1 class="mx-auto mb-4 w-fit">Moin {page.data.user?.user_metadata.name}</h1>
-
-<section class="flex flex-col items-center justify-center gap-4">
-  <!-- Fileupload test -->
-  <input bind:files type="file" accept="image/*" class="dy-file-input" />
-  <button class="dy-btn dy-btn-accent" onclick={() => console.log(files)}>Log Files</button>
-  <button
-    class="dy-btn dy-btn-primary"
-    onclick={async () => {
-      // Perform post request to upload files
-      if (files && files.length > 0) {
-        const formData = new FormData();
-        formData.append("file", files[0]); // Only one file for simplicity
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log("Upload successful:", result);
-          uploadedResults.push(result.url);
-        } else {
-          console.error("Upload failed:", response.statusText);
-        }
-      }
-    }}
-  >
-    Upload
-  </button>
-
-  {#if uploadedResults.length > 0}
-    {#each uploadedResults as result, i}
-      <img src={result} alt="Uploaded Image, {i}" class="size-fit object-cover" />
-    {/each}
-  {/if}
+<section class="dy-prose mx-auto px-4 py-8">
+  <h1 class="text-2xl">Moin <strong>{page.data.user?.user_metadata.name}</strong>!</h1>
+  <p class="text-lg">Willkommen im Dashboard!</p>
+  <p class="text-lg">Hier kannst du deine Veranstaltungen verwalten, Bilder hochladen und vieles mehr.</p>
+  <p class="text-lg">Nutze die Navigation, um zu den verschiedenen Bereichen zu gelangen.</p>
+  <p class="text-lg">Viel Spaß!</p>
+  <p class="mt-2 text-sm">
+    Dein letzter Login war am <span class="font-mono"
+      >{formatGermanDateTime(page.data.user?.last_sign_in_at ?? new Date().toISOString())}</span
+    >.
+  </p>
 </section>
+
+<section class="dy-prose mx-auto space-y-4 px-4 py-8">
+  <h2 class="text-2xl font-bold">Navigation</h2>
+  <div class="flex flex-wrap gap-3">
+    {#each navItems.slice(1) as item}
+      <a
+        type="button"
+        href={item.href}
+        class="dy-btn dy-btn-secondary dy-btn-lg transition-all duration-150 hover:scale-105"
+        style="flex: 1 1 200px;"
+      >
+        {item.label}
+      </a>
+    {/each}
+  </div>
+
+  <button class="dy-btn dy-btn-error dy-btn-outline w-full" onclick={() => goto("/dash/logout")}>
+    Logout
+  </button>
+</section>
+
+<style>
+  section {
+    max-width: var(--container-3xl);
+  }
+</style>
