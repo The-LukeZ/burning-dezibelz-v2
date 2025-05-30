@@ -1,9 +1,8 @@
 import { SvelteMap } from "svelte/reactivity";
-import { API_URL, UnknownVenue } from "./constants";
+import { API_URL, UnknownVenue } from "../constants";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "./supabase";
-import { filterConcerts } from "./utils/concerts";
-import { onMount } from "svelte";
+import type { Database } from "../supabase";
+import { filterConcerts } from "../utils/concerts";
 
 interface EventStoreState {
   /**
@@ -127,13 +126,3 @@ export async function fetchVenues() {
   eventStore.metadata.venuesLoaded = true;
 }
 
-export async function fetchConcertCounts(supabase: SupabaseClient<Database>) {
-  const { data, error } = await supabase.rpc("get_concert_counts_per_venue");
-
-  if (error) {
-    console.error("Error calling function:", error);
-  } else {
-    console.log("Concert counts per venue:", data);
-    return data;
-  }
-}
