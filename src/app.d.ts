@@ -21,6 +21,7 @@ declare global {
     }
 
     interface PageData {
+      supabase: SupabaseClient<Database>;
       session: Session | null;
       user: User | null;
       /**
@@ -42,6 +43,8 @@ declare global {
   type Song = Database["public"]["Tables"]["songs"]["Row"];
 
   type AllowedUser = Database["public"]["Tables"]["allowed_users"]["Row"];
+
+  type Image = Database["public"]["Tables"]["images"]["Row"];
 
   type NavItem = {
     href: string;
