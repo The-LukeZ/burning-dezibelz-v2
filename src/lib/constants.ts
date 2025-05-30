@@ -1,4 +1,5 @@
 export const API_URL = "/api" as const;
+export const IMAGE_URL = "/images" as const;
 
 export const UnknownVenue: VenueDetails = {
   id: "0",
@@ -10,7 +11,3 @@ export const UnknownVenue: VenueDetails = {
   state: "Unbekannter Bundesstaat",
   url: "https://example.com/unknown-venue",
 } as const;
-
-const protocol = import.meta.env.VITE_API_PROTOCOL || "http";
-const origin = import.meta.env.VITE_API_ORIGIN || "localhost:9999";
-export const CDNUrl = (fn: string) => `${protocol}://${origin}/cdn/${fn}` as const;
