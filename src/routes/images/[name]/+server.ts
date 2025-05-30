@@ -1,15 +1,16 @@
-import { env } from "$env/dynamic/private";
-import fs from "node:fs";
+import { FILE_DIR } from "$env/static/private";
+import { ImageCache, imageCache } from "$lib/server/images.js";
+import fs from "fs";
 import path from "node:path";
 import { Readable } from "node:stream";
 import sharp from "sharp";
 
-if (!fs.existsSync(env.FILE_DIR)) {
-  fs.mkdirSync(env.FILE_DIR, { recursive: true });
+if (!fs.existsSync(FILE_DIR)) {
+  fs.mkdirSync(FILE_DIR, { recursive: true });
 }
 
 // Cache directory for optimized images
-const CACHE_DIR = path.join(env.FILE_DIR, ".cache");
+const CACHE_DIR = path.join(FILE_DIR, ".cache");
 if (!fs.existsSync(CACHE_DIR)) {
   fs.mkdirSync(CACHE_DIR, { recursive: true });
 }
@@ -24,16 +25,6 @@ function parseImageParams(url: URL): ImageParams {
   if (url.searchParams.get("fit")) params.fit = url.searchParams.get("fit") as any;
 
   return params;
-}
-
-function generateCacheKey(filename: string, params: ImageParams): string {
-  const paramString = Object.entries(params)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, value]) => `${key}_${value}`)
-    .join("-");
-
-  const ext = params.format || path.extname(filename).slice(1);
-  return `${path.parse(filename).name}_${paramString}.${ext}`;
 }
 
 async function optimizeImage(inputPath: string, params: ImageParams): Promise<Buffer> {
@@ -87,6 +78,9 @@ async function optimizeImage(inputPath: string, params: ImageParams): Promise<Bu
 }
 
 export async function GET({ params, request, locals: { supabase, session }, url }) {
+  // Clear expired cache entries periodically
+  imageCache.clearExpiredCache();
+
   // Parse optimization parameters
   const imageParams = parseImageParams(url);
 
@@ -113,21 +107,24 @@ export async function GET({ params, request, locals: { supabase, session }, url 
   }
 
   // Generate cache key for optimized version
-  const cacheKey = generateCacheKey(params.name, imageParams);
+  const cacheKey = ImageCache.generateCacheKey(params.name, imageParams);
   const cachePath = path.join(CACHE_DIR, cacheKey);
 
   let optimizedBuffer: Buffer;
   let outputMimeType: string = "";
   let cacheStats: fs.Stats | null = null;
 
-  // Check if cached version exists and is newer than original
-  if (fs.existsSync(cachePath)) {
-    cacheStats = fs.statSync(cachePath);
-    const originalStats = fs.statSync(file_path);
+  // Check advanced cache first
+  const cachedEntry = imageCache.getCachedImage(cacheKey);
 
-    if (cacheStats.mtime >= originalStats.mtime) {
+  if (cachedEntry && fs.existsSync(cachedEntry.filepath)) {
+    const originalStats = fs.statSync(file_path);
+    cacheStats = fs.statSync(cachedEntry.filepath);
+
+    // Check if cached version is still valid (newer than original and not expired)
+    if (cacheStats.mtime >= originalStats.mtime && cachedEntry.expires > new Date()) {
       // Use cached version
-      optimizedBuffer = fs.readFileSync(cachePath);
+      optimizedBuffer = fs.readFileSync(cachedEntry.filepath);
       outputMimeType = mimes.lookup(cacheKey);
     }
   }
@@ -137,9 +134,12 @@ export async function GET({ params, request, locals: { supabase, session }, url 
     try {
       optimizedBuffer = await optimizeImage(file_path, imageParams);
 
-      // Cache the optimized version
+      // Save to cache file
       fs.writeFileSync(cachePath, optimizedBuffer);
       cacheStats = fs.statSync(cachePath);
+
+      // Add to advanced cache with 24 hour expiration
+      await imageCache.setCachedImage(cacheKey, cachePath, 24 * 60 * 60);
 
       // Determine output MIME type
       outputMimeType = imageParams.format ? `image/${imageParams.format}` : imageData.mime_type;
