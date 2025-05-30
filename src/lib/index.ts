@@ -1,3 +1,5 @@
+import { allowedMimeTypes } from "./constants";
+
 export function isCurrentPage(href: string, url: URL): boolean {
   return href === url.pathname;
 }
@@ -42,4 +44,37 @@ export function buildImageUrl(filename: string, params: ImageParams = {}) {
 
 export function sanitizeFilename(filename: string): string {
   return filename.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
+}
+
+const escapedMimeTypes = allowedMimeTypes.map((mime) => mime.replace(/\//g, "\\/"));
+
+/**
+ * Removes the file extension from a filename.
+ * @param filename The filename to process.
+ * @returns The filename without its extension.
+ * @example
+ * removeExtension("image.jpg"); // "image"
+ * removeExtension("image2.png"); // "image2"
+ * removeExtension("image3.gif"); // "image3"
+ * removeExtension("image4.webp"); // "image4"
+ * // ...
+ */
+export function removeExtension(filename: string): string {
+  return filename.replace(new RegExp(`\.(${escapedMimeTypes.join("|")})$`), "");
+}
+
+/**
+ * Adds a file extension to a filename.
+ * @param filename The filename to process.
+ * @param ext The file extension to add, e.g. ".jpg", ".png", etc.
+ * @returns The filename with the specified extension added.
+ * @example
+ * addExtension("image", ".jpg"); // "image.jpg"
+ * addExtension("image2", ".png"); // "image2.png"
+ * addExtension("image3", ".gif"); // "image3.gif"
+ * addExtension("image4", ".webp"); // "image4.webp"
+ * // ...
+ */
+export function addExtension(filename: string, ext: ImageExtension): string {
+  return filename + ext;
 }
