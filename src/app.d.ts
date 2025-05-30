@@ -59,6 +59,9 @@ declare global {
     format?: "webp" | "avif" | "jpeg" | "png";
     fit?: "cover" | "contain" | "fill" | "inside" | "outside";
   }
+
+  type ImageMimeTypes = "image/jpeg" | "image/png" | "image/webp" | "image/gif" | "image/avif" | "image/svg+xml" | "image/bmp";
+  type ImageExtension = ".jpg" | ".jpeg" | ".png" | ".webp" | ".gif" | ".avif" | ".svg" | ".bmp";
 }
 
 export {};
