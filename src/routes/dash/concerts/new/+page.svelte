@@ -4,7 +4,7 @@
   import Trashcan from "$lib/assets/Trashcan.svelte";
   import XIcon from "$lib/assets/XIcon.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
-  import { eventStore } from "$lib/stores.svelte";
+  import { eventStore } from "$lib/stores/events.svelte";
   import type { Database, Tables } from "$lib/supabase";
   import { fade } from "svelte/transition";
 

@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
   import { page } from "$app/state";
   import Navbar from "$lib/components/Navbar.svelte";
-  import "$lib/stores.svelte.js";
+  import "$lib/stores/events.svelte.js";
   import Footer from "$lib/components/Footer.svelte";
 
   let { data, children } = $props();

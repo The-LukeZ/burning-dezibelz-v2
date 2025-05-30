@@ -1,4 +1,4 @@
-import { eventStore } from "$lib/stores.svelte.js";
+import { eventStore } from "$lib/stores/events.svelte";
 
 export function getConcertDisplayName(concert: Concert): string {
   if (concert.name) {

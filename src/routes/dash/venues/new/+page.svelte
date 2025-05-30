@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { eventStore } from "$lib/stores.svelte";
+  import { eventStore } from "$lib/stores/events.svelte";
 
   let venueDetails = $state<Omit<VenueDetails, "id">>({
     name: "",

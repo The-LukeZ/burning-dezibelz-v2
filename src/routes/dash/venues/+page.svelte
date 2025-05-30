@@ -1,6 +1,6 @@
 <script lang="ts">
   import Modal from "$lib/components/Modal.svelte";
-  import { eventStore, serializeVenues } from "$lib/stores.svelte.js";
+  import { eventStore, serializeVenues } from "$lib/stores/events.svelte.js";
 
   let selectedVenue = $state<VenueDetails | null>(null);
   let modalOpen = $state(false);

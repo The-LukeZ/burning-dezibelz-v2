@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import ChevronDown from "$lib/assets/ChevronDown.svelte";
-  import { eventStore, getVenueById, serializeConcerts } from "$lib/stores.svelte.js";
+  import { eventStore, getVenueById, serializeConcerts } from "$lib/stores/events.svelte.js";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { onMount } from "svelte";
 

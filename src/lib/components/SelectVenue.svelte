@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { eventStore } from "$lib/stores.svelte";
+  import { eventStore } from "$lib/stores/events.svelte";
   import type { Snippet } from "svelte";
   import type { ClassValue } from "svelte/elements";
   import { scale } from "svelte/transition";

@@ -4,7 +4,7 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
-  import { eventStore, serializeConcerts } from "$lib/stores.svelte.js";
+  import { eventStore, serializeConcerts } from "$lib/stores/events.svelte.js";
   import type { Database, Tables } from "$lib/supabase.ts";
   import { formatDateTimeLocal, formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
 

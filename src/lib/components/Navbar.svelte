@@ -2,7 +2,7 @@
   import { page } from "$app/state";
   import { isCurrentPage } from "$lib";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
-  import { eventStore, fetchConcerts, fetchVenues } from "$lib/stores.svelte";
+  import { eventStore, fetchConcerts, fetchVenues } from "$lib/stores/events.svelte";
   import { onMount } from "svelte";
   import { getItemsForPath } from "$lib/data/navigationData";
   import { goto } from "$app/navigation";
