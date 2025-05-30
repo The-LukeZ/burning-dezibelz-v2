@@ -1,23 +1,36 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase";
 
+/**
+ * Generates a unique concert ID based on the date and whether it is private or public.
+ * @param supabase Supabase client instance
+ * @param data Object containing the ISO timestamp and whether the concert is private or public.
+ *             If private, venueName is optional; if public, venueName is required.
+ * @returns A unique concert ID in the format: `YYYY-MM-DD-I-[private|public]-[venueName]`
+ */
 export async function generateConcertId(
-  isoTimestamp: string,
   supabase: SupabaseClient<Database>,
+  data: { isoTimestamp: string } & (
+    | { isPrivate: true; venueName?: string }
+    | { isPrivate?: false; venueName: string }
+  ),
 ): Promise<string> {
+  const prefix = data.isPrivate ? "private" : "public";
+  let prefix2: string = "";
+  if (!data.isPrivate) {
+    prefix2 = data.venueName.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
+  }
   // Schema: YYYY-MM-DD-I (I=Index)
-  const dateString = isoTimestamp.split("T")[0];
+  const dateString = data.isoTimestamp.split("T")[0];
 
   // Get amount of concerts on that date
-  const { data: count, error } = await supabase.rpc("count_concerts_on_date", { concert_date: dateString });
+  const { data: count, error } = await supabase.rpc("count_concerts_on_date", { date_param: dateString });
   if (error || count === null) {
     console.log("Count of concerts on date:", count);
     console.error("Error counting concerts on date:", error);
     throw new Error("Failed to generate concert ID");
   }
 
-  console.log("Count of concerts on date:", count);
-
   const index = (count ?? 0) + 1;
-  return dateString + "-" + index;
+  return `${dateString}-${index.toString().padStart(3, "0")}-${prefix}${prefix2 ? `-${prefix2}` : ""}`;
 }
