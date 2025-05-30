@@ -90,11 +90,11 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
   const isUsersDashRoute = event.url.pathname === "/dash/users";
   const isAdminRoute = isUsersApiRoute || isUsersDashRoute;
 
-  if (event.locals.user && isAdminRoute) {
+  if (event.locals.user) {
     const { data: users } = await event.locals.supabase.from("allowed_users").select("*");
 
     const allowedUser = users?.find((u) => u.email === event.locals.user!.email) ?? null;
-    if (!allowedUser || allowedUser.role !== "admin") {
+    if (isAdminRoute && (!allowedUser || allowedUser.role !== "admin")) {
       if (isUsersApiRoute) {
         return Response.json({ error: "No Permission" }, { status: 403 });
       }
@@ -103,6 +103,9 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
       }
     }
 
+    console.debug(
+      `User ${event.locals.user!.user_metadata.full_name} is authorized as ${allowedUser?.role} for admin routes`,
+    );
     event.locals.isAdmin = allowedUser?.role === "admin";
   } else {
     event.locals.isAdmin = false;
