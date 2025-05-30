@@ -195,7 +195,7 @@
 
 <Modal
   bind:open={showAddSongModal}
-  onOpenChange={(open) => {
+  onClose={(open) => {
     showAddSongModal = open;
     if (!open) {
       artistInputValue = "";

@@ -178,7 +178,7 @@
 <Modal
   bind:open={selectUser.modalOpen}
   title="Edit User"
-  onOpenChange={() => {
+  onClose={() => {
     if (!selectUser.modalOpen) {
       selectUser.user = null;
     }

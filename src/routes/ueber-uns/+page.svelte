@@ -108,7 +108,7 @@
 
 <Modal
   bind:open={memberSelection.open}
-  onOpenChange={(open) => {
+  onClose={(open) => {
     if (!open) {
       memberSelection.member = null;
     }
