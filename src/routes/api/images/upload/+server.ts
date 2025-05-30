@@ -1,4 +1,5 @@
 import { env } from "$env/dynamic/private";
+import { sanitizeFilename } from "$lib";
 import type { TablesInsert } from "$lib/supabase.ts";
 import { createWriteStream, existsSync, mkdirSync, statSync, unlinkSync } from "node:fs";
 import path from "node:path";
@@ -26,6 +27,8 @@ export async function POST({ request, locals: { supabase, user } }) {
     return new Response(null, { status: 400 });
   }
 
+  const sanitized_file_name = sanitizeFilename(file_name);
+
   // Validate MIME type for images
   if (!content_type.startsWith("image/")) {
     request.body.cancel();
@@ -35,7 +38,7 @@ export async function POST({ request, locals: { supabase, user } }) {
     });
   }
 
-  const file_path = path.normalize(path.join(env.FILE_DIR, file_name));
+  const file_path = path.normalize(path.join(env.FILE_DIR, sanitized_file_name));
 
   if (existsSync(file_path)) {
     request.body.cancel();
@@ -54,7 +57,7 @@ export async function POST({ request, locals: { supabase, user } }) {
 
     // Create image record in Supabase
     const imageData: TablesInsert<"images"> = {
-      filename: file_name,
+      filename: sanitized_file_name,
       original_filename: file_name,
       file_path: file_path,
       file_size: stats.size,
