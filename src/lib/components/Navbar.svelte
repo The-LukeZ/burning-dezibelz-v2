@@ -17,7 +17,6 @@
     if (!equal(oldItems, getItemsForPath(page.url.pathname))) {
       oldItems = getItemsForPath(page.url.pathname);
       navItems = [...oldItems];
-      console.log("Updated nav items:", navItems);
     }
   });
 
