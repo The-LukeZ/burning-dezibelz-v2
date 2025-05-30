@@ -7,7 +7,7 @@
   type Props = {
     children?: Snippet;
     open?: boolean;
-    onOpenChange?: (open: boolean) => void;
+    onClose?: () => void;
     /**
      * Whether to show an "X" button in the top right corner of the modal to close it.
      */
@@ -26,7 +26,7 @@
 
   let {
     open = $bindable(false),
-    onOpenChange = $bindable(() => {}),
+    onClose = $bindable(() => {}),
     withXButton = true,
     closeOnBackdropClick = true,
     closeOnEscape = true,
@@ -61,7 +61,7 @@
   onkeydown={(e) => {
     if (e.key === "Escape" && open && closeOnEscape) {
       open = false;
-      onOpenChange(false);
+      onClose();
     }
   }}
 />
@@ -74,7 +74,7 @@
   onclick={() => {
     if (closeOnBackdropClick) {
       open = false;
-      onOpenChange(false);
+      onClose();
     }
   }}
 >
@@ -93,7 +93,7 @@
           class="dy-btn dy-btn-circle dy-btn-ghost x-button"
           onclick={() => {
             open = false;
-            onOpenChange(false);
+            onClose();
           }}
         >
           <XIcon />
