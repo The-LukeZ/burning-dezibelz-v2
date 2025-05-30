@@ -1,37 +1,84 @@
-import { error } from "@sveltejs/kit";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { env } from "$env/dynamic/private";
+import type { TablesInsert } from "$lib/supabase.ts";
+import { createWriteStream, existsSync, mkdirSync, statSync, unlinkSync } from "node:fs";
+import path from "node:path";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 
-export async function POST({ request, url }) {
-  const formData = Object.fromEntries(await request.formData());
-  const { file } = formData as { file: File | undefined };
+if (!existsSync(env.FILE_DIR)) {
+  mkdirSync(env.FILE_DIR, { recursive: true });
+}
 
-  if (!file) {
-    throw error(400, {
-      message: "No file uploaded",
+export async function POST({ request, locals: { supabase, user } }) {
+  if (!request.body) {
+    return new Response(null, { status: 400 });
+  }
+
+  if (!user) {
+    return new Response(null, { status: 401 });
+  }
+
+  const file_name = request.headers.get("x-file-name");
+  const content_type = request.headers.get("content-type") || "application/octet-stream";
+
+  if (!file_name) {
+    request.body.cancel();
+    return new Response(null, { status: 400 });
+  }
+
+  // Validate MIME type for images
+  if (!content_type.startsWith("image/")) {
+    request.body.cancel();
+    return new Response(JSON.stringify({ error: "Only image files are allowed" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
     });
   }
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const file_path = path.normalize(path.join(env.FILE_DIR, file_name));
 
-  // Create directory if it doesn't exist
-  const fileType = file.type.startsWith("video/") ? "videos" : "images";
-  const uploadDir = join("static", "media", fileType);
-  await mkdir(uploadDir, { recursive: true });
+  if (existsSync(file_path)) {
+    request.body.cancel();
+    return new Response(null, { status: 400 });
+  }
 
-  // Save file
-  const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-").toLowerCase()}`;
-  const filepath = join(uploadDir, filename);
-  await writeFile(filepath, buffer);
+  const nodejs_wstream = createWriteStream(file_path);
+  const web_rstream = request.body;
+  const nodejs_rstream = Readable.fromWeb(web_rstream as any);
 
-  return Response.json(
-    {
-      success: true,
-      url: new URL(`cdn/${fileType}/${filename}`, url.origin).toString(),
-    },
-    {
+  try {
+    await pipeline(nodejs_rstream, nodejs_wstream);
+
+    // Get file stats
+    const stats = statSync(file_path);
+
+    // Create image record in Supabase
+    const imageData: TablesInsert<"images"> = {
+      filename: file_name,
+      original_filename: file_name,
+      file_path: file_path,
+      file_size: stats.size,
+      mime_type: content_type,
+      user_id: user.id,
+      is_private: false,
+    };
+
+    const { data: image, error } = await supabase.from("images").insert(imageData).select().single();
+
+    if (error) {
+      // Clean up file if database insert fails
+      unlinkSync(file_path);
+      return new Response(JSON.stringify({ error: "Failed to save file metadata" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return Response.json(image, {
       headers: { "Content-Type": "application/json" },
-    },
-  );
+    });
+  } catch (e) {
+    unlinkSync(file_path);
+    return new Response(null, { status: 500 });
+  }
 }

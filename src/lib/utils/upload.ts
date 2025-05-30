@@ -9,11 +9,10 @@ export function create_upload() {
     subscribe,
 
     start({ file, url, headers = {} }: { file: File; url: string; headers: Record<string, string> }) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, rej) => {
         xhr = new XMLHttpRequest();
 
         xhr.upload.addEventListener("progress", (event) => {
-          /** @type {number} */
           let progress = 0;
 
           if (event.lengthComputable) {
