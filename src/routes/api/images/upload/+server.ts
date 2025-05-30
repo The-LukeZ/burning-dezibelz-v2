@@ -1,4 +1,4 @@
-import { env } from "$env/dynamic/private";
+import { FILE_DIR } from "$env/static/private";
 import { sanitizeFilename } from "$lib";
 import type { TablesInsert } from "$lib/supabase.ts";
 import { createWriteStream, existsSync, mkdirSync, statSync, unlinkSync } from "node:fs";
@@ -6,8 +6,8 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-if (!existsSync(env.FILE_DIR)) {
-  mkdirSync(env.FILE_DIR, { recursive: true });
+if (!existsSync(FILE_DIR)) {
+  mkdirSync(FILE_DIR, { recursive: true });
 }
 
 export async function POST({ request, locals: { supabase, user } }) {
@@ -38,7 +38,7 @@ export async function POST({ request, locals: { supabase, user } }) {
     });
   }
 
-  const file_path = path.normalize(path.join(env.FILE_DIR, sanitized_file_name));
+  const file_path = path.normalize(path.join(FILE_DIR, sanitized_file_name));
 
   if (existsSync(file_path)) {
     request.body.cancel();
