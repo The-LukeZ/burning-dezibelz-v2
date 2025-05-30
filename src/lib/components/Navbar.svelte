@@ -71,7 +71,7 @@
 {/snippet}
 
 <nav
-  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15 shadow-sm backdrop-blur-md"
+  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15  backdrop-blur-md"
   class:hidden={page.url.pathname === "/dash/login"}
 >
   <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between">
