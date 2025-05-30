@@ -47,7 +47,7 @@ declare global {
     href: string;
     label: string;
     requiresAdmin?: boolean;
-  }
+  };
 }
 
 export {};
