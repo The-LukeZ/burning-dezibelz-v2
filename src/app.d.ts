@@ -51,6 +51,14 @@ declare global {
     label: string;
     requiresAdmin?: boolean;
   };
+
+  interface ImageParams {
+    width?: number;
+    height?: number;
+    quality?: number;
+    format?: "webp" | "avif" | "jpeg" | "png";
+    fit?: "cover" | "contain" | "fill" | "inside" | "outside";
+  }
 }
 
 export {};
