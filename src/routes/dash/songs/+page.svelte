@@ -195,12 +195,9 @@
 
 <Modal
   bind:open={showAddSongModal}
-  onClose={(open) => {
-    showAddSongModal = open;
-    if (!open) {
-      artistInputValue = "";
-      showArtistDropdown = false;
-    }
+  onClose={() => {
+    artistInputValue = "";
+    showArtistDropdown = false;
   }}
   closeOnEscape={true}
   class="w-full max-w-lg overflow-y-visible"

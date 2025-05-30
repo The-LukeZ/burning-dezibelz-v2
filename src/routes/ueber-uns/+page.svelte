@@ -108,10 +108,8 @@
 
 <Modal
   bind:open={memberSelection.open}
-  onClose={(open) => {
-    if (!open) {
-      memberSelection.member = null;
-    }
+  onClose={() => {
+    memberSelection.member = null;
   }}
   class="w-full max-w-4xl"
   closeOnBackdropClick={true}
