@@ -42,11 +42,20 @@
   }
 
   function updateImage(newImg: Image) {
-    const newImgs = $images.map((img) => (img.id === newImg.id ? newImg : img));
-    images.update(() => newImgs);
+    console.log("Updating image:", newImg);
+    images.update((imgs) => imgs.map((img) => (img.id === newImg.id ? newImg : img)));
+  }
+
+  function deleteImage(imageId: string) {
+    console.log("Deleting image with ID:", imageId);
+    images.update((imgs) => imgs.filter((img) => img.id !== imageId));
+  }
+
+  function resetSelectedImage() {
     selectedImage.image = null;
     selectedImage.update = null;
     selectedImage.modalOpen = false;
+    loading = false;
   }
 
   async function handleFileSubmit(event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }) {
@@ -60,12 +69,9 @@
     }
 
     const file = files[0];
-    const headers = { "x-file-name": file.name };
-
-    await upload.start({ url: "/api/upload", file, headers });
+    await upload.start({ url: "/api/images/upload", file, filename: file.name });
     await invalidateAll();
     progress.set(0);
-    event.currentTarget.reset();
 
     loading = false;
   }
@@ -95,7 +101,7 @@
         <input bind:files type="file" class="dy-file-input mx-auto" accept="image/*" />
       </fieldset>
       <progress class="dy-progress" value={progress.current}></progress>
-      <button class="dy-btn dy-btn-primary" disabled={loading}>
+      <button class="dy-btn dy-btn-primary" disabled={loading || !files || files.length === 0}>
         {#if loading}
           Uploading... {$upload.progress}%
         {:else}
@@ -154,9 +160,11 @@
           await update({ invalidateAll: false });
           if (result.type === "success") {
             if (action.toString().endsWith("update")) {
-              console.log("Image updated successfully:", result.data);
+              updateImage(result.data!.image as Image);
+            } else {
+              deleteImage(selectedImage.update!.id);
             }
-            loading = false;
+            resetSelectedImage();
           }
         };
       }}
