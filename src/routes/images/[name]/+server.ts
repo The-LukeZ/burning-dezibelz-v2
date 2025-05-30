@@ -14,14 +14,6 @@ if (!fs.existsSync(CACHE_DIR)) {
   fs.mkdirSync(CACHE_DIR, { recursive: true });
 }
 
-interface ImageParams {
-  width?: number;
-  height?: number;
-  quality?: number;
-  format?: "webp" | "avif" | "jpeg" | "png";
-  fit?: "cover" | "contain" | "fill" | "inside" | "outside";
-}
-
 function parseImageParams(url: URL): ImageParams {
   const params: ImageParams = {};
 
