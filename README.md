@@ -6,4 +6,4 @@
 
 ## TODO
 
-- Uploads: https://github.com/sveltejs/examples/tree/main/examples/sveltekit-file-uploads-nodejs
+- Add a way to automatically delete old cached optimized images after a certain time (e.g. 1 day) to prevent excessive storage usage.
