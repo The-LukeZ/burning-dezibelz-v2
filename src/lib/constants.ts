@@ -11,3 +11,24 @@ export const UnknownVenue: VenueDetails = {
   state: "Unbekannter Bundesstaat",
   url: "https://example.com/unknown-venue",
 } as const;
+
+export const allowedMimeTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+  "image/svg+xml",
+  "image/bmp",
+] as const;
+
+export const allowedImageExtensions = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".gif",
+  ".avif",
+  ".svg",
+  ".bmp",
+] as const;
