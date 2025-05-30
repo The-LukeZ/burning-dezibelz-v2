@@ -1,8 +1,9 @@
+import { FILE_DIR } from "$env/static/private";
 import { sanitizeFilename } from "$lib";
+import { ImageCache, imageCache } from "$lib/server/images";
 import { fail, type Actions } from "@sveltejs/kit";
-import { rename } from "fs/promises";
+import { rename, unlink } from "fs/promises";
 import { join } from "path";
-import { env } from "$env/dynamic/private";
 
 export const actions: Actions = {
   delete: async ({ request, locals: { supabase } }) => {
@@ -13,6 +14,31 @@ export const actions: Actions = {
       return fail(400, {
         error: "Image ID is required",
       });
+    }
+
+    const { data: imageData, error: fetchError } = await supabase
+      .from("images")
+      .select("*")
+      .eq("id", imageId)
+      .single();
+
+    if (fetchError || !imageData) {
+      console.error("Error fetching image data:", fetchError);
+      return fail(404, {
+        error: "Image not found",
+      });
+    }
+
+    // Delete all cached variants
+    await imageCache.clearCacheVariants(imageData.filename);
+
+    // Delete the file from the filesystem
+    const filePath = imageData.file_path || join(FILE_DIR, imageData.filename);
+    try {
+      await unlink(filePath);
+    } catch (unlinkError) {
+      console.error("Error deleting file from filesystem:", unlinkError);
+      // Continue with DB deletion even if file deletion fails
     }
 
     const { error } = await supabase.from("images").delete({ count: "exact" }).eq("id", imageId);
@@ -31,6 +57,7 @@ export const actions: Actions = {
   },
 
   update: async ({ request, locals: { supabase } }) => {
+    // Get all (new) data
     const formData = await request.formData();
     const imageId = formData.get("imageId") as string;
     const name = formData.get("filename") as string;
@@ -43,9 +70,10 @@ export const actions: Actions = {
       });
     }
 
+    // Get old filename and path
     const { data: oldData, error: fetchError } = await supabase
       .from("images")
-      .select("filename")
+      .select("filename, file_path")
       .eq("id", imageId)
       .single();
 
@@ -55,11 +83,36 @@ export const actions: Actions = {
         error: "Image not found",
       });
     }
-    const finalName = sanitizeFilename(name);
 
+    // Delete all cached variants
+    await imageCache.clearCacheVariants(oldData.filename);
+
+    // Build new filename and filePath
+    const finalName = sanitizeFilename(name);
+    const newFilePath = ImageCache.buildImageFilePath(finalName);
+
+    // Rename the file in the fs to the new name
+    const oldPath = oldData.file_path || join(FILE_DIR, oldData.filename);
+
+    try {
+      await rename(oldPath, newFilePath);
+    } catch (renameError) {
+      console.error("Error renaming file:", renameError);
+      return fail(500, {
+        error: "Failed to rename file",
+      });
+    }
+
+    // Update DB
     const { data, error } = await supabase
       .from("images")
-      .update({ filename: finalName, description, is_private })
+      .update({
+        filename: finalName,
+        description,
+        is_private,
+        file_path: newFilePath,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", imageId)
       .select()
       .single();
@@ -68,19 +121,6 @@ export const actions: Actions = {
       console.error("Error updating image:", error);
       return fail(500, {
         error: "Failed to update image",
-      });
-    }
-
-    // Update the file
-    const oldPath = join(env.FILE_DIR, oldData.filename);
-    const newPath = join(env.FILE_DIR, finalName);
-
-    try {
-      await rename(oldPath, newPath);
-    } catch (renameError) {
-      console.error("Error renaming file:", renameError);
-      return fail(500, {
-        error: "Failed to rename file",
       });
     }
 
