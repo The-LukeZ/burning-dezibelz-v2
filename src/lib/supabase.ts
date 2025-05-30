@@ -99,6 +99,48 @@ export type Database = {
           },
         ];
       };
+      images: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          file_path: string;
+          file_size: number;
+          filename: string;
+          id: string;
+          is_private: boolean | null;
+          mime_type: string;
+          original_filename: string;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          file_path: string;
+          file_size: number;
+          filename: string;
+          id?: string;
+          is_private?: boolean | null;
+          mime_type: string;
+          original_filename: string;
+          updated_at?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          file_path?: string;
+          file_size?: number;
+          filename?: string;
+          id?: string;
+          is_private?: boolean | null;
+          mime_type?: string;
+          original_filename?: string;
+          updated_at?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       songs: {
         Row: {
           artist: string;
@@ -159,16 +201,8 @@ export type Database = {
     };
     Functions: {
       count_concerts_on_date: {
-        Args: { concert_date: string };
+        Args: { date_param: string };
         Returns: number;
-      };
-      get_concert_counts_per_venue: {
-        Args: Record<PropertyKey, never>;
-        Returns: {
-          venue_id: string;
-          venue_name: string;
-          concert_count: number;
-        }[];
       };
     };
     Enums: {
