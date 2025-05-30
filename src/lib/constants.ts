@@ -1,5 +1,3 @@
-import { assets } from "$app/paths";
-
 export const API_URL = "/api" as const;
 
 export const UnknownVenue: VenueDetails = {
