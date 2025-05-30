@@ -1,0 +1,122 @@
+<script lang="ts">
+  import { Tween } from "svelte/motion";
+  import { cubicOut } from "svelte/easing";
+  import { slide } from "svelte/transition";
+  import { enhance } from "$app/forms";
+  import { invalidateAll } from "$app/navigation";
+  import { create_upload } from "$lib/stores/upload";
+
+  const upload = create_upload();
+
+  let is_small_submitting = $state(false);
+  let is_large_submitting = $state(false);
+
+  const progress = new Tween(0, {
+    duration: 400,
+    easing: cubicOut,
+  });
+  let files = $state<File[]>([]);
+
+  $effect(() => {
+    progress.set($upload.progress / 100);
+  });
+
+  async function handle_large_submit(event: SubmitEvent) {
+    is_large_submitting = true;
+
+    const target = /** @type {EventTarget & HTMLFormElement} */ (event.target);
+    const file = /** @type {any} */ (target.elements).file.files[0];
+    const headers = { "x-file-name": file.name };
+
+    await upload.start({ url: "/upload", file, headers });
+    await invalidateAll();
+    progress.set(0);
+    // Reset file input
+    target.reset();
+
+    is_large_submitting = false;
+  }
+</script>
+
+<h1>Upload and view files with SvelteKit and Node.js</h1>
+
+<div class="forms">
+  <form
+    class="small"
+    method="POST"
+    action="?/upload"
+    enctype="multipart/form-data"
+    use:enhance={() => {
+      is_small_submitting = true;
+
+      return ({ update }) => {
+        update().then(() => {
+          is_small_submitting = false;
+        });
+      };
+    }}
+  >
+    <div>
+      <label for="file">Select a small file</label>
+      <input type="file" name="file" id="file" required />
+    </div>
+    <button disabled={is_small_submitting} class:--loading={is_small_submitting}>
+      {#if is_small_submitting}
+        Uploading...
+      {:else}
+        Upload
+      {/if}
+    </button>
+  </form>
+
+  <form class="large" onsubmit={handle_large_submit}>
+    <div>
+      <label for="file">Select a large file</label>
+      <input type="file" name="file" id="file" required />
+    </div>
+    <progress class="dy-progress" value={progress.current}></progress>
+    <button disabled={is_large_submitting} class:--loading={is_large_submitting}>
+      {#if is_large_submitting}
+        Uploading... {$upload.progress}%
+      {:else}
+        Upload
+      {/if}
+    </button>
+  </form>
+</div>
+
+<section aria-label="Uploaded files">
+  <h2>Uploaded files</h2>
+  {#if !files.length}
+    <p>No files have been uploaded yet.</p>
+  {:else}
+    <ol class="files">
+      {#each files as file (file.name)}
+        <li class="file" transition:slide={{ duration: 200 }}>
+          <span class="file__size">{(file.size / 1000).toFixed(1)} kB</span>
+          <a class="file__name" href="/files/{file.name}" target="_blank" rel="noreferrer">
+            {file.name}
+          </a>
+          <form
+            class="file__delete-action"
+            method="POST"
+            action="?/delete"
+            enctype="multipart/form-data"
+            use:enhance={({ submitter }) => {
+              submitter?.setAttribute("disabled", "true");
+              submitter?.classList.add("--loading");
+
+              return async ({ update }) => {
+                await update();
+                submitter?.classList.remove("--loading");
+                submitter?.removeAttribute("disabled");
+              };
+            }}
+          >
+            <button name="file_name" value={file.name}>Delete</button>
+          </form>
+        </li>
+      {/each}
+    </ol>
+  {/if}
+</section>
