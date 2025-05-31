@@ -18,6 +18,11 @@ type CacheEntry = {
  * as well as utilities for generating cache keys and file paths.
  */
 class ImageCache {
+  /**
+   * Key: image ID
+   * Value: array of image variants (e.g., thumbnails, resized images)
+   */
+  private imageVariants: Record<string, string[]> = {};
   private cache = new Map<string, CacheEntry>();
   private readonly maxCacheSize = MAX_CACHE_SIZE;
   private oldestKey: string | null = null;
@@ -50,19 +55,40 @@ class ImageCache {
     return Promise.resolve();
   }
 
+  private determineOldestKey() {
+    let oldestKey: string | null = null;
+    let oldestTimestamp: Date | null = null;
+    for (const [key, entry] of this.cache.entries()) {
+      if (!oldestTimestamp || entry.timestamp < oldestTimestamp) {
+        oldestTimestamp = entry.timestamp;
+        oldestKey = key;
+      }
+    }
+    this.oldestKey = oldestKey;
+  }
+
+  private pushImageVariant(imageId: string, cacheKey: string) {
+    if (!this.imageVariants[imageId]) {
+      this.imageVariants[imageId] = [];
+    }
+    this.imageVariants[imageId].push(cacheKey);
+  }
+
   /**
    * Sets a cached image entry with the specified cache key, file path, and expiration time.
    *
    * Automatically manages cache size by removing the oldest entries when the cache
    * reaches its maximum capacity before adding the new entry.
    *
-   * @param cacheKey - The unique key to identify the cached image
-   * @param filepath - The file system path to the cached image file
-   * @param expiresInSeconds - The number of seconds from now when the cache entry should expire
-   *
    * @returns A Promise that resolves when the image has been successfully cached
    */
-  public async setCachedImage(cacheKey: string, filepath: string, expiresInSeconds: number) {
+  public async setCachedImage(data: {
+    imageId: string;
+    cacheKey: string;
+    filepath: string;
+    expiresInSeconds: number;
+  }) {
+    const { imageId, cacheKey, filepath, expiresInSeconds } = data;
     // Check if we need to remove oldest entries to stay under limit
     while (this.cache.size >= this.maxCacheSize) {
       await this.removeOldestEntry();
@@ -70,11 +96,13 @@ class ImageCache {
 
     const expires = dayjs().add(expiresInSeconds, "seconds").toDate();
     const entry: CacheEntry = {
-      filepath,
+      filepath: filepath,
       timestamp: new Date(),
       expires,
     };
     this.cache.set(cacheKey, entry);
+    this.pushImageVariant(imageId, cacheKey);
+    this.determineOldestKey();
   }
 
   /**
@@ -96,13 +124,7 @@ class ImageCache {
       }
     }
     console.log(`Cleared expired ${expiredKeys.length} cache entries.`);
-  }
-
-  /**
-   * Clears the entire image cache.
-   */
-  public clearCache(): void {
-    this.cache.clear();
+    this.determineOldestKey();
   }
 
   /**
@@ -118,6 +140,7 @@ class ImageCache {
       try {
         await unlink(entry.filepath);
       } catch (error) {
+        console.warn(`Failed to delete cached image file: ${entry.filepath}. It may not exist.`, error);
         // File might already be deleted, continue with cache cleanup
       } finally {
         this.cache.delete(cacheKey);
@@ -132,14 +155,14 @@ class ImageCache {
    * and removes the corresponding cached images. This is useful when the
    * original image has been updated and all its variants need to be regenerated.
    *
-   * @param filename - The base filename to match against cache keys
+   * @param imageId - The image ID for which to clear cached variants
    * @returns A promise that resolves when all matching cached variants have been deleted
    */
-  public async clearCacheVariants(filename: string) {
-    const keysToDelete = Array.from(this.cache.keys()).filter((key) => key.startsWith(filename));
-
-    for (const key of keysToDelete) {
-      await this.deleteCachedImage(key);
+  public async clearCacheVariants(imageId: string) {
+    const toDelete = this.imageVariants[imageId] ?? [];
+    if (toDelete.length === 0) return;
+    for (const cacheKey of toDelete) {
+      await this.deleteCachedImage(cacheKey);
     }
   }
 
@@ -168,7 +191,8 @@ class ImageCache {
 
     const ext = params.format || path.extname(filename).slice(1);
     return `${path.parse(filename).name}_${paramString}.${ext}`;
-    // TODO: Find a way to make the filename
+    // TODO: Find a way to make the filename visibly distinguishable from the cache params (because some files may start with the same characters)
+    // For now, there isn't much traffic so this is not a problem
   }
 
   /**
