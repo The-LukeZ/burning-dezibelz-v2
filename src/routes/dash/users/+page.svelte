@@ -5,9 +5,7 @@
   import type { Database } from "$lib/supabase";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { onMount } from "svelte";
-  import { blur, fade } from "svelte/transition";
-
-  let { data: thisPageData } = $props();
+  import { fade } from "svelte/transition";
 
   let { supabase } = page.data;
   let showNotAdminNote = $state(true);
@@ -41,36 +39,32 @@
   async function updateUser(
     user: Database["public"]["Tables"]["allowed_users"]["Update"] & { email: string },
   ) {
-    const { data, error: updateError } = await supabase
-      .from("allowed_users")
-      .update({
-        role: user.role,
-        notes: user.notes,
+    const { data: upUser, error: updateError } = await supabase
+      .rpc("update_allowed_user", {
+        p_target_email: user.email,
+        p_new_role: user.role,
+        p_new_notes: user.notes ?? undefined,
       })
-      .eq("email", user.email)
-      .select("*");
+      .single();
 
-    if (updateError || data.length === 0) {
-      // Somehow, if no rows are returned, it means RLS prevented the update.
+    if (updateError || !upUser) {
       error = updateError?.message || "You do not have permission to update this user.";
-      console.error("Error updating user:", updateError, data);
+      console.error("Error updating user:", updateError, upUser);
       return;
     }
 
-    console.log("User updated successfully:", data);
+    console.log("User updated successfully:", upUser);
+    users = users.map((u) => (u.email === user.email ? upUser : u));
   }
 
   async function deleteUser(email: string) {
-    const { data, error: deleteError } = await supabase
-      .from("allowed_users")
-      .delete()
-      .eq("email", email)
-      .select("*");
+    const { error: deleteError } = await supabase.rpc("delete_allowed_user", {
+      p_target_email: email,
+    });
 
-    if (deleteError || data.length === 0) {
-      // Somehow, if no rows are returned, it means RLS prevented the deletion.
-      error = deleteError?.message || "You do not have permission to delete this user.";
-      console.error("Error deleting user:", deleteError, data);
+    if (deleteError) {
+      error = deleteError.message || "You do not have permission to delete this user.";
+      console.error("Error deleting user:", deleteError);
       return;
     }
 
@@ -83,29 +77,21 @@
     newUserData.modalOpen = false;
     loading = true;
     const { data: newUser, error: createError } = await supabase
-      .from("allowed_users")
-      .insert({
-        email: newUserData.user.email,
-        role: newUserData.user.role as AllowedUserRole,
-        notes: newUserData.user.notes,
-        created_by: page.data.user?.id ?? null,
+      .rpc("insert_allowed_user", {
+        p_email: newUserData.user.email,
+        p_role: newUserData.user.role,
+        p_notes: newUserData.user.notes ?? undefined,
       })
-      .select("*")
       .single();
 
     if (createError) {
-      if (createError.code === "42501") {
-        error = "You do not have permission to create users.";
-      } else if (createError.code === "23505") {
-        error = "User with this email already exists.";
-      } else {
-        error = createError.message || "Failed to create user.";
-      }
+      error = createError.message || "Failed to create user.";
       console.error("Error creating user:", createError);
       loading = false;
       return;
     }
-    users = [newUser, ...users];
+
+    users.push(newUser);
     console.log("User created successfully:", newUser);
     newUserData.user = null;
     loading = false;
@@ -128,10 +114,13 @@
   });
 </script>
 
-{#if !thisPageData.isAdmin && showNotAdminNote}
+{#if !page.data.isAdmin && showNotAdminNote}
   <div class="dy-alert dy-alert-warning mb-4" transition:fade={{ duration: 150 }}>
     <span class="dy-alert-message">You do not have permission to manage users.</span>
-    <button class="dy-btn dy-btn-square dy-btn-outline ml-auto" onclick={() => (showNotAdminNote = false)}>
+    <button
+      class="dy-btn dy-btn-square dy-btn-outline ml-auto size-7"
+      onclick={() => (showNotAdminNote = false)}
+    >
       <XIcon class="size-5" />
     </button>
   </div>
@@ -139,7 +128,11 @@
 
 <div class="mx-auto flex flex-row">
   <h1 class="mb-4 text-2xl font-bold">User Management</h1>
-  <button class="dy-btn dy-btn-secondary ml-auto" onclick={openCreateUserModal}>Add User</button>
+  <button
+    class="dy-btn dy-btn-secondary ml-auto"
+    class:hidden={!page.data.isAdmin}
+    onclick={openCreateUserModal}>Add User</button
+  >
 </div>
 
 <div class="mx-auto overflow-x-auto">
@@ -155,7 +148,7 @@
         <th>Role</th>
         <th>Created</th>
         <th>Notes</th>
-        <th>Actions</th>
+        <th class:hidden={!page.data.isAdmin}>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -174,7 +167,7 @@
             <td><pre>{user.role}</pre></td>
             <td>{formatGermanDateTime(user.created_at)}</td>
             <td>{@html (user.notes || "No notes").replace(/\n/g, "<br />")}</td>
-            <td>
+            <td class:hidden={!page.data.isAdmin}>
               <button
                 class="dy-btn dy-btn-sm dy-btn-primary"
                 onclick={() => {
