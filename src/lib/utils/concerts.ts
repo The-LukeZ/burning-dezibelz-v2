@@ -1,3 +1,4 @@
+import { normalizeName } from "$lib";
 import { eventStore } from "$lib/stores/events.svelte";
 
 export function getConcertDisplayName(concert: Concert): string {
@@ -11,21 +12,30 @@ export function getConcertDisplayName(concert: Concert): string {
   return displayName;
 }
 
-export function formatGermanDateTime(dateString: string | null): string {
+export function formatGermanDateTime(dateString: string | null, onlyDate = false): string {
   if (!dateString) {
     return "Invalid Date";
   }
 
   try {
     const timestamp = new Date(dateString);
-    return timestamp.toLocaleString("de-DE", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Europe/Berlin",
-    });
+    if (onlyDate) {
+      return timestamp.toLocaleDateString("de-DE", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "Europe/Berlin",
+      });
+    } else {
+      return timestamp.toLocaleString("de-DE", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Europe/Berlin",
+      });
+    }
   } catch (e) {
     return "Invalid Date";
   }
@@ -136,3 +146,6 @@ export function filterConcerts(concerts: Concert[], options: FetchConcertOptions
 
   return filteredConcerts;
 }
+
+export const concertHref = (concertId: string, venueName: string | null = null) =>
+  `/konzerte/k/${concertId}${venueName ? `#${normalizeName(venueName)}` : ""}` as const;
