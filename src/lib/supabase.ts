@@ -57,6 +57,7 @@ export type Database = {
           abendkasse: boolean;
           free: boolean;
           id: string;
+          image: string | null;
           name: string | null;
           notes: string | null;
           price: number | null;
@@ -69,6 +70,7 @@ export type Database = {
           abendkasse?: boolean;
           free?: boolean;
           id: string;
+          image?: string | null;
           name?: string | null;
           notes?: string | null;
           price?: number | null;
@@ -81,6 +83,7 @@ export type Database = {
           abendkasse?: boolean;
           free?: boolean;
           id?: string;
+          image?: string | null;
           name?: string | null;
           notes?: string | null;
           price?: number | null;
@@ -90,6 +93,13 @@ export type Database = {
           venue_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "concerts_image_fkey";
+            columns: ["image"];
+            isOneToOne: false;
+            referencedRelation: "images";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "concerts_venue_id_fkey";
             columns: ["venue_id"];
