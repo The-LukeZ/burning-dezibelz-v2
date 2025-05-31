@@ -1,13 +1,22 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import { page } from "$app/state";
   import Modal from "$lib/components/Modal.svelte";
+  import type { Database } from "$lib/supabase";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { onMount } from "svelte";
 
+  let { supabase } = page.data;
   let users = $state<AllowedUser[]>([]);
   let loading = $state(true);
-  let addModalOpen = $state(false);
-  let selectUser = $state<{
+  const newUserData = $state<{
+    modalOpen: boolean;
+    user: Database["public"]["Tables"]["allowed_users"]["Insert"] | null;
+  }>({
+    modalOpen: false,
+    user: null,
+  });
+  const selectUser = $state<{
     modalOpen: boolean;
     user: AllowedUser | null;
   }>({
@@ -16,15 +25,100 @@
   });
   let error = $state<string | null>(null);
 
-  onMount(async () => {
-    const response = await fetch("/api/users");
-    if (response.ok) {
-      const data = await response.json();
-      users = [...data];
+  function openCreateUserModal() {
+    newUserData.modalOpen = true;
+    newUserData.user = {
+      email: "",
+      role: "user",
+      notes: "",
+    };
+  }
+
+  async function updateUser(
+    user: Database["public"]["Tables"]["allowed_users"]["Update"] & { email: string },
+  ) {
+    const { data, error: updateError } = await supabase
+      .from("allowed_users")
+      .update({
+        role: user.role,
+        notes: user.notes,
+      })
+      .eq("email", user.email)
+      .select("*");
+
+    if (updateError || data.length === 0) {
+      // Somehow, if no rows are returned, it means RLS prevented the update.
+      error = updateError?.message || "You do not have permission to update this user.";
+      console.error("Error updating user:", updateError, data);
+      return;
+    }
+
+    console.log("User updated successfully:", data);
+  }
+
+  async function deleteUser(email: string) {
+    const { data, error: deleteError } = await supabase
+      .from("allowed_users")
+      .delete()
+      .eq("email", email)
+      .select("*");
+
+    if (deleteError || data.length === 0) {
+      // Somehow, if no rows are returned, it means RLS prevented the deletion.
+      error = deleteError?.message || "You do not have permission to delete this user.";
+      console.error("Error deleting user:", deleteError, data);
+      return;
+    }
+
+    users = users.filter((user) => user.email !== email);
+    console.log("User deleted successfully:", email);
+  }
+
+  async function createUser() {
+    if (!newUserData.user) return;
+    newUserData.modalOpen = false;
+    loading = true;
+    const { data: newUser, error: createError } = await supabase
+      .from("allowed_users")
+      .insert({
+        email: newUserData.user.email,
+        role: newUserData.user.role as AllowedUserRole,
+        notes: newUserData.user.notes,
+        created_by: page.data.user?.id ?? null,
+      })
+      .select("*")
+      .single();
+
+    if (createError) {
+      if (createError.code === "42501") {
+        error = "You do not have permission to create users.";
+      } else if (createError.code === "23505") {
+        error = "User with this email already exists.";
+      } else {
+        error = createError.message || "Failed to create user.";
+      }
+      console.error("Error creating user:", createError);
       loading = false;
-      console.log("Users loaded successfully:", $state.snapshot(users));
+      return;
+    }
+    users = [newUser, ...users];
+    console.log("User created successfully:", newUser);
+    newUserData.user = null;
+    loading = false;
+  }
+
+  onMount(async () => {
+    const { data, error: fetchError } = await supabase
+      .from("allowed_users")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (fetchError) {
+      console.error("Error fetching users:", fetchError);
+      error = "Failed to load users.";
     } else {
-      console.error("Failed to load users");
+      users = data || [];
+      console.log("Fetched users:", $state.snapshot(users));
     }
     loading = false;
   });
@@ -32,14 +126,7 @@
 
 <div class="container mx-auto flex flex-row">
   <h1 class="mb-4 text-2xl font-bold">User Management</h1>
-  <button
-    class="dy-btn dy-btn-secondary ml-auto"
-    onclick={() => {
-      addModalOpen = true;
-    }}
-  >
-    Add User
-  </button>
+  <button class="dy-btn dy-btn-secondary ml-auto" onclick={openCreateUserModal}>Add User</button>
 </div>
 
 <div class="container mx-auto overflow-x-auto">
@@ -86,17 +173,9 @@
               </button>
               <button
                 class="dy-btn dy-btn-sm dy-btn-error"
-                onclick={() => {
+                onclick={async () => {
                   if (confirm(`Are you sure you want to delete this user?\nE-Mail: ${user.email}`)) {
-                    fetch(`/api/users/${encodeURIComponent(user.email)}`, { method: "DELETE" }).then(
-                      (response) => {
-                        if (response.ok) {
-                          users = users.filter((u) => u.email !== user.email);
-                        } else {
-                          alert("Failed to delete user.");
-                        }
-                      },
-                    );
+                    await deleteUser(user.email);
                   }
                 }}
               >
@@ -110,29 +189,14 @@
   </table>
 </div>
 
-<Modal bind:open={addModalOpen} title="Add User">
-  <form
-    method="POST"
-    action="?/create"
-    class="flex flex-col items-center gap-4"
-    use:enhance={() => {
-      addModalOpen = false;
-      loading = true;
-      return async ({ result, update }) => {
-        await update({ reset: true, invalidateAll: false });
-        if (result.type === "success") {
-          const newUser = result.data?.user as AllowedUser;
-          users = [...users, newUser];
-          loading = false;
-          console.log("New user added:", newUser);
-        } else if (result.type === "failure") {
-          console.error("Error adding user:", result.data?.error);
-          error = (result.data?.error || "Failed to add user.") as string;
-          loading = false;
-        }
-      };
-    }}
-  >
+<Modal
+  bind:open={newUserData.modalOpen}
+  title="Add User"
+  onClose={() => {
+    newUserData.user = null;
+  }}
+>
+  <div class="flex flex-col items-center gap-4">
     <fieldset class="dy-fieldset w-full max-w-xs">
       <legend class="dy-fieldset-legend">User E-Mail</legend>
       <label class="dy-input dy-validator dy-join-item">
@@ -170,9 +234,9 @@
       ></textarea>
     </fieldset>
     <div class="flex w-full justify-center">
-      <button type="submit" class="dy-btn dy-btn-primary w-1/2">Create User</button>
+      <button class="dy-btn dy-btn-primary w-1/2" onclick={createUser}>Create User</button>
     </div>
-  </form>
+  </div>
 </Modal>
 
 <Modal
@@ -185,27 +249,7 @@
   }}
 >
   {#if selectUser.user}
-    <form
-      method="POST"
-      action="?/edit"
-      class="flex flex-col items-center gap-4"
-      use:enhance={() => {
-        selectUser.modalOpen = false;
-        loading = true;
-        return ({ result, update }) => {
-          if (result.type === "success") {
-            const updatedUser = result.data?.user as AllowedUser;
-            users = users.map((u) => (u.email === updatedUser.email ? updatedUser : u));
-            loading = false;
-            console.log("User updated successfully:", updatedUser);
-          } else if (result.type === "failure") {
-            console.error("Error updating user:", result.data?.error);
-            error = (result.data?.error || "Failed to update user.") as string;
-            loading = false;
-          }
-        };
-      }}
-    >
+    <div class="flex flex-col items-center gap-4">
       <fieldset class="dy-fieldset w-full max-w-xs">
         <legend class="dy-fieldset-legend">Edit User</legend>
         <label class="dy-floating-label">
@@ -237,7 +281,17 @@
         ></textarea>
       </fieldset>
 
-      <button class="dy-btn dy-btn-sm dy-btn-secondary">Save</button>
-    </form>
+      <button
+        class="dy-btn dy-btn-sm dy-btn-secondary"
+        onclick={async () => {
+          if (!selectUser.user) return;
+          await updateUser($state.snapshot(selectUser.user));
+          selectUser.modalOpen = false;
+          selectUser.user = null;
+        }}
+      >
+        Save
+      </button>
+    </div>
   {/if}
 </Modal>
