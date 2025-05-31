@@ -46,13 +46,51 @@ export function formatDateTimeLocal(dateString: string): string {
 }
 
 interface FetchConcertOptions {
+  /**
+   * Filter concerts before this date.
+   *
+   * Compares with `<` operator.
+   */
   before?: Date;
+  /**
+   * Filter concerts after this date.
+   *
+   * Compares with `>` operator.
+   */
   after?: Date;
+  /**
+   * Filter concerts by venue ID.
+   */
   venueId?: string;
+  /**
+   * Limit the number of concerts returned.
+   */
   limit?: number;
+  /**
+   * Offset the number of concerts returned.
+   */
   offset?: number;
+  /**
+   * Order of the concerts.
+   *
+   * If provided, then `sort` must also be set!
+   *
+   * - "newestFirst" - Sort by newest first (equivalent to "desc", default).
+   * - "oldestFirst" - Sort by oldest first (equivalent to "asc").
+   * - "asc" - Sort in ascending order (equivalent to "oldestFirst").
+   * - "desc" - Sort in descending order (equivalent to "newestFirst").
+   *
+   * @default "newestFirst"
+   */
   order?: "newestFirst" | "oldestFirst" | "asc" | "desc";
-  sort?: "timestamp";
+  /**
+   * Sort concerts by a specific field.
+   *
+   * Currently only supports sorting by `timestamp`.
+   *
+   * Orders by "newestFirst" by default.
+   */
+  sortBy?: "timestamp";
 }
 
 export function filterConcerts(concerts: Concert[], options: FetchConcertOptions = {}) {
@@ -69,11 +107,11 @@ export function filterConcerts(concerts: Concert[], options: FetchConcertOptions
     filteredConcerts = filteredConcerts.filter((concert) => concert.venue_id === options.venueId);
   }
 
-  const _order = options.order === "newestFirst" || options.order === "asc" ? "asc" : "desc";
+  const _order = options.order === "oldestFirst" || options.order === "asc" ? "asc" : "desc";
 
-  if (options.sort || _order === "asc") {
+  if (options.sortBy && _order === "asc") {
     filteredConcerts = filteredConcerts.sort((a, b) => {
-      if (options.sort === "timestamp") {
+      if (options.sortBy === "timestamp") {
         return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
       }
       return 0;
