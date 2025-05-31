@@ -48,6 +48,8 @@ declare global {
 
   type AllowedUser = Database["public"]["Tables"]["allowed_users"]["Row"];
 
+  type AllowedUserRole = Database["public"]["Enums"]["UserRole"];
+
   type Image = Database["public"]["Tables"]["images"]["Row"];
 
   type NavItem = {
