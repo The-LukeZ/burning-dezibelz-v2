@@ -2,6 +2,8 @@
   import { enhance } from "$app/forms";
   import { page } from "$app/state";
   import { addExtension, buildImageUrl, getFileExtension, removeExtension } from "$lib";
+  import Trashcan from "$lib/assets/Trashcan.svelte";
+  import XIcon from "$lib/assets/XIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { create_upload } from "$lib/utils/upload";
@@ -26,11 +28,14 @@
     image: null as Image | null,
     update: null as Image | null,
   });
-  let imagesListener: any;
   let fileInput: HTMLInputElement;
 
   $effect(() => {
     progress.set($upload.progress / 100);
+  });
+
+  $effect(() => {
+    console.log("Files changed:", $state.snapshot(files));
   });
 
   function selectImage(imageId: string | null) {
@@ -96,6 +101,7 @@
     const file = files[0];
     const res = await upload.start({ url: "/api/images/upload", file, filename: file.name });
     fileInput.value = "";
+    files = undefined;
     progress.set(100);
     loading = false;
 
@@ -118,42 +124,16 @@
       .from("images")
       .select("*")
       .order("created_at", { ascending: false });
+
     if (error) {
       console.error("Error fetching images:", error);
       return;
     }
 
     images = data;
-
-    imagesListener = supabase
-      .channel("public:images")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "images",
-        },
-        (payload) => {
-          if (payload.eventType === "UPDATE") {
-            updateImage(payload.new as Image);
-          } else if (payload.eventType === "DELETE") {
-            deleteImage(payload.old.id);
-          }
-        },
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          console.log("Subscribed to images channel.");
-        }
-      });
   });
 
   onDestroy(async () => {
-    if (imagesListener) {
-      await supabase.removeChannel(imagesListener);
-      console.log("Unsubscribed from images channel.");
-    }
     resetSelectedImage();
     files = undefined;
     progress.set(0);
@@ -168,7 +148,30 @@
     <form class="mx-auto flex w-full max-w-sm flex-col" onsubmit={handleFileSubmit}>
       <fieldset class="dy-fieldset w-full text-center">
         <legend class="dy-fieldset-legend">Pick an image</legend>
-        <input bind:this={fileInput} bind:files type="file" class="dy-file-input w-full" accept="image/*" />
+        <label class="dy-label w-full">
+          <input
+            bind:this={fileInput}
+            bind:files
+            type="file"
+            class="dy-file-input grow"
+            accept="image/*"
+            onchangecapture={(e) => {
+              if (e.currentTarget.files?.length) {
+                progress.set(0);
+              }
+            }}
+          />
+          <button
+            class="dy-btn dy-btn-ghost dy-btn-circle dy-btn-sm hover:text-base-content"
+            class:hidden={!files?.length}
+            onclick={() => {
+              fileInput.value = "";
+              files = undefined;
+            }}
+          >
+            <XIcon />
+          </button>
+        </label>
       </fieldset>
       <div class="dy-join dy-join-vertical">
         <progress class="dy-join-item dy-progress" value={progress.current}></progress>
@@ -191,9 +194,17 @@
       <div class="flex w-full flex-wrap justify-center gap-3">
         {#each images as image}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <button
-            class="dy-card image-grid-item bg-base-200 max-w-md text-start drop-shadow-md drop-shadow-black/40"
+          <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+          <div
+            tabindex="0"
+            class="dy-card image-grid-item bg-base-200 max-w-md text-start drop-shadow-md drop-shadow-black/40 focus:ring-2"
             onclick={() => selectImage(image.id)}
+            onkeydown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                selectImage(image.id);
+              }
+            }}
           >
             <figure class="relative aspect-video">
               <img
@@ -201,20 +212,33 @@
                 alt={image.filename}
                 loading="lazy"
               />
-              <!-- 
-              TODO: Figure out, why bulk deletion does not work on the server side
-              <input
-                id={image.id}
-                type="checkbox"
-                class="dy-checkbox dy-checkbox-lg dy-checkbox-info absolute top-2 right-2"
-                onclick={toggleImageSelection}
-              /> -->
+              <!-- TODO: Make this a checkbox and find out why bulk deletion doesn't work properly (unlink issues) -->
+              <button
+                class="dy-btn dy-btn-warning dy-btn-ghost dy-btn-circle absolute top-2 right-2 z-10"
+                onclick={async (e) => {
+                  e.stopPropagation();
+                  // Imitate a form submission
+                  if (confirm("Are you sure you want to delete this image?")) {
+                    await fetch(`?/delete`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                      },
+                      body: new URLSearchParams({ imageId: image.id }),
+                    });
+                    deleteImage(image.id);
+                    resetSelectedImage();
+                  }
+                }}
+              >
+                <Trashcan />
+              </button>
             </figure>
             <div class="dy-card-body overflow-hidden">
               <div class="w-full"><h3 class="dy-card-title w-full truncate">{image.filename}</h3></div>
               <p class="dy-card-text">Uploaded at: {formatGermanDateTime(image.created_at)}</p>
             </div>
-          </button>
+          </div>
         {/each}
       </div>
     {/if}
@@ -232,13 +256,20 @@
     <form
       method="POST"
       action="?/update"
-      class="flex flex-col items-center justify-center gap-4"
+      class="flex flex-col items-center justify-center gap-2"
       use:enhance={() => {
         loading = true;
-        return async ({ result, update }) => {
+        return async ({ action, result, update }) => {
           await update({ invalidateAll: false });
           if (result.type === "success") {
-            resetSelectedImage();
+            if (action.toString().endsWith("update")) {
+              console.log("Image updated successfully:", result.data);
+              updateImage(result.data as Image);
+            } else if (action.toString().endsWith("delete")) {
+              console.log("Image deleted successfully:", result.data);
+              deleteImage(selectedImage.update!.id);
+              resetSelectedImage();
+            }
           }
         };
       }}
