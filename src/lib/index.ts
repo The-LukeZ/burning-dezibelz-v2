@@ -1,4 +1,4 @@
-import { allowedMimeTypes } from "./constants";
+import { allowedImageExtensions, allowedMimeTypes } from "./constants";
 
 export function isCurrentPage(href: string, url: URL): boolean {
   return href === url.pathname;
@@ -46,8 +46,6 @@ export function sanitizeFilename(filename: string): string {
   return filename.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
 }
 
-const escapedMimeTypes = allowedMimeTypes.map((mime) => mime.replace(/\//g, "\\/"));
-
 /**
  * Removes the file extension from a filename.
  * @param filename The filename to process.
@@ -60,7 +58,7 @@ const escapedMimeTypes = allowedMimeTypes.map((mime) => mime.replace(/\//g, "\\/
  * // ...
  */
 export function removeExtension(filename: string): string {
-  return filename.replace(new RegExp(`\.(${escapedMimeTypes.join("|")})$`), "");
+  return filename.replace(new RegExp(`\.(${allowedImageExtensions.join("|")})$`), "");
 }
 
 /**
@@ -76,5 +74,10 @@ export function removeExtension(filename: string): string {
  * // ...
  */
 export function addExtension(filename: string, ext: ImageExtension): string {
-  return filename + ext;
+  return filename + "." + ext;
+}
+
+export function getFileExtension(filename: string): ImageExtension | null {
+  const match = filename.match(new RegExp(`\.(?<ext>${allowedImageExtensions.join("|")})$`));
+  return match ? (match.groups?.ext as ImageExtension) : null;
 }
