@@ -4,6 +4,7 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
+  import ShareConcertBtn from "$lib/components/ShareConcertBtn.svelte";
   import { eventStore, serializeConcerts } from "$lib/stores/events.svelte.js";
   import type { Database, Tables } from "$lib/supabase.ts";
   import {
@@ -196,9 +197,9 @@
             {:else}
               <td colspan="2" class="dy-glass border-0 text-center">Privates Konzert</td>
             {/if}
-            <td class="flex flex-col gap-1 sm:flex-row">
+            <td class="flex w-min flex-row gap-1">
               <button
-                class="dy-btn dy-btn-primary dy-btn-sm dy-btn-outline w-full sm:w-auto"
+                class="dy-btn dy-btn-primary dy-btn-sm dy-btn-outline w-auto"
                 disabled={loading}
                 onclick={(e) => {
                   e.stopPropagation();
@@ -208,7 +209,7 @@
                 Details
               </button>
               <button
-                class="dy-btn dy-btn-sm dy-btn-error dy-btn-outline w-full sm:w-auto"
+                class="dy-btn dy-btn-sm dy-btn-error dy-btn-outline w-auto"
                 disabled={loading}
                 onclick={async (e) => {
                   e.stopPropagation();
@@ -219,6 +220,7 @@
               >
                 Delete
               </button>
+              <ShareConcertBtn concertData={concert} btnType="info" small={true} />
             </td>
           </tr>
         {/each}
@@ -258,24 +260,7 @@
       </button>
     </div>
 
-    <button
-      class="dy-btn dy-btn-outline"
-      onclick={() => {
-        if (!concert) return;
-        const concertId = concert?.id;
-        if (!concertId) return;
-        let venueName: string | null = null;
-        if (concert.type === "public" && concert.venue_id) {
-          const venue = eventStore.venues.get(concert.venue_id);
-          if (venue) {
-            venueName = venue.name;
-          }
-        }
-        navigator.clipboard.writeText(`${window.location.origin}${concertHref(concertId, venueName)}`);
-      }}
-    >
-      Share
-    </button>
+    <ShareConcertBtn concertData={concert} btnType="info" small={false} />
   </div>
 
   {#if concert !== null}
