@@ -6,7 +6,12 @@
   import SelectVenue from "$lib/components/SelectVenue.svelte";
   import { eventStore, serializeConcerts } from "$lib/stores/events.svelte.js";
   import type { Database, Tables } from "$lib/supabase.ts";
-  import { formatDateTimeLocal, formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
+  import {
+    concertHref,
+    formatDateTimeLocal,
+    formatGermanDateTime,
+    getConcertDisplayName,
+  } from "$lib/utils/concerts.js";
 
   type Concert = Tables<"concerts">;
 
@@ -176,12 +181,9 @@
     <tbody>
       {#if eventStore.metadata.concertsLoaded && eventStore.concerts.size > 0}
         {#each serializeConcerts() as concert}
-          <tr class="hover:bg-primary/15 transition-colors duration-75">
+          <tr id={concert.id} class="hover:bg-primary/15 transition-colors duration-75">
             <td>{formatGermanDateTime(concert.timestamp)}</td>
-            <td
-              colspan={concert.type === "closed" ? 3 : 1}
-              class={concert.type === "closed" ? "dy-glass text-center" : ""}
-            >
+            <td>
               <pre>{concert.type === "closed" ? "Geschlossen" : "Öffentlich"}</pre>
             </td>
             {#if concert.type === "public"}
@@ -191,6 +193,8 @@
                   ? (eventStore.venues?.get(concert.venue_id)?.name ?? "Unknown Venue")
                   : "No Venue"}
               </td>
+            {:else}
+              <td colspan="2" class="dy-glass border-0 text-center">Privates Konzert</td>
             {/if}
             <td class="flex flex-col gap-1 sm:flex-row">
               <button
@@ -234,22 +238,43 @@
 </div>
 
 <Modal bind:open={modalState.open} withXButton={false} class="w-full max-w-3xl sm:min-w-lg">
-  <div class="dy-join mb-4">
+  <div class="flex flex-row items-start justify-between">
+    <div class="dy-join mb-4">
+      <button
+        name="details"
+        class="dy-join-item dy-btn dy-btn-secondary"
+        class:dy-btn-active={modalState.tab === "edit"}
+        onclick={() => (modalState.tab = "edit")}
+      >
+        Edit
+      </button>
+      <button
+        name="details"
+        class="dy-join-item dy-btn dy-btn-secondary"
+        class:dy-btn-active={modalState.tab === "raw"}
+        onclick={() => (modalState.tab = "raw")}
+      >
+        Raw
+      </button>
+    </div>
+
     <button
-      name="details"
-      class="dy-join-item dy-btn dy-btn-secondary"
-      class:dy-btn-active={modalState.tab === "edit"}
-      onclick={() => (modalState.tab = "edit")}
+      class="dy-btn dy-btn-outline"
+      onclick={() => {
+        if (!concert) return;
+        const concertId = concert?.id;
+        if (!concertId) return;
+        let venueName: string | null = null;
+        if (concert.type === "public" && concert.venue_id) {
+          const venue = eventStore.venues.get(concert.venue_id);
+          if (venue) {
+            venueName = venue.name;
+          }
+        }
+        navigator.clipboard.writeText(`${window.location.origin}${concertHref(concertId, venueName)}`);
+      }}
     >
-      Edit
-    </button>
-    <button
-      name="details"
-      class="dy-join-item dy-btn dy-btn-secondary"
-      class:dy-btn-active={modalState.tab === "raw"}
-      onclick={() => (modalState.tab = "raw")}
-    >
-      Raw
+      Share
     </button>
   </div>
 
