@@ -97,7 +97,7 @@
   <div class="flex w-full flex-col items-center">
     <form class="mx-auto flex w-full max-w-md flex-col" onsubmit={handleFileSubmit}>
       <fieldset class="dy-fieldset w-full text-center">
-        <legend class="dy-fieldset-legend">Pick a large file</legend>
+        <legend class="dy-fieldset-legend">Pick an image</legend>
         <input bind:files type="file" class="dy-file-input mx-auto" accept="image/*" />
       </fieldset>
       <progress class="dy-progress" value={progress.current}></progress>
