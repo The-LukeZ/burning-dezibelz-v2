@@ -1,10 +1,16 @@
+import * as Sentry from "@sentry/sveltekit";
 import { createServerClient } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import type { User } from "@supabase/supabase-js";
 
-import { PUBLIC_SUPABASE_URL } from "$env/static/public";
+import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
+
+Sentry.init({
+  dsn: PUBLIC_SENTRY_DSN,
+  tracesSampleRate: 1,
+});
 
 const devToolsCheck: Handle = async ({ event, resolve }) => {
   if (event.url.pathname.startsWith("/.well-known/appspecific/com.chrome.devtools")) {
@@ -114,4 +120,6 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
   return resolve(event);
 };
 
-export const handle = sequence(devToolsCheck, supabase, authGuard, authUserMiddleware);
+export const handle = sequence(Sentry.sentryHandle(), devToolsCheck, supabase, authGuard, authUserMiddleware);
+
+export const handleError = Sentry.handleErrorWithSentry();
