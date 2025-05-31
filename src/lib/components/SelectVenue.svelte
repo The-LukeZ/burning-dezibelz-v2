@@ -65,7 +65,7 @@
   });
 </script>
 
-<div class="relative {className} pointer-events-auto z-[60]">
+<div class="relative {className} pointer-events-auto">
   {@render children()}
   {#if show}
     <!-- Transparent backdrop -->
