@@ -1,14 +1,11 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
-  import { invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
   import { addExtension, buildImageUrl, getFileExtension, removeExtension } from "$lib";
-  import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import { images } from "$lib/stores/images";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { create_upload } from "$lib/utils/upload";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { cubicOut } from "svelte/easing";
   import { Tween } from "svelte/motion";
 
@@ -17,6 +14,7 @@
   let { supabase } = page.data;
   let loading = $state(false);
   let files = $state<FileList>();
+  let images = $state<Image[]>([]);
   const progress = new Tween(0, {
     duration: 400,
     easing: cubicOut,
@@ -26,13 +24,14 @@
     image: null as Image | null,
     update: null as Image | null,
   });
+  let imagesListener: any;
 
   $effect(() => {
     progress.set($upload.progress / 100);
   });
 
   function selectImage(imageId: string | null) {
-    selectedImage.image = $images.find((img) => img.id === imageId) || null;
+    selectedImage.image = images.find((img) => img.id === imageId) || null;
     if (!selectedImage.image) {
       console.error("Image not found:", imageId);
       return;
@@ -41,14 +40,19 @@
     selectedImage.update = structuredClone($state.snapshot(selectedImage.image));
   }
 
+  function addImage(newImg: Image) {
+    console.log("Adding new image:", newImg);
+    images.push(newImg);
+  }
+
   function updateImage(newImg: Image) {
     console.log("Updating image:", newImg);
-    images.update((imgs) => imgs.map((img) => (img.id === newImg.id ? newImg : img)));
+    images = $state.snapshot(images).map((img) => (img.id === newImg.id ? newImg : img));
   }
 
   function deleteImage(imageId: string) {
     console.log("Deleting image with ID:", imageId);
-    images.update((imgs) => imgs.filter((img) => img.id !== imageId));
+    images = $state.snapshot(images).filter((img) => img.id !== imageId);
   }
 
   function resetSelectedImage() {
@@ -72,11 +76,10 @@
     await upload.start({ url: "/api/images/upload", file, filename: file.name });
     progress.set(0);
     loading = false;
-    window.location.reload();
   }
 
   onMount(async () => {
-    if ($images.length > 0) return;
+    if (images.length > 0) return;
 
     const { data, error } = await supabase
       .from("images")
@@ -87,7 +90,39 @@
       return;
     }
 
-    images.set(data);
+    images = data;
+
+    imagesListener = supabase
+      .channel("public:images")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "images",
+        },
+        (payload) => {
+          if (payload.eventType === "UPDATE") {
+            updateImage(payload.new as Image);
+          } else if (payload.eventType === "DELETE") {
+            deleteImage(payload.old.id);
+          } else if (payload.eventType === "INSERT") {
+            addImage(payload.new as Image);
+          }
+        },
+      )
+      .subscribe();
+  });
+
+  onDestroy(async () => {
+    if (imagesListener) {
+      await supabase.removeChannel(imagesListener);
+      console.log("Unsubscribed from images channel.");
+    }
+    resetSelectedImage();
+    files = undefined;
+    progress.set(0);
+    loading = false;
   });
 </script>
 
@@ -113,11 +148,11 @@
 
   <section class="mx-auto flex w-full max-w-5xl flex-col items-center justify-center space-y-4">
     <h2 class="text-2xl font-bold">Uploaded files</h2>
-    {#if !$images.length}
+    {#if !images.length}
       <p>No files have been uploaded yet.</p>
     {:else}
       <div class="flex w-full flex-wrap justify-center gap-3">
-        {#each $images as image}
+        {#each images as image}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <button
             class="dy-card image-grid-item bg-base-200 max-w-md text-start drop-shadow-md drop-shadow-black/40"
@@ -155,14 +190,9 @@
       class="flex flex-col items-center justify-center gap-4"
       use:enhance={() => {
         loading = true;
-        return async ({ action, result, update }) => {
+        return async ({ result, update }) => {
           await update({ invalidateAll: false });
           if (result.type === "success") {
-            if (action.toString().endsWith("update")) {
-              updateImage(result.data!.image as Image);
-            } else {
-              deleteImage(selectedImage.update!.id);
-            }
             resetSelectedImage();
           }
         };
@@ -228,8 +258,12 @@
       </label>
       <input type="hidden" name="imageId" value={selectedImage.update.id} />
       <div class="flex w-full flex-row-reverse justify-center gap-2">
-        <button type="submit" formaction="?/update" class="dy-btn dy-btn-primary">Update Image</button>
-        <button type="submit" formaction="?/delete" class="dy-btn dy-btn-error">Delete Image</button>
+        <button type="submit" formaction="?/update" class="dy-btn dy-btn-primary" disabled={loading}>
+          Update Image
+        </button>
+        <button type="submit" formaction="?/delete" class="dy-btn dy-btn-error" disabled={loading}>
+          Delete Image
+        </button>
       </div>
     </form>
   {/if}

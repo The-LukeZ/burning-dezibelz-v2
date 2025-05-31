@@ -9,7 +9,7 @@ const navItems = {
     { href: "/dash/concerts", label: "Concerts" },
     { href: "/dash/venues", label: "Venues" },
     { href: "/dash/songs", label: "Songs" },
-    { href: "/dash/images", label: "Images" },
+    { href: "/dash/gallery", label: "Gallery" },
     { href: "/dash/users", label: "Users", requiresAdmin: true },
   ],
 } as {
