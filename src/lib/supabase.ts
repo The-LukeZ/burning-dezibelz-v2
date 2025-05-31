@@ -214,6 +214,22 @@ export type Database = {
         Args: { date_param: string };
         Returns: number;
       };
+      get_full_concert: {
+        Args: { p_concert_id: string };
+        Returns: {
+          concert_id: string;
+          concert_name: string;
+          concert_timestamp: string;
+          concert_type: string;
+          venue_id: string;
+          venue_name: string;
+          venue_address: string;
+          venue_city: string;
+          venue_postal_code: string;
+          venue_state: string;
+          venue_country: string;
+        }[];
+      };
     };
     Enums: {
       ConcertType: "public" | "closed";
