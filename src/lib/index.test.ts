@@ -1,107 +1,72 @@
+import { addExtension, getFileExtension, removeExtension, sanitizeFilename } from "$lib";
 import "@testing-library/jest-dom/vitest";
 import { describe, expect, test } from "vitest";
-import { filterConcerts } from "./utils/concerts.js";
 
-describe("filterConcerts", () => {
-  const mockConcerts = [
-    { timestamp: "2023-01-15", venue_id: "loc1", id: "abc", name: "Concert A" },
-    { timestamp: "2023-02-20", venue_id: "loc2", id: "def", name: "Concert B" },
-    { timestamp: "2023-03-25", venue_id: "loc1", id: "ghi", name: "Concert C" },
-    { timestamp: "2023-04-30", venue_id: "loc3", id: "jkl", name: "Concert D" },
-    { timestamp: "2023-05-05", venue_id: "loc2", id: "mno", name: "Concert E" },
-  ] as Concert[];
-  const mixedConcerts = [mockConcerts[3], mockConcerts[0], mockConcerts[1], mockConcerts[4], mockConcerts[2]];
-
-  test("returns all concerts when no options provided", () => {
-    const result = filterConcerts(mockConcerts);
-    expect(result).toHaveLength(5);
-    expect(result).not.toBe(mockConcerts); // Check for copy via structuredClone
+describe("sanitizeFilename", () => {
+  test("replaces special characters with underscores", () => {
+    expect(sanitizeFilename("file@name#test.jpg")).toBe("file_name_test.jpg");
+    expect(sanitizeFilename("my file name.png")).toBe("my_file_name.png");
+    expect(sanitizeFilename("file!@#$%^&*()name.gif")).toBe("file__________name.gif");
   });
 
-  test("filters concerts before a specific timestamp", () => {
-    const before = new Date("2023-03-01");
-    const result = filterConcerts(mockConcerts, { before });
-    expect(result).toHaveLength(2);
-    expect(result[0].timestamp).toBe("2023-01-15");
-    expect(result[1].timestamp).toBe("2023-02-20");
+  test("preserves allowed characters", () => {
+    expect(sanitizeFilename("valid_file-name123.webp")).toBe("valid_file-name123.webp");
+    expect(sanitizeFilename("ABC123_test-file.jpg")).toBe("ABC123_test-file.jpg");
   });
 
-  test("filters concerts after a specific timestamp", () => {
-    const after = new Date("2023-03-01");
-    const result = filterConcerts(mockConcerts, { after });
-    expect(result).toHaveLength(3);
-    expect(result[0].timestamp).toBe("2023-03-25");
-    expect(result[1].timestamp).toBe("2023-04-30");
-    expect(result[2].timestamp).toBe("2023-05-05");
+  test("handles empty string", () => {
+    expect(sanitizeFilename("")).toBe("");
+  });
+});
+
+describe("removeExtension", () => {
+  test("removes common image extensions", () => {
+    expect(removeExtension("image.jpg")).toBe("image");
+    expect(removeExtension("photo.png")).toBe("photo");
+    expect(removeExtension("graphic.gif")).toBe("graphic");
+    expect(removeExtension("picture.webp")).toBe("picture");
   });
 
-  test("filters concerts by venue ID", () => {
-    const result = filterConcerts(mockConcerts, { venueId: "loc1" });
-    expect(result).toHaveLength(2);
-    expect(result[0].venue_id).toBe("loc1");
-    expect(result[1].venue_id).toBe("loc1");
+  test("preserves filename without extension", () => {
+    expect(removeExtension("filename")).toBe("filename");
+    expect(removeExtension("file.txt")).toBe("file.txt");
   });
 
-  test("sorts concerts by timestamp in descending order", () => {
-    const result = filterConcerts(mixedConcerts, { sort: "timestamp", order: "newestFirst" });
-    expect(result).toHaveLength(5);
-    expect(result[0].timestamp).toBe("2023-05-05");
-    expect(result[1].timestamp).toBe("2023-04-30");
-    expect(result[2].timestamp).toBe("2023-03-25");
-    expect(result[3].timestamp).toBe("2023-02-20");
-    expect(result[4].timestamp).toBe("2023-01-15");
+  test("handles multiple dots in filename", () => {
+    expect(removeExtension("file.name.jpg")).toBe("file.name");
+    expect(removeExtension("my.file.name.png")).toBe("my.file.name");
+  });
+});
+
+describe("addExtension", () => {
+  test("adds extension to filename", () => {
+    expect(addExtension("image", "jpg")).toBe("image.jpg");
+    expect(addExtension("photo", "png")).toBe("photo.png");
+    expect(addExtension("graphic", "gif")).toBe("graphic.gif");
+    expect(addExtension("picture", "webp")).toBe("picture.webp");
   });
 
-  test("sorts concerts by timestamp in ascending order", () => {
-    const result = filterConcerts(mixedConcerts, { sort: "timestamp", order: "oldestFirst" });
-    expect(result).toHaveLength(5);
-    expect(result[0].timestamp).toBe("2023-01-15");
-    expect(result[1].timestamp).toBe("2023-02-20");
-    expect(result[2].timestamp).toBe("2023-03-25");
-    expect(result[3].timestamp).toBe("2023-04-30");
-    expect(result[4].timestamp).toBe("2023-05-05");
+  test("adds extension even if filename already has one", () => {
+    expect(addExtension("image.png", "jpg")).toBe("image.png.jpg");
+  });
+});
+
+describe("getFileExtension", () => {
+  test("returns correct extension for valid image files", () => {
+    expect(getFileExtension("image.jpg")).toBe("jpg");
+    expect(getFileExtension("photo.png")).toBe("png");
+    expect(getFileExtension("graphic.gif")).toBe("gif");
+    expect(getFileExtension("picture.webp")).toBe("webp");
   });
 
-  test("limits the number of concerts returned", () => {
-    const result = filterConcerts(mockConcerts, { limit: 2 });
-    expect(result).toHaveLength(2);
+  test("returns null for files without valid extensions", () => {
+    expect(getFileExtension("filename")).toBe(null);
+    expect(getFileExtension("file.txt")).toBe(null);
+    expect(getFileExtension("document.pdf")).toBe(null);
   });
 
-  test("applies offset to concerts returned", () => {
-    const result = filterConcerts(mockConcerts, { offset: 3 });
-    expect(result).toHaveLength(2);
-    expect(result[0].timestamp).toBe("2023-04-30");
-  });
-
-  test("offsets and limits concerts returned", () => {
-    const result = filterConcerts(mockConcerts, { offset: 1, limit: 2 });
-    expect(result).toHaveLength(2);
-    expect(result[0].timestamp).toBe("2023-02-20");
-    expect(result[1].timestamp).toBe("2023-03-25");
-  });
-
-  test("combines multiple filters", () => {
-    const after = new Date("2023-02-01");
-    const before = new Date("2023-05-01");
-    const result = filterConcerts(mockConcerts, {
-      after,
-      before,
-      venueId: "loc1",
-      sort: "timestamp",
-      order: "desc",
-    });
-
-    expect(result).toHaveLength(1);
-    expect(result[0].timestamp).toBe("2023-03-25");
-  });
-
-  test("uses 'newestFirst' as alias for 'desc'", () => {
-    const result = filterConcerts(mockConcerts, { order: "newestFirst" });
-    expect(result[0].timestamp).toBe("2023-05-05");
-  });
-
-  test("uses 'oldestFirst' as alias for 'asc'", () => {
-    const result = filterConcerts(mockConcerts, { order: "oldestFirst" });
-    expect(result[0].timestamp).toBe("2023-01-15");
+  test("handles multiple dots correctly", () => {
+    expect(getFileExtension("file.name.jpg")).toBe("jpg");
+    expect(getFileExtension("my.file.name.png")).toBe("png");
   });
 });
