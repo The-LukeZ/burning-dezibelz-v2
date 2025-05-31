@@ -81,3 +81,12 @@ export function getFileExtension(filename: string): ImageExtension | null {
   const match = filename.match(new RegExp(`\.(?<ext>${allowedImageExtensions.join("|")})$`));
   return match ? (match.groups?.ext as ImageExtension) : null;
 }
+
+export function mimeTypeToExtension(mimeType: string): ImageExtension | null {
+  const match = mimeType.match(/image\/([a-z]+)/);
+  if (match && match[1]) {
+    const ext = match[1] as ImageExtension;
+    return allowedImageExtensions.includes(ext) ? ext : null;
+  }
+  return null;
+}
