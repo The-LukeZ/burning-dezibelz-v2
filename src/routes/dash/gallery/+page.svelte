@@ -26,6 +26,7 @@
     update: null as Image | null,
   });
   let imagesListener: any;
+  let fileInput: HTMLInputElement;
 
   $effect(() => {
     progress.set($upload.progress / 100);
@@ -86,6 +87,7 @@
 
     const file = files[0];
     await upload.start({ url: "/api/images/upload", file, filename: file.name });
+    fileInput.value = "";
     progress.set(0);
     loading = false;
   }
@@ -123,7 +125,11 @@
           }
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("Subscribed to images channel.");
+        }
+      });
   });
 
   onDestroy(async () => {
@@ -145,7 +151,7 @@
     <form class="mx-auto flex w-full max-w-sm flex-col" onsubmit={handleFileSubmit}>
       <fieldset class="dy-fieldset w-full text-center">
         <legend class="dy-fieldset-legend">Pick an image</legend>
-        <input bind:files type="file" class="dy-file-input w-full" accept="image/*" />
+        <input bind:this={fileInput} bind:files type="file" class="dy-file-input w-full" accept="image/*" />
       </fieldset>
       <div class="dy-join dy-join-vertical">
         <progress class="dy-join-item dy-progress" value={progress.current}></progress>
@@ -178,12 +184,14 @@
                 alt={image.filename}
                 loading="lazy"
               />
+              <!-- 
+              TODO: Figure out, why bulk deletion does not work on the server side
               <input
                 id={image.id}
                 type="checkbox"
                 class="dy-checkbox dy-checkbox-lg dy-checkbox-info absolute top-2 right-2"
                 onclick={toggleImageSelection}
-              />
+              /> -->
             </figure>
             <div class="dy-card-body overflow-hidden">
               <div class="w-full"><h3 class="dy-card-title w-full truncate">{image.filename}</h3></div>
