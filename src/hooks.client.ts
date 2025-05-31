@@ -1,4 +1,4 @@
-import { NODE_ENV } from "$env/static/private";
+import { dev } from "$app/environment";
 import { PUBLIC_SENTRY_DSN } from "$env/static/public";
 import { handleErrorWithSentry } from "@sentry/sveltekit";
 import * as Sentry from "@sentry/sveltekit";
@@ -9,4 +9,4 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-export const handleError = NODE_ENV === "production" ? handleErrorWithSentry() : () => {};
+export const handleError = !dev ? handleErrorWithSentry() : () => {};
