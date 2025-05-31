@@ -30,6 +30,9 @@ function parseImageParams(url: URL): ImageParams {
 async function optimizeImage(inputPath: string, params: ImageParams): Promise<Buffer> {
   let transformer = sharp(inputPath);
 
+  // Auto-rotate based on EXIF orientation and remove EXIF data
+  transformer = transformer.rotate();
+
   // Resize if dimensions specified
   if (params.width || params.height) {
     transformer = transformer.resize(params.width, params.height, {
