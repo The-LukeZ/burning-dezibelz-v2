@@ -6,4 +6,6 @@
 
 ## TODO
 
-- Add a way to automatically delete old cached optimized images after a certain time (e.g. 1 day) to prevent excessive storage usage.
+- Add security rules (maybe ratelimits?) to images route to prevent abuse
+  - What is the best way to do this?
+  - Maybe look into arcjet again?
