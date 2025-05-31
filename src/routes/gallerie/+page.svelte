@@ -2,26 +2,24 @@
   import { page } from "$app/state";
   import { buildImageUrl } from "$lib";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
-    import Download from "$lib/assets/Download.svelte";
-  import { images } from "$lib/stores/images";
+  import Download from "$lib/assets/Download.svelte";
   import { onMount } from "svelte";
 
   let { supabase } = page.data;
   let loading = $state(true);
+  let images = $state<Image[]>([]);
 
   onMount(async () => {
-    if ($images.length > 0) return;
-
     const { data, error } = await supabase
       .from("images")
       .select("*")
       .order("created_at", { ascending: false });
+
     if (error) {
       console.error("Error fetching images:", error);
-      return;
+    } else {
+      images = data || [];
     }
-
-    images.set(data);
     loading = false;
   });
 </script>
@@ -32,10 +30,10 @@
 <section>
   {#if loading}
     <span class="dy-loading dy-loading-dots mx-auto my-5"></span>
-  {:else if !loading && $images.length === 0}
+  {:else if !loading && images.length === 0}
     <p class="text-gray-500">Hier ist's ziemlich leer...</p>
-  {:else if !loading && $images.length > 0}
-    {#each $images as image}
+  {:else if !loading && images.length > 0}
+    {#each images as image}
       <div id={image.id} class="image-card">
         <img
           src={buildImageUrl(image.filename, { width: 400, height: 400, fit: "cover" })}
@@ -43,7 +41,7 @@
           loading="lazy"
         />
         <div class="card-actions">
-          <p class="p-2 text-sm text-white truncate">{image.filename}</p>
+          <p class="truncate p-2 text-sm text-white">{image.filename}</p>
           <a
             class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
             href={buildImageUrl(image.filename)}
