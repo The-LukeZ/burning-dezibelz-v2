@@ -10,7 +10,7 @@ import { JsonErrors } from "$lib/constants";
 // See the `delete` action in the `src/routes/dash/gallery/+page.server.ts` file for the form submission handler.
 // Even though the logic is the same, the error handling and response format are VERY different (API vs. form action).
 
-export const DELETE: RequestHandler = async ({ request, locals: { supabase } }) => {
+export const POST: RequestHandler = async ({ request, locals: { supabase } }) => {
   const { imageIds } = await request.json();
 
   if (!Array.isArray(imageIds) || imageIds.length === 0) {
