@@ -69,15 +69,10 @@
     }
 
     const file = files[0];
-    const response: any = await upload.start({ url: "/api/images/upload", file, filename: file.name });
-    // Add the new image to the store if response contains image data
-    if (response && "image" in response && response.image) {
-      images.update((imgs) => [response.image as Image, ...imgs]);
-    }
-    await invalidateAll();
-
+    await upload.start({ url: "/api/images/upload", file, filename: file.name });
     progress.set(0);
     loading = false;
+    window.location.reload();
   }
 
   onMount(async () => {
@@ -128,11 +123,10 @@
             class="dy-card image-grid-item bg-base-200 text-start drop-shadow-md drop-shadow-black/40"
             onclick={() => selectImage(image.id)}
           >
-            <figure>
+            <figure class="aspect-video">
               <img
-                src={buildImageUrl(image.filename, { width: 400, height: 300, fit: "fill" })}
+                src={buildImageUrl(image.filename, { width: 400, height: 300, fit: "contain" })}
                 alt={image.filename}
-                class="aspect-video"
                 loading="lazy"
               />
             </figure>
@@ -152,7 +146,7 @@
   onClose={() => {
     selectedImage.image = null;
   }}
-  class="w-full max-w-2xl"
+  class="max-h-screen w-full max-w-2xl overflow-y-auto"
 >
   {#if selectedImage.image && selectedImage.update}
     <form
@@ -193,33 +187,27 @@
               input,
               getFileExtension(selectedImage.image!.filename)!,
             );
+            console.log("Updated filename:", $state.snapshot(selectedImage.update!.filename));
           }}
           {@attach (element) => {
-            const justFilename = removeExtension(selectedImage.image!.filename);
+            const justFilename = removeExtension(structuredClone(selectedImage.image!.filename));
             element.value = justFilename;
             console.log("Setting initial filename:", justFilename);
           }}
         />
         <p class="dy-validator-hint">Must be valid filename [A-Za-z0-9_.-]</p>
-        <input hidden name="filename_ext" value={getFileExtension(selectedImage.image!.filename)} />
       </fieldset>
-      <div class="shadow-accent relative mx-auto w-full max-w-md shadow-md">
+      <span class="dy-divider my-1 w-full"></span>
+      <div class="mx-auto w-full max-w-lg place-items-center">
         <!-- svelte-ignore a11y_missing_attribute -->
         <img
           src={buildImageUrl(selectedImage.image.filename)}
           alt={selectedImage.image.description || selectedImage.image.filename}
-          class="w-full"
           loading="lazy"
+          class="h-full max-h-96"
         />
-        <a
-          href={buildImageUrl(selectedImage.image.filename)}
-          target="_blank"
-          class="absolute top-2 right-2 flex cursor-pointer items-center justify-center rounded-full bg-black/50 p-2 text-white transition hover:bg-black/70"
-          title="View full size"
-        >
-          <ArrowUpRight />
-        </a>
       </div>
+      <span class="dy-divider my-1 w-full"></span>
       <fieldset class="dy-fieldset">
         <legend class="dy-fieldset-legend">Description</legend>
         <textarea
@@ -239,7 +227,7 @@
         <span class="dy-label-text">Private image (only visible to you)</span>
       </label>
       <input type="hidden" name="imageId" value={selectedImage.update.id} />
-      <div class="flex w-full flex-row-reverse justify-center">
+      <div class="flex w-full flex-row-reverse justify-center gap-2">
         <button type="submit" formaction="?/update" class="dy-btn dy-btn-primary">Update Image</button>
         <button type="submit" formaction="?/delete" class="dy-btn dy-btn-error">Delete Image</button>
       </div>
