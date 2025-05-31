@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
+  import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
   import { onMount } from "svelte";
 
   let error = $state<string | null>(null);
@@ -18,11 +19,14 @@
 <!-- Login with Google -->
 <div class="absolute top-0 right-0 bottom-0 left-0 flex flex-col items-center justify-center gap-4">
   {#if error}
-    <div class="dy-alert dy-alert-error w-xs justify-center px-8">
+    <div class="dy-alert dy-alert-error dy-alert-vertical w-xs justify-center px-8">
       <div>
-        <strong>Error:</strong>
-        {error}
+        <strong>{error}</strong>
       </div>
+      <a href="/" class="dy-btn dy-btn-outline">
+        <ChevronLeft class="size-4" />
+        Back
+      </a>
     </div>
   {/if}
 
