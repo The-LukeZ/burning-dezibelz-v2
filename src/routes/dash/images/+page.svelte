@@ -2,7 +2,7 @@
   import { enhance } from "$app/forms";
   import { invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
-  import { buildImageUrl } from "$lib";
+  import { addExtension, buildImageUrl, getFileExtension, removeExtension } from "$lib";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import { images } from "$lib/stores/images";
@@ -69,10 +69,14 @@
     }
 
     const file = files[0];
-    await upload.start({ url: "/api/images/upload", file, filename: file.name });
+    const response: any = await upload.start({ url: "/api/images/upload", file, filename: file.name });
+    // Add the new image to the store if response contains image data
+    if (response && "image" in response && response.image) {
+      images.update((imgs) => [response.image as Image, ...imgs]);
+    }
     await invalidateAll();
-    progress.set(0);
 
+    progress.set(0);
     loading = false;
   }
 
@@ -87,6 +91,7 @@
       console.error("Error fetching images:", error);
       return;
     }
+
     images.set(data);
   });
 </script>
@@ -182,9 +187,21 @@
           pattern="[A-Za-z0-9_\.\-]+"
           title="Letters, numbers, underscores, dots, and dashes only"
           placeholder="Filename"
-          bind:value={selectedImage.update.filename}
+          oninput={(e) => {
+            const input = e.currentTarget.value;
+            selectedImage.update!.filename = addExtension(
+              input,
+              getFileExtension(selectedImage.image!.filename)!,
+            );
+          }}
+          {@attach (element) => {
+            const justFilename = removeExtension(selectedImage.image!.filename);
+            element.value = justFilename;
+            console.log("Setting initial filename:", justFilename);
+          }}
         />
         <p class="dy-validator-hint">Must be valid filename [A-Za-z0-9_.-]</p>
+        <input hidden name="filename_ext" value={getFileExtension(selectedImage.image!.filename)} />
       </fieldset>
       <div class="shadow-accent relative mx-auto w-full max-w-md shadow-md">
         <!-- svelte-ignore a11y_missing_attribute -->
