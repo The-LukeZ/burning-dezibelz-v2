@@ -13,6 +13,7 @@ export const UnknownVenue: VenueDetails = {
 } as const;
 
 export const allowedMimeTypes = [
+  "image/jpg",
   "image/jpeg",
   "image/png",
   "image/webp",
@@ -22,13 +23,4 @@ export const allowedMimeTypes = [
   "image/bmp",
 ] as const;
 
-export const allowedImageExtensions = [
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".webp",
-  ".gif",
-  ".avif",
-  ".svg",
-  ".bmp",
-] as const;
+export const allowedImageExtensions = ["jpg", "jpeg", "png", "webp", "gif", "avif", "svg", "bmp"] as const;
