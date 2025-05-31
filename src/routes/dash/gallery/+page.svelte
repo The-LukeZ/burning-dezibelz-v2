@@ -15,6 +15,7 @@
   let loading = $state(false);
   let files = $state<FileList>();
   let images = $state<Image[]>([]);
+  let selectedImages = $state<Image[]>([]);
   const progress = new Tween(0, {
     duration: 400,
     easing: cubicOut,
@@ -38,6 +39,17 @@
     }
     selectedImage.modalOpen = !!imageId;
     selectedImage.update = structuredClone($state.snapshot(selectedImage.image));
+  }
+
+  function toggleImageSelection(e: MouseEvent & { currentTarget: EventTarget & HTMLInputElement }) {
+    e.stopPropagation();
+    const imageId = e.currentTarget.id;
+    if (!imageId) return;
+    if (e.currentTarget.checked) {
+      selectedImages.push(images.find((img) => img.id === imageId)!);
+    } else {
+      selectedImages = $state.snapshot(selectedImages).filter((img) => img.id !== imageId);
+    }
   }
 
   function addImage(newImg: Image) {
@@ -160,11 +172,17 @@
             class="dy-card image-grid-item bg-base-200 max-w-md text-start drop-shadow-md drop-shadow-black/40"
             onclick={() => selectImage(image.id)}
           >
-            <figure class="aspect-video">
+            <figure class="relative aspect-video">
               <img
                 src={buildImageUrl(image.filename, { width: 400, height: 300, fit: "contain" })}
                 alt={image.filename}
                 loading="lazy"
+              />
+              <input
+                id={image.id}
+                type="checkbox"
+                class="dy-checkbox dy-checkbox-lg dy-checkbox-info absolute top-2 right-2"
+                onclick={toggleImageSelection}
               />
             </figure>
             <div class="dy-card-body overflow-hidden">
@@ -271,6 +289,21 @@
   {/if}
 </Modal>
 
+{#if selectedImages.length > 0}
+  <div class="dy-toast dy-toast-end">
+    <div class="dy-alert dy-alert-error">
+      <button
+        class="dy-btn dy-btn-soft dy-btn-sm"
+        onclick={() => {
+          selectedImages = [];
+        }}
+      >
+        <span>Delete {selectedImages.length} images</span>
+      </button>
+    </div>
+  </div>
+{/if}
+
 <style>
   .image-grid-item {
     flex: 0 1 400px;
@@ -284,10 +317,10 @@
       height: auto;
       object-fit: cover;
       transition: transform 150ms ease-in-out;
+    }
 
-      &:hover {
-        transform: scale(105%);
-      }
+    figure:hover img {
+      transform: scale(105%);
     }
   }
 
