@@ -70,3 +70,32 @@ describe("getFileExtension", () => {
     expect(getFileExtension("my.file.name.png")).toBe("png");
   });
 });
+
+describe("sanitizeVenuename", () => {
+  const sanitize = (name: string) =>
+    name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]/g, "-")
+      .replace(/-+/g, "-") // Replace multiple dashes with a single dash
+      .toLowerCase();
+
+  test("sanitizes venue names correctly", () => {
+    expect(sanitize("Venue Name")).toBe("venue-name");
+    expect(sanitize("Café de Flore")).toBe("cafe-de-flore");
+    expect(sanitize("München Hauptbahnhof")).toBe("munchen-hauptbahnhof");
+    expect(sanitize("Concert Hall #1")).toBe("concert-hall-1");
+    expect(sanitize("Theatre @ Night")).toBe("theatre-night");
+  });
+  test("returns empty string for empty input", () => {
+    expect(sanitize("")).toBe("");
+  });
+
+  test("handles special characters", () => {
+    expect(sanitize("Venue!@#$%^&*()Name")).toBe("venue-name");
+    expect(sanitize("Café & Bistro")).toBe("cafe-bistro");
+    expect(sanitize("München Hauptbahnhof")).toBe("munchen-hauptbahnhof");
+    expect(sanitize("Concert Hall #1")).toBe("concert-hall-1");
+    expect(sanitize("Theatre @ Night")).toBe("theatre-night");
+  });
+});
