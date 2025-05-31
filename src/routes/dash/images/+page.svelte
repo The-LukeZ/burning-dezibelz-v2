@@ -120,7 +120,7 @@
         {#each $images as image}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <button
-            class="dy-card image-grid-item bg-base-200 text-start drop-shadow-md drop-shadow-black/40"
+            class="dy-card image-grid-item bg-base-200 max-w-md text-start drop-shadow-md drop-shadow-black/40"
             onclick={() => selectImage(image.id)}
           >
             <figure class="aspect-video">
@@ -130,8 +130,8 @@
                 loading="lazy"
               />
             </figure>
-            <div class="dy-card-body">
-              <h3 class="dy-card-title">{image.filename}</h3>
+            <div class="dy-card-body overflow-hidden">
+              <div class="w-full"><h3 class="dy-card-title w-full truncate">{image.filename}</h3></div>
               <p class="dy-card-text">Uploaded at: {formatGermanDateTime(image.created_at)}</p>
             </div>
           </button>
