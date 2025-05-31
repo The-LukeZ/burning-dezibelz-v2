@@ -116,7 +116,7 @@
     border-radius: var(--radius-box);
     padding-inline: calc(var(--spacing) * 8);
     padding-block: calc(var(--spacing) * 6);
-    max-height: 100dvh;
+    max-height: calc(100dvh - 1rem);
     overflow-x: clip;
     overscroll-behavior: contain;
     width: 98%;
