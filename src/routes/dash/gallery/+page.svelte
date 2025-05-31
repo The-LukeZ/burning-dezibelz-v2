@@ -294,8 +294,23 @@
     <div class="dy-alert dy-alert-error">
       <button
         class="dy-btn dy-btn-soft dy-btn-sm"
-        onclick={() => {
-          selectedImages = [];
+        onclick={async (e) => {
+          e.currentTarget.disabled = true;
+          const res = await fetch("/api/images/delete", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ imageIds: selectedImages.map((img) => img.id) }),
+          });
+
+          if (res.ok) {
+            console.log("Images deleted successfully");
+            selectedImages = [];
+          } else {
+            console.error("Failed to delete images:", res.statusText);
+          }
+          e.currentTarget.disabled = false;
         }}
       >
         <span>Delete {selectedImages.length} images</span>
