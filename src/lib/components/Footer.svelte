@@ -15,7 +15,6 @@
         { label: "Kontakt", href: "/kontakt" },
         { label: "Gallerie", href: "/gallerie" },
         { label: "Setlist", href: "/setlist" },
-        { label: "Impressum", href: "/impressum" },
         { label: "Intern", href: "/dash/login" },
       ],
     },
@@ -24,6 +23,13 @@
       items: [
         { label: "Instagram", href: "https://www.instagram.com/burning_dezibelz", icon: Instagram },
         { label: "YouTube", href: "https://www.youtube.com/@BurningDezibelz", icon: Youtube },
+      ],
+    },
+    {
+      title: "Rechtliches",
+      items: [
+        { label: "Datenschutz", href: "/datenschutz" },
+        { label: "Impressum", href: "/impressum" },
       ],
     },
   ];
