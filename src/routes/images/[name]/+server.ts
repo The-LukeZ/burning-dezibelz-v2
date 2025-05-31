@@ -83,6 +83,7 @@ export async function GET({ params, request, locals: { supabase, session }, url 
 
   // Parse optimization parameters
   const imageParams = parseImageParams(url);
+  const shouldDownload = url.searchParams.get("download") === "true";
 
   // Query Supabase to check if the file exists and get metadata
   const { data: imageData, error } = await supabase
@@ -139,7 +140,12 @@ export async function GET({ params, request, locals: { supabase, session }, url 
       cacheStats = fs.statSync(cachePath);
 
       // Add to advanced cache with 24 hour expiration
-      await imageCache.setCachedImage(cacheKey, cachePath, 24 * 60 * 60);
+      await imageCache.setCachedImage({
+        cacheKey: cacheKey,
+        filepath: cachePath,
+        expiresInSeconds: 24 * 60 * 60, // 24 hours
+        imageId: imageData.id,
+      });
 
       // Determine output MIME type
       outputMimeType = imageParams.format ? `image/${imageParams.format}` : imageData.mime_type;
@@ -168,7 +174,7 @@ export async function GET({ params, request, locals: { supabase, session }, url 
     return new Response(null, { status: 304 });
   }
 
-  const headers = {
+  const headers: HeadersInit = {
     ETag: etag,
     "Content-Type": outputMimeType,
     "Content-Length": optimizedBuffer.length.toString(),
@@ -176,6 +182,10 @@ export async function GET({ params, request, locals: { supabase, session }, url 
     "Last-Modified": (cacheStats?.mtime || new Date()).toUTCString(),
     Vary: "Accept", // Vary on Accept header for format negotiation
   };
+
+  if (shouldDownload) {
+    headers["Content-Disposition"] = `attachment; filename="${imageData.filename}"`;
+  }
 
   return new Response(optimizedBuffer, { headers });
 }
