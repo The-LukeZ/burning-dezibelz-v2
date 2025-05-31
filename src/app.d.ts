@@ -60,8 +60,16 @@ declare global {
     fit?: "cover" | "contain" | "fill" | "inside" | "outside";
   }
 
-  type ImageMimeTypes = "image/jpeg" | "image/png" | "image/webp" | "image/gif" | "image/avif" | "image/svg+xml" | "image/bmp";
-  type ImageExtension = ".jpg" | ".jpeg" | ".png" | ".webp" | ".gif" | ".avif" | ".svg" | ".bmp";
+  type ImageMimeTypes =
+    | "image/jpg"
+    | "image/jpeg"
+    | "image/png"
+    | "image/webp"
+    | "image/gif"
+    | "image/avif"
+    | "image/svg+xml"
+    | "image/bmp";
+  type ImageExtension = "jpg" | "jpeg" | "png" | "webp" | "gif" | "avif" | "svg" | "bmp";
 }
 
 export {};
