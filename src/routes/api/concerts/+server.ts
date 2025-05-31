@@ -1,5 +1,7 @@
 import type { Database } from "$lib/supabase";
 import { generateConcertId } from "$lib/server/utils.js";
+import { JsonErrors } from "$lib/constants.js";
+import { ConcertSchema } from "$lib/validators.js";
 
 /*
 Available query parameters:
@@ -74,11 +76,26 @@ export async function POST({ request, locals: { supabase } }) {
     timestamp: new Date(timestamp).toISOString(),
   };
 
-  const id = await generateConcertId(supabase, {
-    isoTimestamp: concert.timestamp,
-    isPrivate: type === "closed",
-    venueName: concert.venue_id ?? undefined,
-  });
+  // Validate the concert data
+  const validation = ConcertSchema.safeParse(concert);
+  if (!validation.success) {
+    console.error("Validation error:", validation.error);
+    return JsonErrors.badRequest(validation.error.message);
+  }
+
+  const { data: venue, error: venueError } = await supabase
+    .from("venues")
+    .select("name")
+    .eq("id", concert.venue_id!)
+    .single();
+
+  if (venueError) {
+    console.error("Error fetching venue:", venueError);
+    return JsonErrors.notFound("Venue not found");
+  }
+
+  const id = await generateConcertId(supabase, concert.timestamp);
+
   concert.id = id;
 
   const { data, error } = await supabase.from("concerts").insert([concert]).select().single();
