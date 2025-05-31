@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import { sanitizeFilename } from "$lib";
+import { mimeTypeToExtension, sanitizeFilename } from "$lib";
 import { ImageCache, imageCache } from "$lib/server/images";
 import { fail, type Actions } from "@sveltejs/kit";
 import { rename, unlink } from "fs/promises";
@@ -60,11 +60,11 @@ export const actions: Actions = {
     // Get all (new) data
     const formData = await request.formData();
     const imageId = formData.get("imageId") as string;
-    const name = formData.get("filename") as string;
+    const filenameWithoutExt = formData.get("filename") as string;
     const description = formData.get("description") as string;
     const is_private = formData.get("is_private") === "on";
 
-    if (!imageId || !name) {
+    if (!imageId || !filenameWithoutExt) {
       return fail(400, {
         error: "Image ID and name are required",
       });
@@ -73,7 +73,7 @@ export const actions: Actions = {
     // Get old filename and path
     const { data: oldData, error: fetchError } = await supabase
       .from("images")
-      .select("filename, file_path")
+      .select("filename, file_path, mime_type")
       .eq("id", imageId)
       .single();
 
@@ -87,8 +87,16 @@ export const actions: Actions = {
     // Delete all cached variants
     await imageCache.clearCacheVariants(oldData.filename);
 
+    const fileExt = mimeTypeToExtension(oldData.mime_type);
+    if (!fileExt) {
+      console.error("Unsupported MIME type:", oldData.mime_type);
+      return fail(400, {
+        error: "Unsupported file type",
+      });
+    }
+
     // Build new filename and filePath
-    const finalName = sanitizeFilename(name);
+    const finalName = sanitizeFilename(`${filenameWithoutExt}.${fileExt}`);
     const newFilePath = ImageCache.buildImageFilePath(finalName);
 
     // Rename the file in the fs to the new name
