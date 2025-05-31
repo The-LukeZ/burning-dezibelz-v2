@@ -1,12 +1,16 @@
 <script lang="ts">
-  import { enhance } from "$app/forms";
   import { page } from "$app/state";
+  import XIcon from "$lib/assets/XIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import type { Database } from "$lib/supabase";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { onMount } from "svelte";
+  import { blur, fade } from "svelte/transition";
+
+  let { data: thisPageData } = $props();
 
   let { supabase } = page.data;
+  let showNotAdminNote = $state(true);
   let users = $state<AllowedUser[]>([]);
   let loading = $state(true);
   const newUserData = $state<{
@@ -124,12 +128,21 @@
   });
 </script>
 
-<div class="container mx-auto flex flex-row">
+{#if !thisPageData.isAdmin && showNotAdminNote}
+  <div class="dy-alert dy-alert-warning mb-4" transition:fade={{ duration: 150 }}>
+    <span class="dy-alert-message">You do not have permission to manage users.</span>
+    <button class="dy-btn dy-btn-square dy-btn-outline ml-auto" onclick={() => (showNotAdminNote = false)}>
+      <XIcon class="size-5" />
+    </button>
+  </div>
+{/if}
+
+<div class="mx-auto flex flex-row">
   <h1 class="mb-4 text-2xl font-bold">User Management</h1>
   <button class="dy-btn dy-btn-secondary ml-auto" onclick={openCreateUserModal}>Add User</button>
 </div>
 
-<div class="container mx-auto overflow-x-auto">
+<div class="mx-auto overflow-x-auto">
   {#if error}
     <div class="dy-alert dy-alert-error">
       <span class="dy-alert-message">{error}</span>
