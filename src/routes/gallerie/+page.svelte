@@ -72,7 +72,7 @@
             href={buildImageUrl(image.filename)}
             target="_blank"
           >
-            Open
+            Öffnen
             <ArrowUpRight class="size-5" />
           </a>
           <a
@@ -112,7 +112,7 @@
 
   .image-card {
     position: relative;
-    flex: 0 1 calc(33.333% - 1rem);
+    flex: 0 1 400px;
     border-radius: 0.5rem;
     overflow: hidden;
     aspect-ratio: 1 / 1;
