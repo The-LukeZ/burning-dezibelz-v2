@@ -104,9 +104,6 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
       if (isUsersApiRoute) {
         return Response.json({ error: "No Permission" }, { status: 403 });
       }
-      if (isUsersDashRoute) {
-        redirect(303, "/dash");
-      }
     }
 
     console.debug(
