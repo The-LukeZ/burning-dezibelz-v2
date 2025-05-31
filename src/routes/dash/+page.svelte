@@ -4,10 +4,23 @@
   import { navItems as _navitems } from "$lib/data/navigationData";
   import { goto } from "$app/navigation";
   const navItems = _navitems.private;
+  console.log("User", page.data.user);
 </script>
 
 <section class="dy-prose mx-auto px-4 py-8">
-  <h1 class="text-2xl">Moin <strong>{page.data.user?.user_metadata.name}</strong>!</h1>
+  <div
+    class="dy-avatar dy-avatar-placeholder mb-4 aspect-square size-24 rounded-full shadow-xl shadow-gray-500/10"
+  >
+    <div class="dy-skeleton absolute size-full rounded-full text-white/70">
+      <span class="text-3xl">{page.data.user?.user_metadata.full_name.charAt(0)}</span>
+    </div>
+    <!-- svelte-ignore a11y_missing_attribute -->
+    <img
+      src={page.data.user?.user_metadata.avatar_url || "/default-avatar.png"}
+      class="dy-mask dy-mask-circle absolute size-full"
+    />
+  </div>
+  <h1 class="text-2xl">Moin <strong class="un">{page.data.user?.user_metadata.name}</strong>!</h1>
   <p class="text-lg">Willkommen im Dashboard!</p>
   <p class="text-lg">Hier kannst du deine Veranstaltungen verwalten, Bilder hochladen und vieles mehr.</p>
   <p class="text-lg">Nutze die Navigation, um zu den verschiedenen Bereichen zu gelangen.</p>
@@ -27,6 +40,7 @@
         type="button"
         href={item.href}
         class="dy-btn dy-btn-secondary dy-btn-lg transition-all duration-150 hover:scale-105"
+        class:hidden={!page.data.isAdmin && item.requiresAdmin}
         style="flex: 1 1 200px;"
       >
         {item.label}
