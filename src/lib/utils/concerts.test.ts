@@ -36,27 +36,27 @@ describe("filterConcerts", () => {
   });
 
   it("should sort concerts by timestamp in ascending order", () => {
-    const result = filterConcerts(mockConcerts, { order: "asc", sort: "timestamp" });
+    const result = filterConcerts(mockConcerts, { order: "asc", sortBy: "timestamp" });
     expect(result.map((c) => c.id)).toEqual(["1", "2", "3", "4"]);
   });
 
   it("should sort concerts by timestamp in descending order", () => {
-    const result = filterConcerts(mockConcerts, { order: "desc", sort: "timestamp" });
+    const result = filterConcerts(mockConcerts, { order: "desc", sortBy: "timestamp" });
     expect(result.map((c) => c.id)).toEqual(["4", "3", "2", "1"]);
   });
 
   it("should sort by oldest first (asc)", () => {
-    const result = filterConcerts(mockConcerts, { order: "oldestFirst", sort: "timestamp" });
+    const result = filterConcerts(mockConcerts, { order: "oldestFirst", sortBy: "timestamp" });
     expect(result.map((c) => c.id)).toEqual(["1", "2", "3", "4"]);
   });
 
   it("should sort by newest first (desc)", () => {
-    const result = filterConcerts(mockConcerts, { order: "newestFirst", sort: "timestamp" });
+    const result = filterConcerts(mockConcerts, { order: "newestFirst", sortBy: "timestamp" });
     expect(result.map((c) => c.id)).toEqual(["4", "3", "2", "1"]);
   });
 
   it("should default to sorting by newest first", () => {
-    const result = filterConcerts(mockConcerts, { sort: "timestamp" });
+    const result = filterConcerts(mockConcerts, { sortBy: "timestamp" });
     expect(result.map((c) => c.id)).toEqual(["4", "3", "2", "1"]);
   });
 
