@@ -91,3 +91,14 @@ export function mimeTypeToExtension(mimeType: string): ImageExtension | null {
   }
   return null;
 }
+
+export function normalizeName(name: string) {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "-")
+    .replace(/-+/g, "-") // Replace multiple dashes with a single dash
+    .replace(/^-|-$/g, "") // Remove leading and trailing dashes
+    .replace(/_+/g, "_") // Replace multiple underscores with a single underscore
+    .toLowerCase();
+}
