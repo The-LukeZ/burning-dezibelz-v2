@@ -71,7 +71,7 @@
 {/snippet}
 
 <nav
-  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15  backdrop-blur-md"
+  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15 backdrop-blur-md"
   class:hidden={page.url.pathname === "/dash/login"}
 >
   <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between">
@@ -79,7 +79,7 @@
       <div class="navbar-branding md:w-1/2">
         <a href="/" class="branding hover:bg-primary/20 rounded px-2 py-1.5 transition hover:text-orange-50">
           <img src="/favicon.ico" alt="Burning Dezibelz Logo" class="size-10" />
-          <span class="text-2xl font-bold">Burning Dezibelz</span>
+          <span class="text-xl font-bold sm:text-2xl">Burning Dezibelz</span>
         </a>
       </div>
     {:else}
