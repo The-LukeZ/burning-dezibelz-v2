@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@sapphire/snowflake": "^3.5.5",
+    "@sentry/sveltekit": "^9.24.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.7",
     "bits-ui": "^1.5.3",
