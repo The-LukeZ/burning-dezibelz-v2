@@ -27,7 +27,16 @@ export function create_upload() {
 
           update((state) => ({ ...state, status }));
 
-          resolve(xhr);
+          if (status === "completed") {
+            try {
+              const responseData = JSON.parse(xhr.responseType === "json" ? xhr.response : xhr.responseText);
+              resolve(responseData as any);
+            } catch (error) {
+              resolve(xhr);
+            }
+          } else {
+            resolve(xhr);
+          }
         });
 
         xhr.upload.addEventListener("error", () => {
