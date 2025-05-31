@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import { mimeTypeToExtension, sanitizeFilename } from "$lib";
+import { mimeTypeToExtension, normalizeName } from "$lib";
 import { ImageCache, imageCache } from "$lib/server/images";
 import { fail, type Actions } from "@sveltejs/kit";
 import { rename, unlink } from "fs/promises";
@@ -97,7 +97,8 @@ export const actions: Actions = {
     }
 
     // Build new filename and filePath
-    const finalName = sanitizeFilename(`${filenameWithoutExt}.${fileExt}`);
+    // We can't normalize the full filename, because the '.' would be removed.
+    const finalName = `${normalizeName(filenameWithoutExt)}.${fileExt}`;
     const newFilePath = ImageCache.buildImageFilePath(finalName);
 
     // Rename the file in the fs to the new name

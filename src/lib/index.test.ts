@@ -1,23 +1,6 @@
-import { addExtension, getFileExtension, removeExtension, sanitizeFilename } from "$lib";
+import { addExtension, getFileExtension, removeExtension } from "$lib";
 import "@testing-library/jest-dom/vitest";
 import { describe, expect, test } from "vitest";
-
-describe("sanitizeFilename", () => {
-  test("replaces special characters with underscores", () => {
-    expect(sanitizeFilename("file@name#test.jpg")).toBe("file_name_test.jpg");
-    expect(sanitizeFilename("my file name.png")).toBe("my_file_name.png");
-    expect(sanitizeFilename("file!@#$%^&*()name.gif")).toBe("file__________name.gif");
-  });
-
-  test("preserves allowed characters", () => {
-    expect(sanitizeFilename("valid_file-name123.webp")).toBe("valid_file-name123.webp");
-    expect(sanitizeFilename("ABC123_test-file.jpg")).toBe("ABC123_test-file.jpg");
-  });
-
-  test("handles empty string", () => {
-    expect(sanitizeFilename("")).toBe("");
-  });
-});
 
 describe("removeExtension", () => {
   test("removes common image extensions", () => {

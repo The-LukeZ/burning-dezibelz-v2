@@ -1,4 +1,4 @@
-import { allowedImageExtensions, allowedMimeTypes } from "./constants";
+import { allowedImageExtensions } from "./constants";
 
 export function isCurrentPage(href: string, url: URL): boolean {
   return href === url.pathname;
@@ -43,10 +43,6 @@ export function buildImageUrl(filename: string, params: ImageParams & { download
   return `/images/${encodeURIComponent(filename)}${_params.size ? "?" + _params.toString() : ""}`;
 }
 
-export function sanitizeFilename(filename: string): string {
-  return filename.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
-}
-
 /**
  * Removes the file extension from a filename.
  * @param filename The filename to process.
@@ -78,6 +74,17 @@ export function addExtension(filename: string, ext: ImageExtension): string {
   return filename + "." + ext;
 }
 
+/**
+ *
+ * @param filename The filename to check for an extension.
+ * @returns The file extension if it matches one of the allowed image extensions, or null if it does not.
+ * @example
+ * getFileExtension("image.jpg"); // "jpg"
+ * getFileExtension("image2.png"); // "png"
+ * getFileExtension("image3.gif"); // "gif"
+ * getFileExtension("image4.webp"); // "webp"
+ * // ...
+ */
 export function getFileExtension(filename: string): ImageExtension | null {
   const match = filename.match(new RegExp(`\.(?<ext>${allowedImageExtensions.join("|")})$`));
   return match ? (match.groups?.ext as ImageExtension) : null;

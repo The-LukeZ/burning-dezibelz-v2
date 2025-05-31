@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase";
-import { normalizeName } from "$lib";
 
 /**
  * Generates a unique concert ID based on the date and whether it is private or public.
