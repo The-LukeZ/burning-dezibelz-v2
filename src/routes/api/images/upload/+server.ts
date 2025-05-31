@@ -1,10 +1,12 @@
-import { FILE_DIR } from "$env/static/private";
-import { sanitizeFilename } from "$lib";
+import { env } from "$env/dynamic/private";
+import { getFileExtension, normalizeName, removeExtension } from "$lib";
 import type { TablesInsert } from "$lib/supabase.ts";
 import { createWriteStream, existsSync, mkdirSync, statSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
+
+const FILE_DIR = env.FILE_DIR!;
 
 if (!existsSync(FILE_DIR)) {
   mkdirSync(FILE_DIR, { recursive: true });
@@ -27,7 +29,7 @@ export async function POST({ request, locals: { supabase, user } }) {
     return new Response(null, { status: 400 });
   }
 
-  const sanitized_file_name = sanitizeFilename(file_name);
+  let sanitized_file_name = normalizeName(removeExtension(file_name)) + "." + getFileExtension(file_name);
 
   // Validate MIME type for images
   if (!content_type.startsWith("image/")) {
@@ -38,11 +40,13 @@ export async function POST({ request, locals: { supabase, user } }) {
     });
   }
 
-  const file_path = path.normalize(path.join(FILE_DIR, sanitized_file_name));
+  let file_path = path.normalize(path.join(FILE_DIR, sanitized_file_name));
 
+  // We could also use supabase to check if the file already exists,
+  // but for simplicity, we check the local filesystem.
   if (existsSync(file_path)) {
-    request.body.cancel();
-    return new Response(null, { status: 400 });
+    sanitized_file_name = `${removeExtension(sanitized_file_name)}-${Date.now()}.${getFileExtension(file_name)}`;
+    file_path = path.join(FILE_DIR, sanitized_file_name);
   }
 
   const nodejs_wstream = createWriteStream(file_path);
