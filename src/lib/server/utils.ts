@@ -10,16 +10,16 @@ import type { Database } from "../supabase";
  */
 export async function generateConcertId(
   supabase: SupabaseClient<Database>,
-  data: { isoTimestamp: string } & (
-    | { isPrivate: true; venueName?: string }
-    | { isPrivate?: false; venueName: string }
-  ),
+  data: { isoTimestamp: string; isPrivate?: boolean; venueName?: string },
 ): Promise<string> {
   const prefix = data.isPrivate ? "private" : "public";
   let prefix2: string = "";
-  if (!data.isPrivate) {
+  if (!data.isPrivate && data.venueName) {
     prefix2 = data.venueName.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
+  } else if (!data.isPrivate && !data.venueName) {
+    throw new Error("Venue name is required for public concerts");
   }
+
   // Schema: YYYY-MM-DD-I (I=Index)
   const dateString = data.isoTimestamp.split("T")[0];
 
