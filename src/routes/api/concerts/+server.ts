@@ -74,7 +74,11 @@ export async function POST({ request, locals: { supabase } }) {
     timestamp: new Date(timestamp).toISOString(),
   };
 
-  const id = await generateConcertId(concert.timestamp, supabase);
+  const id = await generateConcertId(supabase, {
+    isoTimestamp: concert.timestamp,
+    isPrivate: type === "closed",
+    venueName: concert.venue_id ?? undefined,
+  });
   concert.id = id;
 
   const { data, error } = await supabase.from("concerts").insert([concert]).select().single();
