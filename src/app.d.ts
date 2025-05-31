@@ -67,9 +67,8 @@ declare global {
     | "image/webp"
     | "image/gif"
     | "image/avif"
-    | "image/svg+xml"
     | "image/bmp";
-  type ImageExtension = "jpg" | "jpeg" | "png" | "webp" | "gif" | "avif" | "svg" | "bmp";
+  type ImageExtension = "jpg" | "jpeg" | "png" | "webp" | "gif" | "avif" | "bmp";
 }
 
 export {};
