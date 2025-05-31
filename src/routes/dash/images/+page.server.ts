@@ -30,7 +30,8 @@ export const actions: Actions = {
     }
 
     // Delete all cached variants
-    await imageCache.clearCacheVariants(imageData.filename);
+    console.log("Deleting cached variants for:", imageData.filename);
+    await imageCache.clearCacheVariants(imageData.id);
 
     // Delete the file from the filesystem
     const filePath = imageData.file_path || join(env.FILE_DIR, imageData.filename);
@@ -73,7 +74,7 @@ export const actions: Actions = {
     // Get old filename and path
     const { data: oldData, error: fetchError } = await supabase
       .from("images")
-      .select("filename, file_path, mime_type")
+      .select("id, filename, file_path, mime_type")
       .eq("id", imageId)
       .single();
 
@@ -85,7 +86,7 @@ export const actions: Actions = {
     }
 
     // Delete all cached variants
-    await imageCache.clearCacheVariants(oldData.filename);
+    await imageCache.clearCacheVariants(oldData.id);
 
     const fileExt = mimeTypeToExtension(oldData.mime_type);
     if (!fileExt) {
