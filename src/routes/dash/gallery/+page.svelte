@@ -130,19 +130,21 @@
   <h1 class="text-center text-3xl font-bold">Upload and manage images</h1>
 
   <div class="flex w-full flex-col items-center">
-    <form class="mx-auto flex w-full max-w-md flex-col" onsubmit={handleFileSubmit}>
+    <form class="mx-auto flex w-full max-w-sm flex-col" onsubmit={handleFileSubmit}>
       <fieldset class="dy-fieldset w-full text-center">
         <legend class="dy-fieldset-legend">Pick an image</legend>
-        <input bind:files type="file" class="dy-file-input mx-auto" accept="image/*" />
+        <input bind:files type="file" class="dy-file-input w-full" accept="image/*" />
       </fieldset>
-      <progress class="dy-progress" value={progress.current}></progress>
-      <button class="dy-btn dy-btn-primary" disabled={loading || !files || files.length === 0}>
-        {#if loading}
-          Uploading... {$upload.progress}%
-        {:else}
-          Upload
-        {/if}
-      </button>
+      <div class="dy-join dy-join-vertical">
+        <progress class="dy-join-item dy-progress" value={progress.current}></progress>
+        <button class="dy-join-item dy-btn dy-btn-primary" disabled={loading || !files || files.length === 0}>
+          {#if loading}
+            Uploading... {$upload.progress}%
+          {:else}
+            Upload
+          {/if}
+        </button>
+      </div>
     </form>
   </div>
 
