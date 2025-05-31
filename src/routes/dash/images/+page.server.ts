@@ -1,4 +1,4 @@
-import { FILE_DIR } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import { sanitizeFilename } from "$lib";
 import { ImageCache, imageCache } from "$lib/server/images";
 import { fail, type Actions } from "@sveltejs/kit";
@@ -33,7 +33,7 @@ export const actions: Actions = {
     await imageCache.clearCacheVariants(imageData.filename);
 
     // Delete the file from the filesystem
-    const filePath = imageData.file_path || join(FILE_DIR, imageData.filename);
+    const filePath = imageData.file_path || join(env.FILE_DIR, imageData.filename);
     try {
       await unlink(filePath);
     } catch (unlinkError) {
@@ -92,7 +92,7 @@ export const actions: Actions = {
     const newFilePath = ImageCache.buildImageFilePath(finalName);
 
     // Rename the file in the fs to the new name
-    const oldPath = oldData.file_path || join(FILE_DIR, oldData.filename);
+    const oldPath = oldData.file_path || join(env.FILE_DIR, oldData.filename);
 
     try {
       await rename(oldPath, newFilePath);
