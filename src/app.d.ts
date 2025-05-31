@@ -38,6 +38,10 @@ declare global {
 
   type Concert = Database["public"]["Tables"]["concerts"]["Row"];
 
+  type ConcertWithDetails = Concert & {
+    venue: VenueDetails | null;
+  };
+
   type VenueDetails = Database["public"]["Tables"]["venues"]["Row"];
 
   type Song = Database["public"]["Tables"]["songs"]["Row"];
