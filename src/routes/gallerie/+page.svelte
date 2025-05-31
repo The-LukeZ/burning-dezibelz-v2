@@ -80,6 +80,7 @@
     flex: 0 1 calc(33.333% - 1rem);
     border-radius: 0.5rem;
     overflow: hidden;
+    aspect-ratio: 1 / 1;
 
     .card-actions {
       position: absolute;
