@@ -5,7 +5,7 @@ import { sequence } from "@sveltejs/kit/hooks";
 import type { User } from "@supabase/supabase-js";
 
 import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
-import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
+import { NODE_ENV, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 
 Sentry.init({
   dsn: PUBLIC_SENTRY_DSN,
@@ -122,4 +122,12 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
 
 export const handle = sequence(Sentry.sentryHandle(), devToolsCheck, supabase, authGuard, authUserMiddleware);
 
-export const handleError = Sentry.handleErrorWithSentry();
+export const handleError =
+  NODE_ENV === "production"
+    ? Sentry.handleErrorWithSentry()
+    : ({ error }: any) => {
+        console.error("Error occurred:", error);
+        return {
+          message: "An error occurred",
+        };
+      };
