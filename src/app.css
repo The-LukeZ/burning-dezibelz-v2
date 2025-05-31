@@ -67,4 +67,37 @@
       color: var(--color-secondary-content);
     }
   }
+
+  .un {
+    display: inline-block;
+    padding-bottom: 2px;
+    position: relative;
+  }
+
+  .un::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #fff;
+    transform-origin: left;
+    transition: width 0.3s ease-out;
+    cursor: default;
+  }
+
+  .un:hover::before {
+    width: 100%;
+  }
+
+  .un-force {
+    display: inline-block;
+    padding-bottom: 2px;
+    background-image: linear-gradient(#fff 0 0);
+    background-position: 0 100%;
+    background-size: 0% 2px;
+    background-repeat: no-repeat;
+    background-size: 100% 2px;
+  }
 }
