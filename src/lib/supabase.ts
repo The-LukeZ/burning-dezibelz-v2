@@ -214,6 +214,10 @@ export type Database = {
         Args: { date_param: string };
         Returns: number;
       };
+      delete_allowed_user: {
+        Args: { p_target_email: string };
+        Returns: undefined;
+      };
       get_full_concert: {
         Args: { p_concert_id: string };
         Returns: {
@@ -228,6 +232,34 @@ export type Database = {
           venue_postal_code: string;
           venue_state: string;
           venue_country: string;
+        }[];
+      };
+      insert_allowed_user: {
+        Args: {
+          p_email: string;
+          p_role: Database["public"]["Enums"]["UserRole"];
+          p_notes?: string;
+        };
+        Returns: {
+          email: string;
+          role: Database["public"]["Enums"]["UserRole"];
+          notes: string;
+          created_at: string;
+          created_by: string;
+        }[];
+      };
+      update_allowed_user: {
+        Args: {
+          p_target_email: string;
+          p_new_role?: Database["public"]["Enums"]["UserRole"];
+          p_new_notes?: string;
+        };
+        Returns: {
+          email: string;
+          role: Database["public"]["Enums"]["UserRole"];
+          notes: string;
+          created_at: string;
+          created_by: string;
         }[];
       };
     };
