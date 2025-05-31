@@ -153,7 +153,7 @@
             bind:this={fileInput}
             bind:files
             type="file"
-            class="dy-file-input grow"
+            class="dy-file-input dy-file-input-accent grow"
             accept="image/*"
             onchangecapture={(e) => {
               if (e.currentTarget.files?.length) {
@@ -174,8 +174,8 @@
         </label>
       </fieldset>
       <div class="dy-join dy-join-vertical">
-        <progress class="dy-join-item dy-progress" value={progress.current}></progress>
-        <button class="dy-join-item dy-btn dy-btn-primary" disabled={loading || !files || files.length === 0}>
+        <progress class="dy-join-item dy-progress dy-progress-secondary" value={progress.current}></progress>
+        <button class="dy-join-item dy-btn dy-btn-accent" disabled={!files?.length || loading} type="submit">
           {#if loading}
             Uploading... {$upload.progress}%
           {:else}
@@ -214,7 +214,7 @@
               />
               <!-- TODO: Make this a checkbox and find out why bulk deletion doesn't work properly (unlink issues) -->
               <button
-                class="dy-btn dy-btn-warning dy-btn-ghost dy-btn-circle absolute top-2 right-2 z-10"
+                class="dy-btn dy-btn-warning dy-btn-soft dy-btn-circle absolute top-2 right-2 z-10 shadow-md"
                 onclick={async (e) => {
                   e.stopPropagation();
                   // Imitate a form submission
