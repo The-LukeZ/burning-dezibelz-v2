@@ -5,15 +5,40 @@
   import Download from "$lib/assets/Download.svelte";
   import { onMount } from "svelte";
 
+  let { data: pageData } = $props();
   let { supabase } = page.data;
   let loading = $state(true);
   let images = $state<Image[]>([]);
+  let imageCount = $derived(pageData.imageCount || 0);
+  const IMAGE_LIMIT = 15;
+
+  async function loadMoreImages(e: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+    e.currentTarget.disabled = true;
+    const { data: _images, error } = await supabase
+      .from("images")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(images.length, images.length + IMAGE_LIMIT - 1);
+
+    if (error) {
+      console.error("Error fetching more images:", error);
+    } else {
+      if (_images && _images.length > 0) {
+        images.push(..._images);
+      } else {
+        console.warn("No more images to load.");
+      }
+    }
+
+    e.currentTarget.disabled = false;
+  }
 
   onMount(async () => {
     const { data, error } = await supabase
       .from("images")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(IMAGE_LIMIT);
 
     if (error) {
       console.error("Error fetching images:", error);
@@ -64,6 +89,16 @@
   {/if}
 </section>
 
+<!-- Load more button -->
+<div class="mx-auto my-5 flex flex-col items-center justify-center gap-2">
+  {#if !loading && imageCount > images.length}
+    <p class="text-gray-500">{images.length} von {imageCount} Bildern geladen</p>
+    <button class="dy-btn dy-btn-primary dy-btn-soft" onclick={loadMoreImages}>Mehr laden</button>
+  {:else if !loading && images.length == imageCount}
+    <p class="text-gray-500">Alle Bilder wurden geladen.</p>
+  {/if}
+</div>
+
 <style>
   section {
     display: flex;
@@ -81,6 +116,12 @@
     border-radius: 0.5rem;
     overflow: hidden;
     aspect-ratio: 1 / 1;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
     .card-actions {
       position: absolute;
