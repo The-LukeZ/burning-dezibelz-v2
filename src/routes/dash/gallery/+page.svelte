@@ -9,10 +9,11 @@
   import { cubicOut } from "svelte/easing";
   import { Tween } from "svelte/motion";
 
-  const upload = create_upload();
+  const upload = create_upload<Image>();
 
   let { supabase } = page.data;
   let loading = $state(false);
+  let error = $state<string | null>(null);
   let files = $state<FileList>();
   let images = $state<Image[]>([]);
   let selectedImages = $state<Image[]>([]);
@@ -42,6 +43,11 @@
     selectedImage.update = structuredClone($state.snapshot(selectedImage.image));
   }
 
+  /**
+   * Toggles the selection of an image.
+   *
+   * Currently not used.
+   */
   function toggleImageSelection(e: MouseEvent & { currentTarget: EventTarget & HTMLInputElement }) {
     e.stopPropagation();
     const imageId = e.currentTarget.id;
@@ -78,6 +84,8 @@
   async function handleFileSubmit(event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }) {
     event.preventDefault();
     loading = true;
+    error = null;
+    progress.set(0);
 
     if (!files || files.length === 0) {
       console.error("No files selected for upload.");
@@ -86,10 +94,21 @@
     }
 
     const file = files[0];
-    await upload.start({ url: "/api/images/upload", file, filename: file.name });
+    const res = await upload.start({ url: "/api/images/upload", file, filename: file.name });
     fileInput.value = "";
-    progress.set(0);
+    progress.set(100);
     loading = false;
+
+    if (!res.success) {
+      console.error("Upload failed:", res.error);
+      loading = false;
+      error = res.error?.message || "Unknown error during upload";
+      return;
+    } else {
+      console.log("Upload successful:", res.data);
+      addImage(res.data);
+      resetSelectedImage();
+    }
   }
 
   onMount(async () => {
@@ -120,8 +139,6 @@
             updateImage(payload.new as Image);
           } else if (payload.eventType === "DELETE") {
             deleteImage(payload.old.id);
-          } else if (payload.eventType === "INSERT") {
-            addImage(payload.new as Image);
           }
         },
       )
