@@ -1,7 +1,5 @@
 import { SvelteMap } from "svelte/reactivity";
 import { API_URL, UnknownVenue } from "../constants";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "../supabase";
 import { filterConcerts } from "../utils/concerts";
 
 interface EventStoreState {
@@ -30,7 +28,7 @@ export const eventStore = {
 
 export function serializeConcerts(): Concert[] {
   return filterConcerts(Array.from(eventStore.concerts.values()), {
-    sort: "timestamp",
+    sortBy: "timestamp",
     order: "newestFirst",
   });
 }
