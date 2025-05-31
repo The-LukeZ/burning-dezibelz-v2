@@ -140,7 +140,7 @@ class ImageCache {
       try {
         await unlink(entry.filepath);
       } catch (error) {
-        console.warn(`Failed to delete cached image file: ${entry.filepath}. It may not exist.`, error);
+        console.log(`[WARN] Failed to delete cached image file: ${entry.filepath}. It may not exist.`, error);
         // File might already be deleted, continue with cache cleanup
       } finally {
         this.cache.delete(cacheKey);
