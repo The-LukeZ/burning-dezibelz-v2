@@ -31,13 +31,14 @@ export function markdownToHtml(markdown: string, infoLink = false): string {
   return html;
 }
 
-export function buildImageUrl(filename: string, params: ImageParams = {}) {
+export function buildImageUrl(filename: string, params: ImageParams & { download?: boolean } = {}) {
   const _params = new URLSearchParams();
   if (params.width) _params.set("w", params.width.toString());
   if (params.height) _params.set("h", params.height.toString());
   if (params.quality) _params.set("q", params.quality.toString());
   if (params.format) _params.set("f", params.format);
   if (params.fit) _params.set("fit", params.fit);
+  if (params.download) _params.set("download", "true");
 
   return `/images/${encodeURIComponent(filename)}${_params.size ? "?" + _params.toString() : ""}`;
 }
