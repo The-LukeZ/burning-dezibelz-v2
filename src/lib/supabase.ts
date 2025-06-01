@@ -225,6 +225,11 @@ export type Database = {
           concert_name: string;
           concert_timestamp: string;
           concert_type: string;
+          concert_notes: string;
+          concert_price: number;
+          concert_ticket_url: string;
+          concert_abendkasse: boolean;
+          concert_free: boolean;
           venue_id: string;
           venue_name: string;
           venue_address: string;
@@ -232,6 +237,18 @@ export type Database = {
           venue_postal_code: string;
           venue_state: string;
           venue_country: string;
+          venue_url: string;
+          image_id: string;
+          image_filename: string;
+          image_original_filename: string;
+          image_file_path: string;
+          image_file_size: number;
+          image_mime_type: string;
+          image_description: string;
+          image_is_private: boolean;
+          image_created_at: string;
+          image_updated_at: string;
+          image_user_id: string;
         }[];
       };
       insert_allowed_user: {
