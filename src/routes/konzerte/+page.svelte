@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SiteHeader from "$lib/components/SiteHeader.svelte";
   import { buildImageUrl } from "$lib";
   import Lock from "$lib/assets/Lock.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
@@ -18,10 +19,10 @@
   let concertsLoaded = $derived(eventStore.metadata.concertsLoaded);
 </script>
 
-<h1 class="mx-auto my-3 w-fit text-3xl font-bold">Konzerte</h1>
+<SiteHeader title="Anstehende Konzerte" />
 
 <section>
-  {#if !concertsLoaded}
+  {#if !concertsLoaded && eventStore.concerts.size === 0}
     <span class="dy-loading dy-loading-dots mx-auto my-3"></span>
   {:else if concertsLoaded && eventStore.concerts.size === 0}
     <p class="mx-auto my-3">Keine anstehenden Konzerte gefunden.</p>
