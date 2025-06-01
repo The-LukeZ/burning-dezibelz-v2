@@ -8,4 +8,4 @@
   let { class: className = "" }: Props = $props();
 </script>
 
-<img src="/placeholder-concert.webp" alt="Placeholder Concert; Generated with Gemini" class={className} />
+<img src="/placeholder-concert.webp" alt="Platzhalter Konzertbild; Generiert mit Gemini" class={className} />
