@@ -8,10 +8,24 @@
  */
 function authenticated(request: Request, env: Env): boolean {
   const authHeader = request.headers.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  const url = new URL(request.url);
+  const tokenFromUrl = url.searchParams.get("token");
+
+  let token: string | null = null;
+
+  // Check Authorization header first
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  }
+  // Fall back to URL parameter if no valid header
+  else if (tokenFromUrl) {
+    token = tokenFromUrl;
+  }
+
+  if (!token) {
     return false;
   }
-  const token = authHeader.split(" ")[1];
+
   return token === env.IMG_TOKEN;
 }
 
