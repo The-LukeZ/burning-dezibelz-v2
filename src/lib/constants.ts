@@ -1,5 +1,5 @@
 export const API_URL = "/api" as const;
-export const IMAGE_URL = "/images" as const;
+export const IMAGE_URL = "/cdn" as const;
 
 export const UnknownVenue: VenueDetails = {
   id: "0",

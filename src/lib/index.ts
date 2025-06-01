@@ -49,7 +49,7 @@ export function buildImageUrl(filename: string, params: ImageParams & { download
   if (params.fit) _params.set("fit", params.fit);
   if (params.download) _params.set("download", "true");
 
-  return `/images/${encodeURIComponent(filename)}${_params.size ? "?" + _params.toString() : ""}`;
+  return `/cdn/${encodeURIComponent(filename)}${_params.size ? "?" + _params.toString() : ""}`;
 }
 
 /**

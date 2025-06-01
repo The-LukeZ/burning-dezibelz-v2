@@ -7,8 +7,6 @@
   import Modal from "$lib/components/Modal.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { onDestroy, onMount } from "svelte";
-  import { cubicOut } from "svelte/easing";
-  import { Tween } from "svelte/motion";
 
   let { supabase } = page.data;
   let loading = $state(false);
@@ -52,7 +50,7 @@
     const file = files?.[0];
 
     if (file) {
-      const res = await fetch("/api/images/presigned", {
+      const res = await fetch("/api/cdn/presigned", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -315,7 +313,7 @@
         class="dy-btn dy-btn-soft dy-btn-sm"
         onclick={async (e) => {
           e.currentTarget.disabled = true;
-          const res = await fetch("/api/images/delete", {
+          const res = await fetch("/api/cdn/delete", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
