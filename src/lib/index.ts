@@ -1,7 +1,14 @@
 import { allowedImageExtensions } from "./constants";
 
+/**
+ * Checks if the provided href matches the current page's pathname.
+ *
+ * @param href - The href string to compare against the current page
+ * @param url - The URL object containing the current page information
+ * @returns True if the href matches the current pathname, false otherwise
+ */
 export function isCurrentPage(href: string, url: URL): boolean {
-  return href === url.pathname;
+  return url.pathname.startsWith(href) || url.pathname === href;
 }
 
 export function markdownToHtml(markdown: string, infoLink = false): string {
