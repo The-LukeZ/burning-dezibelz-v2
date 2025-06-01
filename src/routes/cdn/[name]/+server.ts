@@ -1,5 +1,4 @@
 import { PUBLIC_R2_BUCKET_NAME } from "$env/static/public";
-import { env } from "$env/dynamic/private";
 import { JsonErrors } from "$lib/constants";
 import { RateLimiter } from "$lib/server/ratelimiter";
 import { S3 } from "$lib/server/s3";
