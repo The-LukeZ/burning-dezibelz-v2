@@ -1,11 +1,12 @@
 import { env } from "$env/dynamic/private";
 import { PUBLIC_R2_BUCKET_NAME } from "$env/static/public";
-import { normalizeName } from "$lib";
+import { getFileExtension, normalizeName, removeExtension } from "$lib";
+import { JsonErrors } from "$lib/constants.js";
 import { S3 } from "$lib/server/s3.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export async function POST({ request }) {
+export async function POST({ request, locals: { supabase } }) {
   try {
     const { fileName, fileType } = (await request.json()) as {
       fileName: string | undefined;
@@ -16,7 +17,7 @@ export async function POST({ request }) {
       return Response.json({ error: "File name or file type is missing" }, { status: 400 });
     }
 
-    const objectKey = `images/${normalizeName(Date.now().toString())}-${normalizeName(fileName)}`;
+    const objectKey = `images/${Date.now().toString()}-${normalizeName(removeExtension(fileName))}.${getFileExtension(fileName)}`;
 
     const command = new PutObjectCommand({
       Bucket: PUBLIC_R2_BUCKET_NAME,
@@ -32,14 +33,28 @@ export async function POST({ request }) {
       expiresIn: 900, // 15 minutes
     });
 
+    const { data: imageRecord, error: dbError } = await supabase
+      .from("images")
+      .insert({
+        name: fileName,
+        r2_key: objectKey,
+        status: "pending",
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error("Database error:", dbError);
+      return JsonErrors.serverError("Failed to create image record");
+    }
+
     return Response.json({
       presignedUrl,
       fileName: objectKey,
-      // URL where file will be accessible after upload (if bucket is public)
-      fileUrl: `${env.R2_PUBLIC_URL}/${PUBLIC_R2_BUCKET_NAME}/${objectKey}`,
+      imageId: imageRecord.id,
     });
   } catch (error) {
     console.error("Error generating presigned URL:", error);
-    return Response.json({ error: "Failed to generate presigned URL" }, { status: 500 });
+    return JsonErrors.serverError("Failed to generate presigned URL");
   }
 }
