@@ -42,6 +42,10 @@ declare global {
     venue: VenueDetails | null;
   };
 
+  type ConcertType = Database["public"]["Enums"]["ConcertType"];
+
+  type MaybeConcertType = ConcertType | undefined;
+
   type VenueDetails = Database["public"]["Tables"]["venues"]["Row"];
 
   type Song = Database["public"]["Tables"]["songs"]["Row"];

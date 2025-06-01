@@ -2,6 +2,7 @@
   import { eventStore } from "$lib/stores/events.svelte";
   import type { Database } from "$lib/supabase";
   import { concertHref } from "$lib/utils/concerts";
+  import type { ClassValue } from "svelte/elements";
 
   interface Props {
     concertData:
@@ -22,13 +23,21 @@
      * This will determine the button's colors.
      */
     btnType?: "warning" | "success" | "info";
+    btnText?: string;
+    additionalClasses?: ClassValue;
   }
 
-  let { concertData, small = true, btnType = "info" }: Props = $props();
+  let {
+    concertData,
+    small = true,
+    btnType = "info",
+    additionalClasses = "",
+    btnText = "Share",
+  }: Props = $props();
 </script>
 
 <button
-  class="dy-btn dy-btn-outline"
+  class="dy-btn {additionalClasses}"
   class:dy-btn-sm={small}
   class:dy-btn-info={btnType === "info"}
   class:dy-btn-warning={btnType === "warning"}
@@ -43,10 +52,9 @@
         venueName = venue.name;
       }
     }
-    const link = `${window.location.origin}${concertHref(concertId, venueName)}`;
-    navigator.clipboard.writeText(link);
-    alert("Concert link copied to clipboard!\n" + link);
+    navigator.clipboard.writeText(`${window.location.origin}${concertHref(concertId, venueName)}`);
+    alert("Konzert Link kopiert!");
   }}
 >
-  Share
+  {btnText}
 </button>

@@ -220,7 +220,12 @@
               >
                 Delete
               </button>
-              <ShareConcertBtn concertData={concert} btnType="info" small={true} />
+              <ShareConcertBtn
+                concertData={concert}
+                btnType="info"
+                small={true}
+                additionalClasses={"dy-btn-outline"}
+              />
             </td>
           </tr>
         {/each}

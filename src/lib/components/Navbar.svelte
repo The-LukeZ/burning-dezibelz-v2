@@ -45,7 +45,7 @@
       </a>
     </li>
   {/each}
-  {#if isDashboard}
+  {#if isDashboard && page.url.pathname !== "/dash/login"}
     <button
       class="dy-btn dy-btn-error dy-btn-outline"
       onclick={() => goto("/dash/logout")}
@@ -70,10 +70,7 @@
   {/if}
 {/snippet}
 
-<nav
-  class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15 backdrop-blur-md"
-  class:hidden={page.url.pathname === "/dash/login"}
->
+<nav class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15 backdrop-blur-md">
   <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between">
     {#if !isDashboard}
       <div class="navbar-branding md:w-1/2">

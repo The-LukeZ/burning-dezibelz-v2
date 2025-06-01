@@ -1,16 +1,12 @@
 import { env } from "$env/dynamic/private";
 import { getFileExtension, normalizeName, removeExtension } from "$lib";
 import type { TablesInsert } from "$lib/supabase.ts";
-import { createWriteStream, existsSync, mkdirSync, statSync, unlinkSync } from "node:fs";
-import path from "node:path";
-import { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
 
-const FILE_DIR = env.FILE_DIR!;
-
-if (!existsSync(FILE_DIR)) {
-  mkdirSync(FILE_DIR, { recursive: true });
-}
+// R2 configuration
+const R2_ENDPOINT = env.R2_ENDPOINT!;
+const R2_ACCESS_KEY_ID = env.R2_ACCESS_KEY_ID!;
+const R2_SECRET_ACCESS_KEY = env.R2_SECRET_ACCESS_KEY!;
+const R2_BUCKET_NAME = env.R2_BUCKET_NAME!;
 
 export async function POST({ request, locals: { supabase, user } }) {
   if (!request.body) {
@@ -29,8 +25,6 @@ export async function POST({ request, locals: { supabase, user } }) {
     return new Response(null, { status: 400 });
   }
 
-  let sanitized_file_name = normalizeName(removeExtension(file_name)) + "." + getFileExtension(file_name);
-
   // Validate MIME type for images
   if (!content_type.startsWith("image/")) {
     request.body.cancel();
@@ -40,31 +34,42 @@ export async function POST({ request, locals: { supabase, user } }) {
     });
   }
 
-  let file_path = path.normalize(path.join(FILE_DIR, sanitized_file_name));
+  let sanitized_file_name = normalizeName(removeExtension(file_name)) + "." + getFileExtension(file_name);
 
-  // We could also use supabase to check if the file already exists,
-  // but for simplicity, we check the local filesystem.
-  if (existsSync(file_path)) {
-    sanitized_file_name = `${removeExtension(sanitized_file_name)}-${Date.now()}.${getFileExtension(file_name)}`;
-    file_path = path.join(FILE_DIR, sanitized_file_name);
-  }
+  // Add timestamp to prevent conflicts
+  sanitized_file_name = `${removeExtension(sanitized_file_name)}-${Date.now()}.${getFileExtension(file_name)}`;
 
-  const nodejs_wstream = createWriteStream(file_path);
-  const web_rstream = request.body;
-  const nodejs_rstream = Readable.fromWeb(web_rstream as any);
+  // Convert request body to buffer
+  const arrayBuffer = await request.arrayBuffer();
+  const fileBuffer = new Uint8Array(arrayBuffer);
 
   try {
-    await pipeline(nodejs_rstream, nodejs_wstream);
+    // Upload to R2
+    const uploadUrl = `${R2_ENDPOINT}/${R2_BUCKET_NAME}/${sanitized_file_name}`;
 
-    // Get file stats
-    const stats = statSync(file_path);
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        Authorization: `AWS4-HMAC-SHA256 Credential=${R2_ACCESS_KEY_ID}/...`, // You'll need proper AWS v4 signing
+        "Content-Type": content_type,
+        "Content-Length": fileBuffer.length.toString(),
+      },
+      body: fileBuffer,
+    });
+
+    if (!uploadResponse.ok) {
+      return new Response(JSON.stringify({ error: "Failed to upload to R2" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     // Create image record in Supabase
     const imageData: TablesInsert<"images"> = {
       filename: sanitized_file_name,
       original_filename: file_name,
-      file_path: file_path,
-      file_size: stats.size,
+      file_path: `https://your-domain.com/images/${sanitized_file_name}`, // Your R2 public URL
+      file_size: fileBuffer.length,
       mime_type: content_type,
       user_id: user.id,
       is_private: false,
@@ -73,8 +78,7 @@ export async function POST({ request, locals: { supabase, user } }) {
     const { data: image, error } = await supabase.from("images").insert(imageData).select().single();
 
     if (error) {
-      // Clean up file if database insert fails
-      unlinkSync(file_path);
+      // Optionally clean up R2 file if database insert fails
       return new Response(JSON.stringify({ error: "Failed to save file metadata" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
@@ -85,7 +89,9 @@ export async function POST({ request, locals: { supabase, user } }) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
-    unlinkSync(file_path);
-    return new Response(null, { status: 500 });
+    return new Response(JSON.stringify({ error: "Upload failed" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

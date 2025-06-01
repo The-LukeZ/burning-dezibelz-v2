@@ -5,89 +5,67 @@
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
   import ContentContainer from "$lib/components/ContentContainer.svelte";
-  import { eventStore, getVenueById } from "$lib/stores/events.svelte";
+  import ShareConcertBtn from "$lib/components/ShareConcertBtn.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts";
-  import { onMount } from "svelte";
   import type { ClassValue } from "svelte/elements";
   import { fade, slide } from "svelte/transition";
 
-  let { supabase, imageName } = $derived(page.data);
+  let { data } = $props();
 
-  let concert = $state<Concert>();
-  let venue = $state<VenueDetails>();
-  let imageUrl = $derived(imageName ? `/images/${imageName}` : null);
-  let error = $state<string | null>(null);
-
-  onMount(async () => {
-    let _concert = eventStore.concerts.get(page.params.concertid);
-    if (!_concert) {
-      const { data, error: fetchError } = await supabase
-        .from("concerts")
-        .select("*")
-        .eq("id", page.params.concertid)
-        .single();
-
-      if (fetchError) {
-        console.error("Error fetching concert:", fetchError);
-        error = "Konzert nicht gefunden.";
-        return;
-      }
-      _concert = data as Concert;
-    }
-
-    concert = _concert;
-
-    // Fetch venue information for public concerts
-    if (concert?.venue_id && concert.type === "public") {
-      let _venue = getVenueById(concert.venue_id);
-      if (!_venue) {
-        const { data: venueData, error: venueError } = await supabase
-          .from("venues")
-          .select("*")
-          .eq("id", concert.venue_id)
-          .single();
-
-        if (!venueError && venueData) {
-          _venue = venueData;
-        } else {
-          console.error("Error fetching venue:", venueError);
-          error = "Veranstaltungsort nicht gefunden.";
-          return;
-        }
-      }
-
-      venue = structuredClone(_venue as VenueDetails);
-    }
-  });
+  let concert = $derived(data.concert ?? null);
+  let venue = $derived(data.venue ?? null);
+  let image = $derived(data.image ?? null);
+  let imageUrl = $derived(image ? `/images/${image.filename}` : null);
+  let error = $state<string | null>(data.error ?? null);
+  let backUrl = $derived(page.url.searchParams.get("back") ?? "/konzerte");
 </script>
 
-{#snippet backBtn(additionalClasses: ClassValue = "")}
-  <button
-    class="dy-btn dy-btn-soft dy-btn-primary h-10 w-fit transition-all duration-300 {additionalClasses}"
-    onclick={() => history.back()}
+{#snippet backBtn()}
+  <a
+    class="dy-btn dy-btn-soft dy-btn-primary h-10 w-fit transition-all duration-300"
+    href={backUrl}
+    rel="prev"
   >
     <ChevronLeft class="size-6" />
     Zurück
-  </button>
+  </a>
 {/snippet}
 
 <ContentContainer maxWidth={900}>
   <div class="w-full space-y-4 p-2 pt-4">
-    {@render backBtn("sm:hidden sm:opacity-0 opacity-100")}
+    {#if concert}
+      <div class="flex justify-between">
+        <a
+          class="dy-btn dy-btn-soft dy-btn-primary h-10 w-fit transition-all duration-300"
+          href={backUrl}
+          rel="prev"
+        >
+          <ChevronLeft class="size-6" />
+          Zurück
+        </a>
+
+        <ShareConcertBtn
+          btnType="success"
+          concertData={concert}
+          small={false}
+          additionalClasses="ml-auto"
+          btnText="Teilen"
+        />
+      </div>
+    {/if}
     <div class="big-concert-card">
-      {#if error}
+      {#if error || !concert}
+        {@const errorMsg =
+          data.status === 404 ? "Konzert nicht gefunden." : (error ?? "Ein Fehler ist aufgetreten.")}
         <div class="dy-alert dy-alert-error dy-alert-vertical w-full" transition:fade>
           <h1 class="text-xl font-bold">Fehler</h1>
-          <div class="font-mono">{error}</div>
+          <div class="font-mono">{errorMsg}</div>
         </div>
         <div class="mx-auto my-4">
-          {@render backBtn("dy-btn-sm")}
+          {@render backBtn()}
         </div>
-      {:else if !concert}
-        <span class="dy-loading dy-loading-dots mx-auto my-4"></span>
       {:else}
         <figure class="relative aspect-[21/9] overflow-hidden">
-          {@render backBtn("absolute top-2 left-2  hidden sm:inline-flex opacity-0 sm:opacity-100")}
           {#if imageUrl}
             <img src={imageUrl} class="size-full object-cover" alt={concert.name ?? "Privates Konzert"} />
           {:else}
@@ -183,7 +161,7 @@
 
 <style>
   .big-concert-card {
-    --light-gray: color-mix(in oklab, var(--color-gray-200) 15%, transparent);
+    --light-gray: color-mix(in oklab, var(--color-gray-200) 12%, transparent);
     background-color: var(--color-base-200);
     display: grid;
     grid-template-columns: 1fr;
