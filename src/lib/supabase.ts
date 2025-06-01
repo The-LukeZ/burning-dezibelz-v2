@@ -102,6 +102,30 @@ export type Database = {
           },
         ];
       };
+      images: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          r2_key: string;
+          status: Database["public"]["Enums"]["ImageStatus"];
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          r2_key: string;
+          status?: Database["public"]["Enums"]["ImageStatus"];
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          r2_key?: string;
+          status?: Database["public"]["Enums"]["ImageStatus"];
+        };
+        Relationships: [];
+      };
       songs: {
         Row: {
           artist: string;
@@ -169,39 +193,6 @@ export type Database = {
         Args: { p_target_email: string };
         Returns: undefined;
       };
-      get_full_concert: {
-        Args: { p_concert_id: string };
-        Returns: {
-          concert_id: string;
-          concert_name: string;
-          concert_timestamp: string;
-          concert_type: string;
-          concert_notes: string;
-          concert_price: number;
-          concert_ticket_url: string;
-          concert_abendkasse: boolean;
-          concert_free: boolean;
-          venue_id: string;
-          venue_name: string;
-          venue_address: string;
-          venue_city: string;
-          venue_postal_code: string;
-          venue_state: string;
-          venue_country: string;
-          venue_url: string;
-          image_id: string;
-          image_filename: string;
-          image_original_filename: string;
-          image_file_path: string;
-          image_file_size: number;
-          image_mime_type: string;
-          image_description: string;
-          image_is_private: boolean;
-          image_created_at: string;
-          image_updated_at: string;
-          image_user_id: string;
-        }[];
-      };
       insert_allowed_user: {
         Args: {
           p_email: string;
@@ -233,6 +224,7 @@ export type Database = {
     };
     Enums: {
       ConcertType: "public" | "closed";
+      ImageStatus: "pending" | "completed";
       UserRole: "admin" | "editor" | "user";
     };
     CompositeTypes: {
@@ -343,6 +335,7 @@ export const Constants = {
   public: {
     Enums: {
       ConcertType: ["public", "closed"],
+      ImageStatus: ["pending", "completed"],
       UserRole: ["admin", "editor", "user"],
     },
   },
