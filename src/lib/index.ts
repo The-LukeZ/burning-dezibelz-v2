@@ -7,8 +7,10 @@ import { allowedImageExtensions } from "./constants";
  * @param url - The URL object containing the current page information
  * @returns True if the href matches the current pathname, false otherwise
  */
-export function isCurrentPage(href: string, url: URL): boolean {
-  return url.pathname.startsWith(href) || url.pathname === href;
+export function isCurrentPage(navItem: NavItem, url: URL): boolean {
+  return !navItem.pathMatching || navItem.pathMatching === "partial"
+    ? url.pathname.startsWith(navItem.href)
+    : url.pathname === navItem.href;
 }
 
 export function markdownToHtml(markdown: string, infoLink = false): string {
