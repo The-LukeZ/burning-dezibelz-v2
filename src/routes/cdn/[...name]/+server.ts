@@ -4,6 +4,7 @@ import { RateLimiter } from "$lib/server/ratelimiter";
 import { S3 } from "$lib/server/s3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import dayjs from "dayjs";
+import sharp from "sharp";
 
 const Limiter = new RateLimiter({
   points: 100, // 100 requests
@@ -62,13 +63,82 @@ function manageCacheSize() {
   }
 }
 
+// --- Sharp Image Processing ---
+interface TransformOptions {
+  width?: number;
+  height?: number;
+  format?: "jpeg" | "png" | "webp" | "avif";
+  quality?: number;
+}
+
+function parseTransformParams(url: URL): TransformOptions {
+  const params: TransformOptions = {};
+
+  const width = url.searchParams.get("w") || url.searchParams.get("width");
+  const height = url.searchParams.get("h") || url.searchParams.get("height");
+  const format = url.searchParams.get("f") || url.searchParams.get("format");
+  const quality = url.searchParams.get("q") || url.searchParams.get("quality");
+
+  if (width && !isNaN(Number(width))) params.width = Number(width);
+  if (height && !isNaN(Number(height))) params.height = Number(height);
+  if (format && ["jpeg", "png", "webp", "avif"].includes(format)) params.format = format as any;
+  if (quality && !isNaN(Number(quality))) params.quality = Math.min(100, Math.max(1, Number(quality)));
+
+  return params;
+}
+
+async function transformImage(
+  buffer: Buffer,
+  options: TransformOptions,
+): Promise<{ buffer: Buffer; contentType: string }> {
+  let transformer = sharp(buffer);
+
+  if (options.width || options.height) {
+    transformer = transformer.resize(options.width, options.height, {
+      fit: "inside",
+      withoutEnlargement: true,
+    });
+  }
+
+  // Apply format and quality
+  if (options.format) {
+    switch (options.format) {
+      case "jpeg":
+        transformer = transformer.jpeg({ quality: options.quality || 80 });
+        break;
+      case "png":
+        transformer = transformer.png({ quality: options.quality || 80 });
+        break;
+      case "webp":
+        transformer = transformer.webp({ quality: options.quality || 80 });
+        break;
+      case "avif":
+        transformer = transformer.avif({ quality: options.quality || 80 });
+        break;
+    }
+  }
+
+  const transformedBuffer = await transformer.toBuffer();
+  const contentType = options.format ? `image/${options.format}` : "image/jpeg";
+
+  return { buffer: transformedBuffer, contentType };
+}
+
+function hasTransformations(options: TransformOptions): boolean {
+  return !!(options.width || options.height || options.format || options.quality);
+}
+
 // --- GET Request Handler ---
-export async function GET({ params, request, getClientAddress }) {
+export async function GET({ params, request, getClientAddress, url }) {
   const imageName = params.name;
 
   if (!imageName) {
     return JsonErrors.badRequest("Image name parameter is missing.");
   }
+
+  // Parse transformation parameters
+  const transformOptions = parseTransformParams(url);
+  const shouldTransform = hasTransformations(transformOptions);
 
   // Check and perform daily cache clearing
   checkAndClearCache();
@@ -84,8 +154,8 @@ export async function GET({ params, request, getClientAddress }) {
     return JsonErrors.tooManyRequests("Too Many Requests");
   }
 
-  // --- Cache Check ---
-  if (imageCache.has(imageName)) {
+  // --- Cache Check (skip for transformed images) ---
+  if (!shouldTransform && imageCache.has(imageName)) {
     const cached = imageCache.get(imageName)!;
     // Update last accessed time
     cached.lastAccessed = dayjs().toISOString();
@@ -102,7 +172,7 @@ export async function GET({ params, request, getClientAddress }) {
     });
   }
 
-  console.log(`[Cache] MISS for image: ${imageName}`);
+  console.log(`[Cache] MISS for image: ${imageName}${shouldTransform ? " (transformation requested)" : ""}`);
 
   try {
     const command = new GetObjectCommand({
@@ -121,16 +191,41 @@ export async function GET({ params, request, getClientAddress }) {
 
     // Convert the S3 response body (SdkStream) to a Buffer.
     const byteArray = await s3Response.Body.transformToByteArray();
-    const imageBuffer = Buffer.from(byteArray);
-
-    // Determine content type; default if not provided by S3.
-    const contentType = s3Response.ContentType || "application/octet-stream";
+    let imageBuffer = Buffer.from(byteArray);
+    let contentType = s3Response.ContentType || "application/octet-stream";
     const eTag = s3Response.ETag;
 
-    // Manage cache size before adding new entry
+    // Apply transformations if requested
+    if (shouldTransform) {
+      try {
+        const transformed = await transformImage(imageBuffer, transformOptions);
+        imageBuffer = Buffer.from(transformed.buffer);
+        contentType = transformed.contentType;
+
+        console.log(
+          `[Sharp] Transformed image: ${imageName}, Options: ${JSON.stringify(
+            transformOptions,
+          )}, Size: ${imageBuffer.length} bytes`,
+        );
+
+        // Return transformed image without caching
+        return new Response(imageBuffer, {
+          headers: {
+            "Content-Type": contentType,
+            "X-Cache-Status": "MISS-TRANSFORMED",
+            "Cache-Control": "public, max-age=86400",
+          },
+        });
+      } catch (transformError: any) {
+        console.error(`[Sharp Error] Failed to transform image "${imageName}": ${transformError.message}`);
+        return JsonErrors.serverError("Image transformation failed");
+      }
+    }
+
+    // Manage cache size before adding new entry (only for non-transformed images)
     manageCacheSize();
 
-    // Store in cache.
+    // Store in cache (only original images).
     imageCache.set(imageName, {
       buffer: imageBuffer,
       contentType,
@@ -166,8 +261,6 @@ export async function GET({ params, request, getClientAddress }) {
       return err;
     }
     // For other errors, return a generic 500.
-    return JsonErrors.internalServerError(
-      `Server error fetching image: ${err.message || "Unknown R2 error"}`,
-    );
+    return JsonErrors.serverError(`Server error fetching image: ${err.message || "Unknown R2 error"}`);
   }
 }
