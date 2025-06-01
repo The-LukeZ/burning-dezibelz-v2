@@ -1,14 +1,24 @@
 <script lang="ts">
   import "../app.css";
-  import { goto, invalidateAll } from "$app/navigation";
+  import { beforeNavigate, goto, invalidateAll } from "$app/navigation";
   import { onMount } from "svelte";
   import { page } from "$app/state";
   import Navbar from "$lib/components/Navbar.svelte";
   import "$lib/stores/events.svelte.js";
   import Footer from "$lib/components/Footer.svelte";
+  import { slide } from "svelte/transition";
 
   let { data, children } = $props();
   let { supabase, session } = $derived(data);
+  let pageLoading = $state(false);
+
+  beforeNavigate((nav) => {
+    pageLoading = true;
+
+    nav.complete.then(() => {
+      pageLoading = false;
+    });
+  });
 
   onMount(() => {
     const {
@@ -42,8 +52,14 @@
 
 <Navbar />
 
-<div class="page-container" class:with-margin={page.url.pathname !== "/"}>
-  {@render children()}
+<div class="page-container" class:with-margin={page.url.pathname !== "/"} class:grid={pageLoading}>
+  {#if !pageLoading}
+    {@render children()}
+  {:else}
+    <div class="relative grid min-h-full w-full place-items-center">
+      <span class="dy-loading dy-loading-spinner w-20"></span>
+    </div>
+  {/if}
 </div>
 
 {#if !page.url.pathname.startsWith("/dash")}
