@@ -55,6 +55,6 @@ export const JsonErrors = {
   /**
    * 500 Internal Server Error
    */
-  internalServerError: (message: string = "") =>
+  serverError: (message: string = "") =>
     Response.json({ error: message || "Internal Server Error" }, { status: 500 }),
 } as const;
