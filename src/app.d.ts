@@ -54,8 +54,6 @@ declare global {
 
   type AllowedUserRole = Database["public"]["Enums"]["UserRole"];
 
-  type Image = Database["public"]["Tables"]["images"]["Row"];
-
   type NavItem = {
     href: string;
     label: string;

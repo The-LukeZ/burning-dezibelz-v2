@@ -8,16 +8,15 @@
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { onDestroy, onMount } from "svelte";
 
-  let { supabase } = page.data;
   let loading = $state(false);
   let error = $state<string | null>(null);
   let files = $state<FileList>();
-  let images = $state<Image[]>([]);
-  let selectedImages = $state<Image[]>([]);
+  let images = $state<string[]>([]);
+  let selectedImages = $state<string[]>([]);
   const selectedImage = $state({
     modalOpen: false,
-    image: null as Image | null,
-    update: null as Image | null,
+    image: null as string | null,
+    update: null as string | null,
   });
   let fileInput: HTMLInputElement;
 
@@ -26,7 +25,7 @@
   });
 
   function selectImage(imageId: string | null) {
-    selectedImage.image = images.find((img) => img.id === imageId) || null;
+    selectedImage.image = images.find((img) => img === imageId) || null;
     if (!selectedImage.image) {
       console.error("Image not found:", imageId);
       return;
@@ -50,7 +49,7 @@
     const file = files?.[0];
 
     if (file) {
-      const res = await fetch("/api/cdn/presigned", {
+      const res = await fetch("/api/cdn/upload", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -81,26 +80,25 @@
         console.error("Failed to upload file");
         return;
       }
-
-      const { key } = await uploadRes.json();
-      console.log("File uploaded successfully:", key);
     }
   }
 
   onMount(async () => {
-    if (images.length > 0) return;
+    const res = await fetch("/api/cdn/list", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-    const { data, error } = await supabase
-      .from("images")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { images } = await res.json();
 
-    if (error) {
-      console.error("Error fetching images:", error);
+    if (!Array.isArray(images)) {
+      console.error("Unexpected response format:", images);
       return;
     }
 
-    images = data;
+    console.log("Fetched images:", images);
   });
 
   onDestroy(async () => {

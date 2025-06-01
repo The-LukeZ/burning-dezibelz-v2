@@ -16,7 +16,7 @@ export async function POST({ request }) {
       return Response.json({ error: "File name or file type is missing" }, { status: 400 });
     }
 
-    const objectKey = `${normalizeName(Date.now().toString())}-${normalizeName(fileName)}`;
+    const objectKey = `images/${normalizeName(Date.now().toString())}-${normalizeName(fileName)}`;
 
     const command = new PutObjectCommand({
       Bucket: PUBLIC_R2_BUCKET_NAME,
