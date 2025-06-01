@@ -39,6 +39,8 @@
   async function updateUser(
     user: Database["public"]["Tables"]["allowed_users"]["Update"] & { email: string },
   ) {
+    error = null;
+    loading = true;
     const { data: upUser, error: updateError } = await supabase
       .rpc("update_allowed_user", {
         p_target_email: user.email,
@@ -58,6 +60,7 @@
   }
 
   async function deleteUser(email: string) {
+    error = null;
     const { error: deleteError } = await supabase.rpc("delete_allowed_user", {
       p_target_email: email,
     });
@@ -75,6 +78,7 @@
   async function createUser() {
     if (!newUserData.user) return;
     newUserData.modalOpen = false;
+    error = null;
     loading = true;
     const { data: newUser, error: createError } = await supabase
       .rpc("insert_allowed_user", {
@@ -294,6 +298,7 @@
           await updateUser($state.snapshot(selectUser.user));
           selectUser.modalOpen = false;
           selectUser.user = null;
+          loading = false;
         }}
       >
         Save
