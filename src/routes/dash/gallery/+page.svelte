@@ -1,53 +1,41 @@
 <script lang="ts">
-  import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import { addExtension, buildImageUrl, getFileExtension, removeExtension } from "$lib";
+  import { buildImageUrl } from "$lib";
   import Trashcan from "$lib/assets/Trashcan.svelte";
   import XIcon from "$lib/assets/XIcon.svelte";
-  import Modal from "$lib/components/Modal.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { onDestroy, onMount } from "svelte";
 
   let { supabase } = page.data;
-  let loading = $state(false);
+  let siteLoading = $state(false);
   let error = $state<string | null>(null);
-  let files = $state<FileList>();
+  const upload = $state<{
+    uploading: boolean;
+    files: FileList | undefined;
+  }>({
+    uploading: false,
+    files: undefined,
+  });
   let images = $state<DBImage[]>([]);
   let selectedImages = $state<DBImage[]>([]);
-  const selectedImage = $state({
-    modalOpen: false,
-    image: null as DBImage | null,
-    update: null as DBImage | null,
-  });
   let fileInput: HTMLInputElement;
 
   $effect(() => {
-    console.log("Files changed:", $state.snapshot(files));
+    console.log("Files changed:", $state.snapshot(upload.files));
   });
 
-  function selectImage(imageId: string | null) {
-    selectedImage.image = images.find((img) => img.id === imageId) || null;
-    if (!selectedImage.image) {
-      console.error("Image not found:", imageId);
-      return;
-    }
-    selectedImage.modalOpen = !!imageId;
-    selectedImage.update = structuredClone($state.snapshot(selectedImage.image));
-  }
-
-  function resetSelectedImage() {
-    selectedImage.image = null;
-    selectedImage.update = null;
-    selectedImage.modalOpen = false;
-    loading = false;
+  function viewImage(imageId: string) {
+    goto(`/dash/gallery/${imageId}`);
   }
 
   async function handleFileSubmit(event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }) {
     event.preventDefault();
-    loading = true;
+    siteLoading = true;
     error = null;
+    upload.uploading = true;
 
-    const file = files?.[0];
+    const file = upload.files?.[0];
     if (!file) return;
 
     try {
@@ -93,12 +81,13 @@
 
       // Reset form
       fileInput.value = "";
-      files = undefined;
+      upload.files = undefined;
+      upload.uploading = false;
     } catch (err: any) {
       error = err.message;
       console.error("Upload failed:", err);
     } finally {
-      loading = false;
+      siteLoading = false;
     }
   }
 
@@ -107,7 +96,7 @@
     const { data, error } = await supabase
       .from("images")
       .select("*")
-      .eq("upload_status", "completed")
+      .eq("status", "completed")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -122,10 +111,10 @@
     if (!confirm("Are you sure you want to delete this image?")) return;
 
     try {
-      loading = true;
+      siteLoading = true;
 
       // This should also delete from R2 in the backend
-      const response = await fetch("/api/images/delete", {
+      const response = await fetch("/api/cdn/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageIds: [imageId] }),
@@ -137,12 +126,11 @@
 
       // Remove from local state
       images = images.filter((img) => img.id !== imageId);
-      resetSelectedImage();
     } catch (err: any) {
       error = err.message;
       console.error("Delete failed:", err);
     } finally {
-      loading = false;
+      siteLoading = false;
     }
   }
 
@@ -165,9 +153,8 @@
   });
 
   onDestroy(async () => {
-    resetSelectedImage();
-    files = undefined;
-    loading = false;
+    upload.files = undefined;
+    siteLoading = false;
   });
 </script>
 
@@ -181,17 +168,17 @@
         <label class="dy-label w-full">
           <input
             bind:this={fileInput}
-            bind:files
+            bind:files={upload.files}
             type="file"
             class="dy-file-input dy-file-input-accent grow"
             accept="image/*"
           />
           <button
             class="dy-btn dy-btn-ghost dy-btn-circle dy-btn-sm hover:text-base-content"
-            class:hidden={!files?.length}
+            class:hidden={!upload.files?.length}
             onclick={() => {
               fileInput.value = "";
-              files = undefined;
+              upload.files = undefined;
             }}
           >
             <XIcon />
@@ -199,9 +186,16 @@
         </label>
       </fieldset>
       <div class="dy-join dy-join-vertical">
-        <progress class="dy-join-item dy-progress dy-progress-secondary"></progress>
-        <button class="dy-join-item dy-btn dy-btn-accent" disabled={!files?.length || loading} type="submit">
-          {#if loading}
+        <progress
+          class="dy-join-item dy-progress dy-progress-secondary"
+          value={upload.uploading ? undefined : 0}
+        ></progress>
+        <button
+          class="dy-join-item dy-btn dy-btn-accent"
+          disabled={!upload.files?.length || upload.uploading}
+          type="submit"
+        >
+          {#if upload.uploading}
             Uploading...
           {:else}
             Upload
@@ -223,17 +217,17 @@
           <div
             tabindex="0"
             class="dy-card image-grid-item bg-base-200 max-w-md text-start drop-shadow-md drop-shadow-black/40 focus:ring-2"
-            onclick={() => selectImage(image.id)}
+            onclick={() => viewImage(image.id)}
             onkeydown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                selectImage(image.id);
+                viewImage(image.id);
               }
             }}
           >
             <figure class="relative aspect-video">
               <img
-                src={buildImageUrl(image.r2_key, { width: 400, height: 300, fit: "contain" })}
+                src={buildImageUrl(image.r2_key, { width: 400, height: 300, fit: "contain", quality: 50 })}
                 alt={image.name}
                 loading="lazy"
               />
@@ -242,24 +236,14 @@
                 class="dy-btn dy-btn-warning dy-btn-soft dy-btn-circle absolute top-2 right-2 z-10 shadow-md"
                 onclick={async (e) => {
                   e.stopPropagation();
-                  // Imitate a form submission
-                  if (confirm("Are you sure you want to delete this image?")) {
-                    await fetch(`api/cdn/delete`, {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({ imageIds: [image.id] }),
-                    });
-                    resetSelectedImage();
-                  }
+                  await deleteImage(image.id);
                 }}
               >
                 <Trashcan />
               </button>
             </figure>
             <div class="dy-card-body overflow-hidden">
-              <div class="w-full"><h3 class="dy-card-title w-full truncate">{image.id}</h3></div>
+              <div class="w-full"><h3 class="dy-card-title w-full truncate">{image.name}</h3></div>
               <p class="dy-card-text">Uploaded at: {formatGermanDateTime(image.created_at)}</p>
             </div>
           </div>
@@ -268,74 +252,6 @@
     {/if}
   </section>
 </div>
-
-<Modal
-  bind:open={selectedImage.modalOpen}
-  onClose={() => {
-    selectedImage.image = null;
-  }}
-  class="max-h-screen w-full max-w-2xl overflow-y-auto"
->
-  {#if selectedImage.image && selectedImage.update}
-    <form
-      method="POST"
-      action="?/update"
-      class="flex flex-col items-center justify-center gap-2"
-      use:enhance={() => {
-        loading = true;
-        return async ({ action, result, update }) => {
-          await update({ invalidateAll: false });
-          if (result.type === "success") {
-            if (action.toString().endsWith("update")) {
-              console.log("Image updated successfully:", result.data);
-            } else if (action.toString().endsWith("delete")) {
-              console.log("Image deleted successfully:", result.data);
-              resetSelectedImage();
-            }
-          }
-        };
-      }}
-    >
-      <h2 class="text-2xl font-bold">Image Details</h2>
-      <fieldset class="dy-fieldset">
-        <legend class="dy-fieldset-legend">Image name</legend>
-        <input
-          required
-          name="filename"
-          type="text"
-          class="dy-input dy-validator w-full max-w-md"
-          minlength="3"
-          maxlength="256"
-          pattern="[A-Za-z0-9_\.\-]+"
-          title="Letters, numbers, underscores, dots, and dashes only"
-          placeholder="Filename"
-          bind:value={selectedImage.update.name}
-        />
-        <p class="dy-validator-hint">Must be valid filename [A-Za-z0-9_.-]</p>
-      </fieldset>
-      <span class="dy-divider my-1 w-full"></span>
-      <div class="mx-auto w-full max-w-lg place-items-center">
-        <!-- svelte-ignore a11y_missing_attribute -->
-        <img
-          src={buildImageUrl(selectedImage.image.r2_key)}
-          alt={selectedImage.image.name}
-          loading="lazy"
-          class="h-full max-h-96"
-        />
-      </div>
-      <span class="dy-divider my-1 w-full"></span>
-      <input type="hidden" name="imageId" value={selectedImage.update.id} />
-      <div class="flex w-full flex-row-reverse justify-center gap-2">
-        <button type="submit" formaction="?/update" class="dy-btn dy-btn-primary" disabled={loading}>
-          Update Image
-        </button>
-        <button type="submit" formaction="?/delete" class="dy-btn dy-btn-error" disabled={loading}>
-          Delete Image
-        </button>
-      </div>
-    </form>
-  {/if}
-</Modal>
 
 {#if selectedImages.length > 0}
   <div class="dy-toast dy-toast-end">
