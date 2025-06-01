@@ -76,14 +76,14 @@
   }
 
   async function createUser() {
-    if (!newUserData.user) return;
+    if (!newUserData.user || !newUserData.user.email) return;
     newUserData.modalOpen = false;
     error = null;
     loading = true;
     const { data: newUser, error: createError } = await supabase
       .rpc("insert_allowed_user", {
         p_email: newUserData.user.email,
-        p_role: newUserData.user.role,
+        p_role: newUserData.user.role ?? "user",
         p_notes: newUserData.user.notes ?? undefined,
       })
       .single();
@@ -207,42 +207,51 @@
   }}
 >
   <div class="flex flex-col items-center gap-4">
-    <fieldset class="dy-fieldset w-full max-w-xs">
-      <legend class="dy-fieldset-legend">User E-Mail</legend>
-      <label class="dy-input dy-validator dy-join-item">
-        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <g
-            stroke-linejoin="round"
-            stroke-linecap="round"
-            stroke-width="2.5"
-            fill="none"
-            stroke="currentColor"
-          >
-            <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-          </g>
-        </svg>
-        <input type="email" name="email" placeholder="user@gmail.com" required autocomplete="email" />
-      </label>
-      <div class="dy-validator-hint hidden">Enter valid email address</div>
-    </fieldset>
-    <fieldset class="dy-fieldset w-full max-w-xs">
-      <legend class="dy-fieldset-legend">Role</legend>
-      <select name="role" class="dy-select">
-        <option value="user">User</option>
-        <option value="editor">Editor</option>
-        <option value="admin">Admin</option>
-      </select>
-      <ul class="list-inside list-disc text-xs opacity-70">
-        <li>An <strong>Editor</strong> can only manage concerts, venues and songs.</li>
-        <li><strong>Users</strong> have no purpose at the moment.</li>
-      </ul>
-    </fieldset>
-    <fieldset class="dy-fieldset w-full max-w-xs">
-      <legend class="dy-fieldset-legend">Notes</legend>
-      <textarea name="notes" class="dy-textarea max-h-32" placeholder="Optional notes about the user"
-      ></textarea>
-    </fieldset>
+    {#if newUserData.user}
+      <fieldset class="dy-fieldset w-full max-w-xs">
+        <legend class="dy-fieldset-legend">User E-Mail</legend>
+        <label class="dy-input dy-validator dy-join-item">
+          <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <g
+              stroke-linejoin="round"
+              stroke-linecap="round"
+              stroke-width="2.5"
+              fill="none"
+              stroke="currentColor"
+            >
+              <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+            </g>
+          </svg>
+          <input
+            bind:value={newUserData.user.email}
+            type="email"
+            name="email"
+            placeholder="user@gmail.com"
+            required
+            autocomplete="email"
+          />
+        </label>
+        <div class="dy-validator-hint hidden">Enter valid email address</div>
+      </fieldset>
+      <fieldset class="dy-fieldset w-full max-w-xs">
+        <legend class="dy-fieldset-legend">Role</legend>
+        <select name="role" class="dy-select" bind:value={newUserData.user.role}>
+          <option value="user">User</option>
+          <option value="editor">Editor</option>
+          <option value="admin">Admin</option>
+        </select>
+        <ul class="list-inside list-disc text-xs opacity-70">
+          <li>An <strong>Editor</strong> can only manage concerts, venues and songs.</li>
+          <li><strong>Users</strong> have no purpose at the moment.</li>
+        </ul>
+      </fieldset>
+      <fieldset class="dy-fieldset w-full max-w-xs">
+        <legend class="dy-fieldset-legend">Notes</legend>
+        <textarea name="notes" class="dy-textarea max-h-32" placeholder="Optional notes about the user"
+        ></textarea>
+      </fieldset>
+    {/if}
     <div class="flex w-full justify-center">
       <button class="dy-btn dy-btn-primary w-1/2" onclick={createUser}>Create User</button>
     </div>
