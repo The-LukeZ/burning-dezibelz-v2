@@ -17,7 +17,7 @@ export async function POST({ request, locals: { supabase } }) {
       return Response.json({ error: "File name or file type is missing" }, { status: 400 });
     }
 
-    const objectKey = `images/${Date.now().toString()}-${normalizeName(removeExtension(fileName))}.${getFileExtension(fileName)}`;
+    const objectKey = `images/${Date.now().toString()}-${normalizeName(fileName)}`;
 
     const command = new PutObjectCommand({
       Bucket: PUBLIC_R2_BUCKET_NAME,
