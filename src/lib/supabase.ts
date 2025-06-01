@@ -106,24 +106,24 @@ export type Database = {
         Row: {
           created_at: string;
           created_by: string | null;
-          description: string | null;
           id: string;
+          name: string;
           r2_key: string;
           status: Database["public"]["Enums"]["ImageStatus"];
         };
         Insert: {
           created_at?: string;
           created_by?: string | null;
-          description?: string | null;
           id?: string;
+          name: string;
           r2_key: string;
           status?: Database["public"]["Enums"]["ImageStatus"];
         };
         Update: {
           created_at?: string;
           created_by?: string | null;
-          description?: string | null;
           id?: string;
+          name?: string;
           r2_key?: string;
           status?: Database["public"]["Enums"]["ImageStatus"];
         };
