@@ -94,13 +94,6 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "concerts_image_fkey";
-            columns: ["image"];
-            isOneToOne: false;
-            referencedRelation: "images";
-            referencedColumns: ["id"];
-          },
-          {
             foreignKeyName: "concerts_venue_id_fkey";
             columns: ["venue_id"];
             isOneToOne: false;
@@ -108,48 +101,6 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
-      };
-      images: {
-        Row: {
-          created_at: string | null;
-          description: string | null;
-          file_path: string;
-          file_size: number;
-          filename: string;
-          id: string;
-          is_private: boolean | null;
-          mime_type: string;
-          original_filename: string;
-          updated_at: string | null;
-          user_id: string | null;
-        };
-        Insert: {
-          created_at?: string | null;
-          description?: string | null;
-          file_path: string;
-          file_size: number;
-          filename: string;
-          id?: string;
-          is_private?: boolean | null;
-          mime_type: string;
-          original_filename: string;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
-        Update: {
-          created_at?: string | null;
-          description?: string | null;
-          file_path?: string;
-          file_size?: number;
-          filename?: string;
-          id?: string;
-          is_private?: boolean | null;
-          mime_type?: string;
-          original_filename?: string;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
-        Relationships: [];
       };
       songs: {
         Row: {
