@@ -8,15 +8,16 @@
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { onDestroy, onMount } from "svelte";
 
+  let { supabase } = page.data;
   let loading = $state(false);
   let error = $state<string | null>(null);
   let files = $state<FileList>();
-  let images = $state<string[]>([]);
-  let selectedImages = $state<string[]>([]);
+  let images = $state<DBImage[]>([]);
+  let selectedImages = $state<DBImage[]>([]);
   const selectedImage = $state({
     modalOpen: false,
-    image: null as string | null,
-    update: null as string | null,
+    image: null as DBImage | null,
+    update: null as DBImage | null,
   });
   let fileInput: HTMLInputElement;
 
@@ -25,7 +26,7 @@
   });
 
   function selectImage(imageId: string | null) {
-    selectedImage.image = images.find((img) => img === imageId) || null;
+    selectedImage.image = images.find((img) => img.id === imageId) || null;
     if (!selectedImage.image) {
       console.error("Image not found:", imageId);
       return;
@@ -47,56 +48,118 @@
     error = null;
 
     const file = files?.[0];
+    if (!file) return;
 
-    if (file) {
-      const res = await fetch("/api/cdn/upload", {
+    try {
+      // Step 1: Get presigned URL and create DB record
+      const uploadRes = await fetch("/api/cdn/upload", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fileName: file.name,
           fileType: file.type,
         }),
       });
 
-      if (!res.ok) {
-        console.error("Failed to get presigned URL");
-        return;
+      if (!uploadRes.ok) {
+        throw new Error("Failed to initialize upload");
       }
 
-      const { presignedUrl, ...rest } = await res.json();
-      console.log("Presigned URL received:", presignedUrl);
-      console.log("Additional data:", rest);
-      const uploadRes = await fetch(presignedUrl, {
+      const { presignedUrl, imageId } = await uploadRes.json();
+
+      // Step 2: Upload to R2
+      const r2Response = await fetch(presignedUrl, {
         method: "PUT",
-        headers: {
-          "Content-Type": file.type,
-        },
+        headers: { "Content-Type": file.type },
         body: file,
       });
 
-      if (!uploadRes.ok) {
-        console.error("Failed to upload file");
-        return;
+      if (!r2Response.ok) {
+        throw new Error("Failed to upload to R2");
       }
+
+      // Step 3: Confirm upload success in database
+      await fetch("/api/cdn/upload/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageId,
+          fileSize: file.size,
+        }),
+      });
+
+      // Step 4: Refresh the images list
+      await refreshImages();
+
+      // Reset form
+      fileInput.value = "";
+      files = undefined;
+    } catch (err: any) {
+      error = err.message;
+      console.error("Upload failed:", err);
+    } finally {
+      loading = false;
+    }
+  }
+
+  // Helper function to refresh images from Supabase
+  async function refreshImages() {
+    const { data, error } = await supabase
+      .from("images")
+      .select("*")
+      .eq("upload_status", "completed")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching images:", error);
+      return;
+    }
+
+    images = data;
+  }
+
+  async function deleteImage(imageId: string) {
+    if (!confirm("Are you sure you want to delete this image?")) return;
+
+    try {
+      loading = true;
+
+      // This should also delete from R2 in the backend
+      const response = await fetch("/api/images/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageIds: [imageId] }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete image");
+      }
+
+      // Remove from local state
+      images = images.filter((img) => img.id !== imageId);
+      resetSelectedImage();
+    } catch (err: any) {
+      error = err.message;
+      console.error("Delete failed:", err);
+    } finally {
+      loading = false;
     }
   }
 
   onMount(async () => {
-    const res = await fetch("/api/cdn/list", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const { data: _images, error: fetchError } = await supabase
+      .from("images")
+      .select("*")
+      .eq("status", "completed")
+      .order("created_at", { ascending: false });
 
-    const { images } = await res.json();
-
-    if (!Array.isArray(images)) {
-      console.error("Unexpected response format:", images);
+    if (fetchError) {
+      console.error("Error fetching images:", fetchError);
+      error = fetchError.message;
       return;
     }
+
+    images = _images || [];
 
     console.log("Fetched images:", images);
   });
@@ -154,7 +217,7 @@
       <p>No files have been uploaded yet.</p>
     {:else}
       <div class="flex w-full flex-wrap justify-center gap-3">
-        {#each images as image}
+        {#each images as image, index}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
           <div
@@ -170,23 +233,23 @@
           >
             <figure class="relative aspect-video">
               <img
-                src={buildImageUrl(image.filename, { width: 400, height: 300, fit: "contain" })}
-                alt={image.filename}
+                src={buildImageUrl(image.r2_key, { width: 400, height: 300, fit: "contain" })}
+                alt={image.name}
                 loading="lazy"
               />
-              <!-- TODO: Make this a checkbox and find out why bulk deletion doesn't work properly (unlink issues) -->
+              <!-- TODO: Implement bulk deletion -->
               <button
                 class="dy-btn dy-btn-warning dy-btn-soft dy-btn-circle absolute top-2 right-2 z-10 shadow-md"
                 onclick={async (e) => {
                   e.stopPropagation();
                   // Imitate a form submission
                   if (confirm("Are you sure you want to delete this image?")) {
-                    await fetch(`?/delete`, {
+                    await fetch(`api/cdn/delete`, {
                       method: "POST",
                       headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Content-Type": "application/json",
                       },
-                      body: new URLSearchParams({ imageId: image.id }),
+                      body: JSON.stringify({ imageIds: [image.id] }),
                     });
                     resetSelectedImage();
                   }
@@ -196,7 +259,7 @@
               </button>
             </figure>
             <div class="dy-card-body overflow-hidden">
-              <div class="w-full"><h3 class="dy-card-title w-full truncate">{image.filename}</h3></div>
+              <div class="w-full"><h3 class="dy-card-title w-full truncate">{image.id}</h3></div>
               <p class="dy-card-text">Uploaded at: {formatGermanDateTime(image.created_at)}</p>
             </div>
           </div>
@@ -246,19 +309,7 @@
           pattern="[A-Za-z0-9_\.\-]+"
           title="Letters, numbers, underscores, dots, and dashes only"
           placeholder="Filename"
-          oninput={(e) => {
-            const input = e.currentTarget.value;
-            selectedImage.update!.filename = addExtension(
-              input,
-              getFileExtension(selectedImage.image!.filename)!,
-            );
-            console.log("Updated filename:", $state.snapshot(selectedImage.update!.filename));
-          }}
-          {@attach (element) => {
-            const justFilename = removeExtension(structuredClone(selectedImage.image!.filename));
-            element.value = justFilename;
-            console.log("Setting initial filename:", justFilename);
-          }}
+          bind:value={selectedImage.update.name}
         />
         <p class="dy-validator-hint">Must be valid filename [A-Za-z0-9_.-]</p>
       </fieldset>
@@ -266,31 +317,13 @@
       <div class="mx-auto w-full max-w-lg place-items-center">
         <!-- svelte-ignore a11y_missing_attribute -->
         <img
-          src={buildImageUrl(selectedImage.image.filename)}
-          alt={selectedImage.image.description || selectedImage.image.filename}
+          src={buildImageUrl(selectedImage.image.r2_key)}
+          alt={selectedImage.image.name}
           loading="lazy"
           class="h-full max-h-96"
         />
       </div>
       <span class="dy-divider my-1 w-full"></span>
-      <fieldset class="dy-fieldset">
-        <legend class="dy-fieldset-legend">Description</legend>
-        <textarea
-          name="description"
-          class="dy-textarea max-h-40 w-full max-w-md"
-          placeholder="Description"
-          bind:value={selectedImage.update.description}
-        ></textarea>
-      </fieldset>
-      <label class="dy-label">
-        <input
-          type="checkbox"
-          name="is_private"
-          bind:checked={selectedImage.update.is_private}
-          class="dy-checkbox"
-        />
-        <span class="dy-label-text">Private image (only visible to you)</span>
-      </label>
       <input type="hidden" name="imageId" value={selectedImage.update.id} />
       <div class="flex w-full flex-row-reverse justify-center gap-2">
         <button type="submit" formaction="?/update" class="dy-btn dy-btn-primary" disabled={loading}>
