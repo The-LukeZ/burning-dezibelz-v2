@@ -1,4 +1,5 @@
 import { PUBLIC_R2_BUCKET_NAME } from "$env/static/public";
+import { env } from "$env/dynamic/private";
 import { JsonErrors } from "$lib/constants";
 import { RateLimiter } from "$lib/server/ratelimiter";
 import { S3 } from "$lib/server/s3";
@@ -105,11 +106,10 @@ export async function GET({ params, request, getClientAddress }) {
   console.log(`[Cache] MISS for image: ${imageName}`);
 
   try {
-    const getObjectParams = {
+    const command = new GetObjectCommand({
       Bucket: PUBLIC_R2_BUCKET_NAME,
       Key: imageName,
-    };
-    const command = new GetObjectCommand(getObjectParams);
+    });
     const s3Response = await S3.send(command).catch((err) => {
       throw err;
     });
