@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  let { children }: { children?: Snippet } = $props();
+  let { children, maxWidth = 1200 }: { children?: Snippet; maxWidth?: number } = $props();
 </script>
 
-<div class="content-container">
+<div class="content-container" style:max-width="{maxWidth}px">
   {@render children?.()}
 </div>
 
@@ -12,7 +12,6 @@
   .content-container {
     height: 100%;
     width: 100%;
-    max-width: 1200px;
     margin-inline: auto;
   }
 </style>
