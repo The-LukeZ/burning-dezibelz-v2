@@ -9,16 +9,18 @@
 
 <section class="dy-prose mx-auto px-4 py-8">
   <div
-    class="dy-avatar dy-avatar-placeholder mb-4 aspect-square size-24 rounded-full shadow-xl shadow-gray-500/10"
+    class="dy-avatar dy-avatar-placeholder mb-4 aspect-square size-24 rounded-full shadow-xl shadow-gray-600/25 select-none"
   >
     <div class="dy-skeleton absolute size-full rounded-full text-white/70">
       <span class="text-3xl">{page.data.user?.user_metadata.full_name.charAt(0)}</span>
     </div>
     <!-- svelte-ignore a11y_missing_attribute -->
-    <img
-      src={page.data.user?.user_metadata.avatar_url || "/default-avatar.png"}
-      class="dy-mask dy-mask-circle absolute size-full"
-    />
+    {#if page.data.user?.user_metadata.avatar_url}
+      <img
+        src={page.data.user?.user_metadata.avatar_url ?? "favicon.png"}
+        class="dy-mask dy-mask-circle absolute size-full"
+      />
+    {/if}
   </div>
   <h1 class="text-2xl">Moin <strong class="un">{page.data.user?.user_metadata.name}</strong>!</h1>
   <p class="text-lg">Willkommen im Dashboard!</p>
