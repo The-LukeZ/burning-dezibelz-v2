@@ -1,11 +1,12 @@
 import * as Sentry from "@sentry/sveltekit";
 import { createServerClient } from "@supabase/ssr";
+import type { User } from "@supabase/supabase-js";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
-import type { User } from "@supabase/supabase-js";
 
-import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { NODE_ENV, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
+import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
+import NodeCache from "node-cache";
 
 Sentry.init({
   dsn: PUBLIC_SENTRY_DSN,
