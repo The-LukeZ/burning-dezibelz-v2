@@ -6,12 +6,9 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts";
-  import { create_upload } from "$lib/utils/upload";
   import { onDestroy, onMount } from "svelte";
   import { cubicOut } from "svelte/easing";
   import { Tween } from "svelte/motion";
-
-  const upload = create_upload<Image>();
 
   let { supabase } = page.data;
   let loading = $state(false);
@@ -19,20 +16,12 @@
   let files = $state<FileList>();
   let images = $state<Image[]>([]);
   let selectedImages = $state<Image[]>([]);
-  const progress = new Tween(0, {
-    duration: 400,
-    easing: cubicOut,
-  });
   const selectedImage = $state({
     modalOpen: false,
     image: null as Image | null,
     update: null as Image | null,
   });
   let fileInput: HTMLInputElement;
-
-  $effect(() => {
-    progress.set($upload.progress / 100);
-  });
 
   $effect(() => {
     console.log("Files changed:", $state.snapshot(files));
@@ -48,37 +37,6 @@
     selectedImage.update = structuredClone($state.snapshot(selectedImage.image));
   }
 
-  /**
-   * Toggles the selection of an image.
-   *
-   * Currently not used.
-   */
-  function toggleImageSelection(e: MouseEvent & { currentTarget: EventTarget & HTMLInputElement }) {
-    e.stopPropagation();
-    const imageId = e.currentTarget.id;
-    if (!imageId) return;
-    if (e.currentTarget.checked) {
-      selectedImages.push(images.find((img) => img.id === imageId)!);
-    } else {
-      selectedImages = $state.snapshot(selectedImages).filter((img) => img.id !== imageId);
-    }
-  }
-
-  function addImage(newImg: Image) {
-    console.log("Adding new image:", newImg);
-    images.push(newImg);
-  }
-
-  function updateImage(newImg: Image) {
-    console.log("Updating image:", newImg);
-    images = $state.snapshot(images).map((img) => (img.id === newImg.id ? newImg : img));
-  }
-
-  function deleteImage(imageId: string) {
-    console.log("Deleting image with ID:", imageId);
-    images = $state.snapshot(images).filter((img) => img.id !== imageId);
-  }
-
   function resetSelectedImage() {
     selectedImage.image = null;
     selectedImage.update = null;
@@ -90,30 +48,44 @@
     event.preventDefault();
     loading = true;
     error = null;
-    progress.set(0);
 
-    if (!files || files.length === 0) {
-      console.error("No files selected for upload.");
-      loading = false;
-      return;
-    }
+    const file = files?.[0];
 
-    const file = files[0];
-    const res = await upload.start({ url: "/api/images/upload", file, filename: file.name });
-    fileInput.value = "";
-    files = undefined;
-    progress.set(100);
-    loading = false;
+    if (file) {
+      const res = await fetch("/api/images/presigned", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+        }),
+      });
 
-    if (!res.success) {
-      console.error("Upload failed:", res.error);
-      loading = false;
-      error = res.error?.message || "Unknown error during upload";
-      return;
-    } else {
-      console.log("Upload successful:", res.data);
-      addImage(res.data);
-      resetSelectedImage();
+      if (!res.ok) {
+        console.error("Failed to get presigned URL");
+        return;
+      }
+
+      const { presignedUrl, ...rest } = await res.json();
+      console.log("Presigned URL received:", presignedUrl);
+      console.log("Additional data:", rest);
+      const uploadRes = await fetch(presignedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      });
+
+      if (!uploadRes.ok) {
+        console.error("Failed to upload file");
+        return;
+      }
+
+      const { key } = await uploadRes.json();
+      console.log("File uploaded successfully:", key);
     }
   }
 
@@ -136,7 +108,6 @@
   onDestroy(async () => {
     resetSelectedImage();
     files = undefined;
-    progress.set(0);
     loading = false;
   });
 </script>
@@ -155,11 +126,6 @@
             type="file"
             class="dy-file-input dy-file-input-accent grow"
             accept="image/*"
-            onchangecapture={(e) => {
-              if (e.currentTarget.files?.length) {
-                progress.set(0);
-              }
-            }}
           />
           <button
             class="dy-btn dy-btn-ghost dy-btn-circle dy-btn-sm hover:text-base-content"
@@ -174,10 +140,10 @@
         </label>
       </fieldset>
       <div class="dy-join dy-join-vertical">
-        <progress class="dy-join-item dy-progress dy-progress-secondary" value={progress.current}></progress>
+        <progress class="dy-join-item dy-progress dy-progress-secondary"></progress>
         <button class="dy-join-item dy-btn dy-btn-accent" disabled={!files?.length || loading} type="submit">
           {#if loading}
-            Uploading... {$upload.progress}%
+            Uploading...
           {:else}
             Upload
           {/if}
@@ -226,7 +192,6 @@
                       },
                       body: new URLSearchParams({ imageId: image.id }),
                     });
-                    deleteImage(image.id);
                     resetSelectedImage();
                   }
                 }}
@@ -264,10 +229,8 @@
           if (result.type === "success") {
             if (action.toString().endsWith("update")) {
               console.log("Image updated successfully:", result.data);
-              updateImage(result.data as Image);
             } else if (action.toString().endsWith("delete")) {
               console.log("Image deleted successfully:", result.data);
-              deleteImage(selectedImage.update!.id);
               resetSelectedImage();
             }
           }
