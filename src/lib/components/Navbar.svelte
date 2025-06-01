@@ -38,7 +38,7 @@
       <a
         href={item.href}
         class="nav-btn"
-        class:active-link={isCurrentPage(item.href, page.url)}
+        class:active-link={isCurrentPage(item, page.url)}
         class:hidden={item.requiresAdmin && !page.data.isAdmin}
       >
         {item.label}

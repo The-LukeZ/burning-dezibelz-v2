@@ -5,7 +5,7 @@ const navItems = {
     { href: "/kontakt", label: "Kontakt" },
   ],
   private: [
-    { href: "/dash", label: "Dash Home" },
+    { href: "/dash", label: "Dash Home", pathMatching: "exact" },
     { href: "/dash/concerts", label: "Concerts" },
     { href: "/dash/venues", label: "Venues" },
     { href: "/dash/songs", label: "Songs" },
