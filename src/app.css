@@ -72,6 +72,7 @@
     display: inline-block;
     padding-bottom: 2px;
     position: relative;
+    cursor: default;
   }
 
   .un::before {
@@ -99,5 +100,6 @@
     background-size: 0% 2px;
     background-repeat: no-repeat;
     background-size: 100% 2px;
+    cursor: default;
   }
 }
