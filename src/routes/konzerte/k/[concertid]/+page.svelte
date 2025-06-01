@@ -1,4 +1,3 @@
-<!-- TODO: Dynamic back button -->
 <script lang="ts">
   import { page } from "$app/state";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
@@ -7,7 +6,6 @@
   import ContentContainer from "$lib/components/ContentContainer.svelte";
   import ShareConcertBtn from "$lib/components/ShareConcertBtn.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts";
-  import type { ClassValue } from "svelte/elements";
   import { fade, slide } from "svelte/transition";
 
   let { data } = $props();
@@ -15,7 +13,7 @@
   let concert = $derived(data.concert ?? null);
   let venue = $derived(data.venue ?? null);
   let image = $derived(data.image ?? null);
-  let imageUrl = $derived(image ? `/images/${image.filename}` : null);
+  let imageUrl = $derived(image ? `/cdn/${image.filename}` : null);
   let error = $state<string | null>(data.error ?? null);
   let backUrl = $derived(page.url.searchParams.get("back") ?? "/konzerte");
 </script>

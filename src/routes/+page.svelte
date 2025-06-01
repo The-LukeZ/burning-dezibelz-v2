@@ -3,7 +3,6 @@
   import ChevronDown from "$lib/assets/ChevronDown.svelte";
   import { eventStore, getVenueById, serializeConcerts } from "$lib/stores/events.svelte.js";
   import { formatGermanDateTime } from "$lib/utils/concerts";
-  import { onMount } from "svelte";
 
   let banner = $state<HTMLDivElement>();
   let firstSection = $state<HTMLElement>();

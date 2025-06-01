@@ -1,5 +1,3 @@
-import * as Sentry from "@sentry/sveltekit";
-
 export async function load({ params, locals: { supabase } }) {
   const { data: fullData, error: imageError } = await supabase
     .rpc("get_full_concert", {
