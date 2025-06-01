@@ -237,15 +237,15 @@ export type Database = {
       insert_allowed_user: {
         Args: {
           p_email: string;
-          p_role: Database["public"]["Enums"]["UserRole"];
+          p_role?: Database["public"]["Enums"]["UserRole"];
           p_notes?: string;
         };
         Returns: {
+          created_at: string | null;
+          created_by: string | null;
           email: string;
+          notes: string | null;
           role: Database["public"]["Enums"]["UserRole"];
-          notes: string;
-          created_at: string;
-          created_by: string;
         }[];
       };
       update_allowed_user: {
@@ -255,11 +255,11 @@ export type Database = {
           p_new_notes?: string;
         };
         Returns: {
+          created_at: string | null;
+          created_by: string | null;
           email: string;
+          notes: string | null;
           role: Database["public"]["Enums"]["UserRole"];
-          notes: string;
-          created_at: string;
-          created_by: string;
         }[];
       };
     };
