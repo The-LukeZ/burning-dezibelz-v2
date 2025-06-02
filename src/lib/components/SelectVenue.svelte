@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { eventStore } from "$lib/stores/events.svelte";
+  import { EventStore } from "$lib/stores/events.svelte";
   import type { Snippet } from "svelte";
   import type { ClassValue } from "svelte/elements";
   import { scale } from "svelte/transition";
@@ -38,8 +38,8 @@
 
   let search = $state("");
   let filteredVenues = $derived.by(() => {
-    if (!eventStore.metadata.venuesLoaded) return null;
-    const venueMap = $state.snapshot(eventStore.venues);
+    if (!EventMetadata.venuesLoaded) return null;
+    const venueMap = $state.snapshot(EventStore.venues);
     const filtered = venueMap.values().filter((venue) => {
       if (exclude.includes(venue.id)) return false;
       if (search === "") return true;
@@ -96,7 +96,10 @@
               {#if filteredVenues.length > 0}
                 {#each filteredVenues as venue}
                   <div class="w-full" id={venue.id}>
-                    <button class="dy-btn dy-btn-ghost dy-btn-sm w-full" onclick={() => onselect(venue)}>
+                    <button
+                      class="dy-btn dy-btn-soft dy-btn-primary dy-btn-sm w-full"
+                      onclick={() => onselect(venue)}
+                    >
                       {venue.name}
                     </button>
                   </div>
