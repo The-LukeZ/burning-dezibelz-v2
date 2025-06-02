@@ -1,5 +1,6 @@
 import type { Database } from "$lib/supabase";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
+import type { Graph, Thing, WithContext } from "schema-dts";
 
 // for information about these interfaces
 declare global {
@@ -105,6 +106,8 @@ declare global {
     | "image/avif"
     | "image/bmp";
   type ImageExtension = "jpg" | "jpeg" | "png" | "webp" | "gif" | "avif" | "bmp";
+
+  type SchemaOrgSchema = Graph | WithContext<Thing>;
 }
 
 export {};
