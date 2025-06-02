@@ -51,19 +51,7 @@ export default {
 
     // Remove leading slash if present (pathname usually starts with /)
     if (imageKey.startsWith("/")) {
-      imageKey = imageKey.substring(1);
-    }
-
-    // IMPORTANT: Adjust this prefix based on your Worker's route configuration.
-    // If your Worker route is `yourdomain.com/secure-images/*`, and you want
-    // `yourdomain.com/secure-images/foo.jpg` to map to `foo.jpg` in R2,
-    // then set `routePrefixToRemove` to `secure-images/`.
-    // If your route is `images.yourdomain.com/*` and you want `images.yourdomain.com/foo.jpg`
-    // to map to `foo.jpg` in R2, then `routePrefixToRemove` should be empty or not used,
-    // assuming `imageKey` directly matches the R2 object key.
-    const routePrefixToRemove: string = "images/"; // Example: "secure-images/"
-    if (routePrefixToRemove && imageKey.startsWith(routePrefixToRemove)) {
-      imageKey = imageKey.substring(routePrefixToRemove.length);
+      imageKey = imageKey.slice(1);
     }
 
     if (!imageKey) {
