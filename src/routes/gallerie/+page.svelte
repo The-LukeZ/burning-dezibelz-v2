@@ -77,7 +77,7 @@
           </a>
           <a
             class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
-            href={buildImageUrl(image.r2_key, { download: true })}
+            href={buildImageUrl(image.r2_key, { download: true, format: "png" })}
             target="_blank"
           >
             Download
