@@ -1,11 +1,15 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { page } from "$app/state";
+  import { buildImageUrl } from "$lib";
   import ChevronDown from "$lib/assets/ChevronDown.svelte";
   import Trashcan from "$lib/assets/Trashcan.svelte";
   import XIcon from "$lib/assets/XIcon.svelte";
+  import ImageSelector from "$lib/components/ImageSelector.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
   import { eventStore } from "$lib/stores/events.svelte";
-  import type { Database, Tables } from "$lib/supabase";
+  import type { Database } from "$lib/supabase";
+  import { onMount } from "svelte";
   import { fade } from "svelte/transition";
 
   let concert = $state<Omit<Database["public"]["Tables"]["concerts"]["Insert"], "id">>({
@@ -20,6 +24,7 @@
     ticket_url: "",
   });
 
+  let { supabase } = page.data;
   let ticketModes = $state({
     online: false,
     abendkasse: false,
@@ -28,6 +33,19 @@
   let venueSelector = $state({ open: false });
   let loading = $state(false);
   let error = $state<string | null>(null);
+  let images = $state<DBImage[]>([]);
+  let imageSelect = $state<{
+    open: boolean;
+    image: DBImage | null;
+  }>({
+    open: false,
+    image: null,
+  });
+
+  function handleImageSelect(image: DBImage) {
+    concert.image = image.id;
+    imageSelect.image = image;
+  }
 
   function switchConcertType() {
     concert.type = concert.type === "public" ? "closed" : "public";
@@ -80,6 +98,7 @@
         free: ticketModes.free,
         price: ticketModes.free ? null : concert.price,
         ticket_url: ticketModes.online ? concert.ticket_url : null,
+        image: concert.type === "closed" ? null : (concert.image ?? null),
       };
 
       console.log("Concert Data", concertData);
@@ -108,6 +127,23 @@
       loading = false;
     }
   }
+
+  onMount(async () => {
+    // Fetch images for the ImageSelector
+    const { data, error: fetchError } = await supabase
+      .from("images")
+      .select("*")
+      .eq("status", "completed")
+      .order("created_at", { ascending: false });
+
+    if (fetchError) {
+      console.error("Error fetching images:", fetchError);
+      error = fetchError.message;
+      return;
+    }
+
+    images = data || [];
+  });
 </script>
 
 <div class="container mx-auto flex h-full max-w-xl flex-col gap-3">
@@ -309,6 +345,44 @@
     ></textarea>
   </fieldset>
 
+  <fieldset class="dy-fieldset">
+    <legend class="dy-fieldset-legend">Concert Image</legend>
+    {#if imageSelect.image && concert.type !== "closed"}
+      {@const addOpacity = (e: { currentTarget: HTMLDivElement }) =>
+        e.currentTarget.classList.add("opacity-100", "bg-black/30")}
+      {@const removeOpacity = (e: { currentTarget: HTMLDivElement }) =>
+        e.currentTarget.classList.remove("opacity-100", "bg-black/30")}
+      <div class="relative h-32 w-44 overflow-hidden rounded-lg shadow-md">
+        <img
+          src={buildImageUrl(imageSelect.image.r2_key, { width: 128, height: 96, fit: "cover" })}
+          alt={imageSelect.image.name || "Concert Image"}
+          class="dy-skeleton h-full w-full object-cover"
+        />
+        <div
+          class="absolute top-0 right-0 bottom-0 left-0 grid place-items-center opacity-0 transition-opacity duration-150"
+          role="button"
+          tabindex="0"
+          onmouseover={addOpacity}
+          onmouseout={removeOpacity}
+          onfocus={addOpacity}
+          onblur={removeOpacity}
+        >
+          <button
+            class="dy-btn dy-btn-circle transition"
+            onclick={() => {
+              concert.image = null;
+              imageSelect.image = null;
+            }}
+          >
+            <XIcon />
+          </button>
+        </div>
+      </div>
+    {:else}
+      <button class="dy-btn dy-btn-outline" onclick={() => (imageSelect.open = true)}>Select Image</button>
+    {/if}
+  </fieldset>
+
   <div class="mt-2 flex flex-row justify-end gap-4">
     <button class="dy-btn dy-btn-error" onclick={() => goto("/dash/concerts")}>Cancel</button>
     <button class="dy-btn dy-btn-primary" disabled={loading} onclick={handleSubmit}>
@@ -316,3 +390,5 @@
     </button>
   </div>
 </div>
+
+<ImageSelector {images} onselect={handleImageSelect} bind:show={imageSelect.open} />
