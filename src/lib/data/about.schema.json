@@ -49,7 +49,7 @@
               "properties": {
                 "type": {
                   "type": "string",
-                  "enum": ["website", "youtube", "instagram", "facebook", "other"]
+                  "enum": ["youtube", "instagram", "facebook", "other"]
                 },
                 "url": {
                   "type": "string",
