@@ -1,4 +1,5 @@
 import { allowedImageExtensions } from "./constants";
+import { concertHref } from "./utils/concerts";
 
 /**
  * Checks if the provided href matches the current page's pathname.
@@ -117,4 +118,13 @@ export function normalizeName(name: string) {
     .replace(/^-|-$/g, "") // Remove leading and trailing dashes
     .replace(/_+/g, "_") // Replace multiple underscores with a single underscore
     .toLowerCase();
+}
+
+export async function copyConcertLink(concertId: string, venueName: string | null = null) {
+  try {
+    await navigator.clipboard.writeText(`${window.location.origin}${concertHref(concertId, venueName)}`);
+    alert("✅ Konzert Link wurde in die Zwischenablage kopiert!");
+  } catch (error) {
+    console.error("Failed to copy concert link:", error);
+  }
 }
