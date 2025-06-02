@@ -4,8 +4,8 @@ import { z } from "zod";
 const ConcertTypeSchema = z.enum(["public", "closed"]);
 
 // Concert validator based on the Insert type (for creating new concerts)
-export const ConcertSchema = z.object({
-  id: z.string().uuid(),
+export const ConcertCreateSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(1).nullable().optional(),
   timestamp: z.string().datetime(),
   type: ConcertTypeSchema.optional(),
@@ -31,5 +31,5 @@ export const VenueSchema = z.object({
 });
 
 // Update schemas (all fields optional)
-export const ConcertUpdateSchema = ConcertSchema.partial();
+export const ConcertUpdateSchema = ConcertCreateSchema.partial();
 export const VenueUpdateSchema = VenueSchema.partial();
