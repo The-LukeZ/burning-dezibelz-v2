@@ -2,11 +2,16 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import type { Snippet } from "svelte";
   import type { ClassValue } from "svelte/elements";
-  import { scale } from "svelte/transition";
+  import { fade, scale } from "svelte/transition";
 
   type Props = {
     children?: Snippet;
     open?: boolean;
+    /**
+     * Callback function to be called when the modal is closed.
+     *
+     * `open` is set to `false` **before** this function is called.
+     */
     onClose?: () => void;
     /**
      * Whether to show an "X" button in the top right corner of the modal to close it.
@@ -68,7 +73,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div
-  class="fixed inset-0 z-[700] grid place-items-center bg-black/25 backdrop-blur-xs"
+  class="fixed inset-0 z-[700] grid place-items-center bg-black/25 backdrop-blur-xs transition-all duration-150"
   class:hidden={!open}
   class:pointer-events-auto={open}
   onclick={() => {
@@ -77,6 +82,7 @@
       onClose();
     }
   }}
+  transition:fade={{ duration: 150 }}
 >
   {#if open}
     <div
