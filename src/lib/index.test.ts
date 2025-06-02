@@ -1,5 +1,4 @@
 import { addExtension, getFileExtension, removeExtension } from "$lib";
-import "@testing-library/jest-dom/vitest";
 import { describe, expect, test } from "vitest";
 
 describe("removeExtension", () => {
