@@ -68,7 +68,7 @@
       <ChevronLeft />
       Go back
     </a>
-    <h1 class="text-2xl font-bold">Edit Venue</h1>
+    <h1 class="text-2xl font-bold">Update Venue</h1>
 
     {#if error}
       <div class="dy-alert dy-alert-error">
@@ -140,7 +140,7 @@
     <div class="mt-2 flex flex-row justify-end gap-4">
       <button class="dy-btn dy-btn-error" onclick={() => goto("/dash/venues")}>Cancel</button>
       <button class="dy-btn dy-btn-primary" disabled={loading} onclick={handleSubmit}>
-        {loading ? "Creating..." : "Create Venue"}
+        {loading ? "Updating..." : "Update Venue"}
       </button>
     </div>
   </div>
