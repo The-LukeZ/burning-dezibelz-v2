@@ -15,13 +15,12 @@
   let image = $derived(data.image ?? null);
   let imageUrl = $derived(image ? `/cdn/${image.name}` : null);
   let error = $state<string | null>(data.error ?? null);
-  let backUrl = $derived(page.url.searchParams.get("back") ?? "/konzerte");
 </script>
 
 {#snippet backBtn()}
   <a
     class="dy-btn dy-btn-soft dy-btn-primary h-10 w-fit transition-all duration-300"
-    href={backUrl}
+    href={data.backUrl}
     rel="prev"
   >
     <ChevronLeft class="size-6" />
@@ -35,7 +34,7 @@
       <div class="flex justify-between">
         <a
           class="dy-btn dy-btn-soft dy-btn-primary h-10 w-fit transition-all duration-300"
-          href={backUrl}
+          href={data.backUrl}
           rel="prev"
         >
           <ChevronLeft class="size-6" />
