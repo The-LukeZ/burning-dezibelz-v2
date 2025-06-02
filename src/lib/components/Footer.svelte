@@ -41,7 +41,7 @@
       <a
         href="https://github.com/The-LukeZ"
         target="_blank"
-        class="un text-primary w-full cursor-pointer text-center no-underline transition hover:opacity-80"
+        class="un text-primary w-full cursor-pointer text-center italic no-underline transition hover:opacity-80"
       >
         Seite erstellt von Luca
       </a>
