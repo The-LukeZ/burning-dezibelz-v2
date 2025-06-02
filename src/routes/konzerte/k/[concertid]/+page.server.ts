@@ -1,9 +1,7 @@
 export async function load({ params, locals: { supabase } }) {
-  const { data: fullData, error: imageError } = await supabase
-    .rpc("get_full_concert", {
-      p_concert_id: params.concertid,
-    })
-    .maybeSingle();
+  const { data: fullData, error: imageError } = await supabase.rpc("get_full_concert", {
+    p_concert_id: params.concertid,
+  });
 
   if (imageError || !fullData) {
     console.error(imageError);
@@ -38,19 +36,11 @@ export async function load({ params, locals: { supabase } }) {
       }
     : null;
 
-  const image: Image | null = fullData.image_id
+  const image: PartialDBImage | null = fullData.image_id
     ? {
         id: fullData.image_id,
-        filename: fullData.image_filename,
-        original_filename: fullData.image_original_filename,
-        file_path: fullData.image_file_path,
-        file_size: fullData.image_file_size,
-        mime_type: fullData.image_mime_type,
-        is_private: fullData.image_is_private,
-        description: fullData.image_description ?? null,
-        created_at: fullData.image_created_at,
-        updated_at: fullData.image_updated_at,
-        user_id: fullData.image_user_id ?? null,
+        name: fullData.image_name,
+        r2_key: fullData.image_r2_key,
       }
     : null;
 
