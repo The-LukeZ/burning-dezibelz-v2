@@ -160,8 +160,8 @@
 
 <style>
   .big-concert-card {
-    --light-gray: color-mix(in oklab, var(--color-gray-200) 12%, transparent);
-    background-color: var(--color-base-200);
+    --light-gray: color-mix(in oklab, var(--color-gray-200) 10%, transparent);
+    background-color: var(--color-base-100);
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
