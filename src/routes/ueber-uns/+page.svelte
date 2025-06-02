@@ -1,5 +1,9 @@
 <script lang="ts">
   import { markdownToHtml } from "$lib";
+  import Facebook from "$lib/assets/social/Facebook.svelte";
+  import Globe from "$lib/assets/social/Globe.svelte";
+  import Instagram from "$lib/assets/social/Instagram.svelte";
+  import Youtube from "$lib/assets/social/Youtube.svelte";
   import ContentContainer from "$lib/components/ContentContainer.svelte";
   import Modal from "$lib/components/Modal.svelte";
 
@@ -14,7 +18,7 @@
 
   const memberSelection = $state<{
     open: boolean;
-    member: any;
+    member: (typeof bandMembers)[0] | null;
   }>({
     open: false,
     member: null,
@@ -78,7 +82,7 @@
           <!-- Member Info -->
           <div class="dy-card-body p-6">
             <h2 class="dy-card-title text-primary mb-2 text-lg font-bold">
-              {member.name}
+              {member.shortName}
             </h2>
 
             <!-- Bio Preview -->
@@ -129,9 +133,37 @@
         </div>
       </div>
       <div>
-        <h3 class="text-primary text-3xl font-bold">
-          {memberSelection.member.name}
-        </h3>
+        <div class="inline-flex items-start gap-2">
+          <h3 class="text-primary mr-2 text-3xl font-bold">
+            {memberSelection.member.shortName}
+          </h3>
+          {#if memberSelection.member.links?.length}
+            {#each memberSelection.member.links as link}
+              <div
+                class="dy-tooltip dy-tooltip-bottom dy-tooltip-secondary duration-100"
+                data-tip={link.text}
+              >
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary hover:text-secondary inline-flex rounded-full p-2 transition-colors hover:bg-white/10"
+                  aria-label="Link zu {link.text}"
+                >
+                  {#if link.type === "youtube"}
+                    <Youtube />
+                  {:else if link.type === "facebook"}
+                    <Facebook />
+                  {:else if link.type === "instagram"}
+                    <Instagram />
+                  {:else}
+                    <Globe />
+                  {/if}
+                </a>
+              </div>
+            {/each}
+          {/if}
+        </div>
         <div class="mt-1 flex gap-2">
           {#each memberSelection.member.roles as role}
             <span class="dy-badge dy-badge-primary dy-badge-sm">
