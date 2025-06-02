@@ -6,7 +6,6 @@ import { sequence } from "@sveltejs/kit/hooks";
 
 import { NODE_ENV, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
-import NodeCache from "node-cache";
 
 Sentry.init({
   dsn: PUBLIC_SENTRY_DSN,
