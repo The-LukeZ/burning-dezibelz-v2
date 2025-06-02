@@ -196,6 +196,31 @@ export type Database = {
         Args: { p_target_email: string };
         Returns: undefined;
       };
+      get_full_concert: {
+        Args: { p_concert_id: string };
+        Returns: {
+          concert_id: string;
+          concert_name: string;
+          concert_timestamp: string;
+          concert_type: string;
+          concert_notes: string;
+          concert_price: number;
+          concert_ticket_url: string;
+          concert_abendkasse: boolean;
+          concert_free: boolean;
+          venue_id: string;
+          venue_name: string;
+          venue_address: string;
+          venue_city: string;
+          venue_postal_code: string;
+          venue_state: string;
+          venue_country: string;
+          venue_url: string;
+          image_id: string;
+          image_name: string;
+          image_r2_key: string;
+        };
+      };
       insert_allowed_user: {
         Args: {
           p_email: string;
