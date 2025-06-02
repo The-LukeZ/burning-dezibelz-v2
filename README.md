@@ -6,9 +6,5 @@
 
 ## TODO
 
-- Add archive
-
-  - Add button on /konzerte to go to the archive page
-  - Maybe fetch archived concerts from supabase instead of filtering on the frontend
-
 - Add bulk deletion of images by selecting them in the gallery
+- Make use of `pikaday` for date selection in the admin panel?
