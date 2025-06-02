@@ -3,22 +3,17 @@
   import Facebook from "$lib/assets/social/Facebook.svelte";
   import Globe from "$lib/assets/social/Globe.svelte";
   import Instagram from "$lib/assets/social/Instagram.svelte";
+  import Spotify from "$lib/assets/social/Spotify.svelte";
   import Youtube from "$lib/assets/social/Youtube.svelte";
   import ContentContainer from "$lib/components/ContentContainer.svelte";
   import Modal from "$lib/components/Modal.svelte";
 
   let { data } = $props();
-  let aboutUs = $derived(data.about.map((s) => markdownToHtml(s)));
-  let bandMembers = $derived(
-    data.members.map((m) => ({
-      ...m,
-      bio: m.bio.map((s) => markdownToHtml(s)),
-    })),
-  );
+  let bandMembers = $derived<BandMember[]>(data.members);
 
   const memberSelection = $state<{
     open: boolean;
-    member: (typeof bandMembers)[0] | null;
+    member: BandMember | null;
   }>({
     open: false,
     member: null,
@@ -39,7 +34,7 @@
   <section class="flex flex-col-reverse items-center justify-center gap-4 lg:flex-row">
     <div class="max-w-2xl text-center">
       <h2 class="text-base-content">Über uns</h2>
-      {#each aboutUs as line}
+      {#each data.about as line}
         <p>{@html line}</p>
       {/each}
       <a href="/setlist" class="dy-link dy-link-primary">Erfahre mehr über unsere Setlist.</a>
@@ -100,7 +95,7 @@
                 aria-expanded={memberSelection.open && memberSelection.member?.id === member.id}
                 aria-controls="bio-{member.id}"
               >
-                {memberSelection.open ? "Weniger anzeigen" : "Mehr erfahren"}
+                Mehr lesen
               </button>
             </div>
           </div>
@@ -110,19 +105,49 @@
   </section>
 </ContentContainer>
 
+{#snippet memberLinks(member: BandMember, mobile: boolean = false)}
+  {#if member.links?.length}
+    <div class={mobile ? "inline-flex sm:hidden" : "hidden sm:inline-flex"}>
+      {#each member.links as link}
+        <div class="dy-tooltip dy-tooltip-bottom dy-tooltip-secondary duration-100" data-tip={link.text}>
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary hover:text-secondary inline-flex rounded-full p-2 transition-colors hover:bg-white/10"
+            aria-label="Link zu {link.text}"
+          >
+            {#if link.type === "youtube"}
+              <Youtube />
+            {:else if link.type === "facebook"}
+              <Facebook />
+            {:else if link.type === "instagram"}
+              <Instagram />
+            {:else if link.type === "spotify"}
+              <Spotify />
+            {:else}
+              <Globe />
+            {/if}
+          </a>
+        </div>
+      {/each}
+    </div>
+  {/if}
+{/snippet}
+
 <Modal
   bind:open={memberSelection.open}
   onClose={() => {
     memberSelection.member = null;
   }}
-  class="w-full max-w-4xl"
+  class="w-full max-w-4xl space-y-4"
   closeOnBackdropClick={true}
   closeOnEscape={true}
   withXButton={true}
 >
   {#if memberSelection.member}
     <!-- Modal Header -->
-    <div class="mb-6 flex items-center gap-4">
+    <div class="flex items-center gap-4">
       <div class="dy-avatar">
         <div class="h-16 w-16 rounded-full">
           <img
@@ -133,38 +158,13 @@
         </div>
       </div>
       <div>
-        <div class="inline-flex items-start gap-2">
-          <h3 class="text-primary mr-2 text-3xl font-bold">
+        <div class="inline-flex gap-3">
+          <h3 class="text-primary text-3xl font-bold">
             {memberSelection.member.shortName}
           </h3>
-          {#if memberSelection.member.links?.length}
-            {#each memberSelection.member.links as link}
-              <div
-                class="dy-tooltip dy-tooltip-bottom dy-tooltip-secondary duration-100"
-                data-tip={link.text}
-              >
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-primary hover:text-secondary inline-flex rounded-full p-2 transition-colors hover:bg-white/10"
-                  aria-label="Link zu {link.text}"
-                >
-                  {#if link.type === "youtube"}
-                    <Youtube />
-                  {:else if link.type === "facebook"}
-                    <Facebook />
-                  {:else if link.type === "instagram"}
-                    <Instagram />
-                  {:else}
-                    <Globe />
-                  {/if}
-                </a>
-              </div>
-            {/each}
-          {/if}
+          {@render memberLinks(memberSelection.member, false)}
         </div>
-        <div class="mt-1 flex gap-2">
+        <div class="mt-2 flex gap-2">
           {#each memberSelection.member.roles as role}
             <span class="dy-badge dy-badge-primary dy-badge-sm">
               {role}
@@ -173,6 +173,8 @@
         </div>
       </div>
     </div>
+
+    {@render memberLinks(memberSelection.member, true)}
 
     <!-- Full Bio -->
     <div class="dy-prose max-h-[60vh] max-w-none overflow-y-auto">
