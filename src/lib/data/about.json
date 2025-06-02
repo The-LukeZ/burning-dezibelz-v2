@@ -13,7 +13,13 @@
       "shortName": "Jan",
       "roles": ["Gesang", "Gitarre"],
       "image": "/members/jan.jpg",
-      "links": [],
+      "links": [
+        {
+          "type": "facebook",
+          "url": "https://www.facebook.com/jan.mehlhorn.3",
+          "text": "Jan Mehlhorn"
+        }
+      ],
       "bio": [
         "Seit 1983 lasse ich die Saiten meiner Gitarre glühen und habe nie aufgehört, die Bühne zu meiner zweiten Heimat zu machen. Meine musikalischen Wurzeln liegen bei den Giganten des Heavy Metal und Hard Rock - AC/DC, Motörhead, Iron Maiden, Saxon und viele mehr haben mich geprägt und treiben mich bis heute an. Mein Stil? Laut, wild und heavy - genau so, wie es sein muss.",
         "Wenn ich gerade mal nicht auf der Bühne stehe oder im Proberaum bin, genieße ich das Leben in vollen Zügen. Musik war schon immer mein ständiger Begleiter - ob bei meinen früheren Bands wie Phonetik, Zyklon oder Bölk oder jetzt bei Burning Dezibel'z, meiner aktuellen musikalischen Familie. Die Chemie zwischen uns passt einfach - bei uns läuft alles wie geschmiert, und das spürt man bei jedem Gig.",
@@ -40,7 +46,28 @@
       "shortName": "Micha",
       "roles": ["Gesang", "Gitarre"],
       "image": "/members/micha.jpg",
-      "links": [],
+      "links": [
+        {
+          "type": "instagram",
+          "url": "https://www.instagram.com/maikel.dee?igsh=NTlvdHQ2c3lxaGFr",
+          "text": "@maikel.dee"
+        },
+        {
+          "type": "youtube",
+          "url": "https://youtube.com/playlist?list=OLAK5uy_khiYpVmCFCrYfHFZxU-3SwcDQS1MXRmHc&si=ObDDmygadW6FXiej",
+          "text": "\"Maikel Dee\" Playlist"
+        },
+        {
+          "type": "spotify",
+          "url": "https://open.spotify.com/artist/7nam1TmVgr2yOkkQLVEjSs?si=4FMkVTWFQ8ejw6upN04OXA",
+          "text": "Maikel Dee - Künstler"
+        },
+        {
+          "type": "spotify",
+          "url": "https://open.spotify.com/intl-de/album/3eHER4Dy8pFB2VdsnKJSs0?si=OCrtEdrTT3-Gf1-wvWvSbQ",
+          "text": "Maikel Dee - Album"
+        }
+      ],
       "bio": [
         "Ich bin in Altenburg geboren, aber meine Wurzeln liegen im lebhaften Dörfchen Bornshain. Musik begleitet mich seit etwa 2010 - und richtig los ging es, nachdem ich mein erstes AC/DC-Konzert erlebt habe. Von diesem Moment an wusste ich, dass Rock'n'Roll mein Weg ist.",
         "Meine Einflüsse? Klassiker wie AC/DC, Led Zeppelin, Airbourne, Böhse Onkelz und Black Sabbath prägen meinen Sound. Mein Stil lässt sich ganz einfach in drei Worten beschreiben: Rock And Roll - pur, direkt und kraftvoll.",

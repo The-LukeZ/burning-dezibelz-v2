@@ -49,7 +49,7 @@
               "properties": {
                 "type": {
                   "type": "string",
-                  "enum": ["youtube", "instagram", "facebook", "other"]
+                  "enum": ["youtube", "instagram", "facebook", "spotify", "other"]
                 },
                 "url": {
                   "type": "string",
@@ -59,7 +59,8 @@
                   "type": "string"
                 }
               },
-              "required": ["type", "url"]
+              "required": ["type", "url"],
+              "uniqueItems": false
             }
           },
           "bio": {
