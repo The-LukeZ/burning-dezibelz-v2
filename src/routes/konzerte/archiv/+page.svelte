@@ -1,22 +1,40 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { buildImageUrl } from "$lib";
   import Lock from "$lib/assets/Lock.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
   import SiteHeader from "$lib/components/SiteHeader.svelte";
-  import { EventMetadata, EventStore, serializeConcerts } from "$lib/stores/events.svelte";
-  import { concertHref, filterConcerts, formatGermanDateTime } from "$lib/utils/concerts";
+  import { EventStore, fetchConcerts, serializeConcerts } from "$lib/stores/events.svelte";
+  import { concertHref, formatGermanDateTime } from "$lib/utils/concerts";
+  import { onMount } from "svelte";
+  import { SvelteMap } from "svelte/reactivity";
 
-  const filteredConcerts = $derived<ConcertWithDetails[]>(
-    filterConcerts(serializeConcerts(), {
-      before: new Date(),
-      limit: 100,
-    }).map((concert) => ({
-      ...concert,
-      venue: concert.venue_id ? (EventStore.venues.get(concert.venue_id) ?? null) : null,
+  let loading = $state(true);
+  let concerts = new SvelteMap<string, Concert>();
+  const filteredConcerts = $derived(
+    serializeConcerts(concerts).map((con) => ({
+      ...con,
+      venue: con.venue_id ? (EventStore.venues.get(con.venue_id) ?? null) : null,
     })),
   );
 
-  let concertsLoaded = $derived(EventMetadata.concertsLoaded);
+  onMount(async () => {
+    const res = await fetchConcerts({
+      before: new Date(),
+      limit: 100,
+      order: "newestFirst",
+      sortBy: "timestamp",
+    });
+
+    if (Array.isArray(res)) {
+      for (const concert of res) {
+        concerts.set(concert.id, concert);
+      }
+      loading = false;
+    } else {
+      console.error("Error fetching concerts");
+    }
+  });
 </script>
 
 <SiteHeader title="Konzertarchiv" />
@@ -27,9 +45,9 @@
 </div>
 
 <section>
-  {#if !concertsLoaded && EventStore.concerts.size === 0}
+  {#if loading && EventStore.concerts.size === 0}
     <span class="dy-loading dy-loading-dots mx-auto my-3"></span>
-  {:else if concertsLoaded && EventStore.concerts.size === 0}
+  {:else if !loading && EventStore.concerts.size === 0}
     <p class="mx-auto my-3">Keine anstehenden Konzerte gefunden.</p>
   {:else}
     {#each filteredConcerts as concert}
@@ -61,7 +79,7 @@
 
           <div class="dy-card-actions mt-auto justify-end">
             <a
-              href={concertHref(concert.id, concert.venue?.name)}
+              href={concertHref(concert.id, concert.venue?.name) + "?back=archive"}
               class="dy-btn dy-btn-secondary"
               target="_self"
               rel="noopener noreferrer"
