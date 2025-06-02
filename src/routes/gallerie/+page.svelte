@@ -69,19 +69,11 @@
           <p class="truncate p-2 text-sm text-white">{image.name}</p>
           <a
             class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
-            href={buildImageUrl(image.r2_key)}
+            href={buildImageUrl(image.r2_key, { format: "png" })}
             target="_blank"
           >
             Öffnen
             <ArrowUpRight class="size-5" />
-          </a>
-          <a
-            class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
-            href={buildImageUrl(image.r2_key, { download: true, format: "png" })}
-            target="_blank"
-          >
-            Download
-            <Download class="size-5" />
           </a>
         </div>
       </div>
