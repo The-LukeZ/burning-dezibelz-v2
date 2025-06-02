@@ -1,7 +1,8 @@
-import type { Database } from "$lib/supabase";
-import { generateConcertId } from "$lib/server/utils.js";
 import { JsonErrors } from "$lib/constants.js";
-import { ConcertSchema } from "$lib/validators.js";
+import { generateConcertId } from "$lib/server/utils.js";
+import type { Database } from "$lib/supabase";
+import { ConcertCreateSchema } from "$lib/validators.js";
+import { fromError as FromZodError } from "zod-validation-error";
 
 /*
 Available query parameters:
@@ -20,7 +21,7 @@ export async function GET({ url, locals: { supabase } }) {
   // Always have a default value for important parameters
   const limit = searchParams.has("limit") ? parseInt(searchParams.get("limit")!) : 100;
   const offset = searchParams.has("offset") ? parseInt(searchParams.get("offset")!) : 0;
-  const order = searchParams.get("order") ?? "desc";
+  const order = searchParams.get("order") === "asc" ? "asc" : "desc";
   const sort = searchParams.get("sort_col") ?? "timestamp";
 
   const before = searchParams.get("before");
@@ -63,40 +64,51 @@ export async function POST({ request, locals: { supabase } }) {
   // Construct the thing
   const { name, venue_id, abendkasse, free, notes, price, ticket_url, type, timestamp } = body as Concert;
 
-  const concert: Database["public"]["Tables"]["concerts"]["Insert"] = {
-    id: "",
-    name,
-    venue_id,
-    abendkasse,
-    free,
-    notes,
-    price,
-    ticket_url,
-    type,
+  const partialConcert: Partial<Database["public"]["Tables"]["concerts"]["Insert"]> = {
+    name: name || null,
+    venue_id: venue_id || null,
+    abendkasse: abendkasse ?? true,
+    free: free ?? false,
+    notes: notes || null,
+    price: price ?? null,
+    ticket_url: ticket_url || null,
+    type: type || "public",
     timestamp: new Date(timestamp).toISOString(),
   };
 
+  if (partialConcert.type === "public") {
+    if (!partialConcert.venue_id) {
+      return JsonErrors.badRequest("Public concerts must have a venue_id");
+    }
+
+    const { data: venue, error: venueError } = await supabase
+      .from("venues")
+      .select("name")
+      .eq("id", partialConcert.venue_id!)
+      .single();
+
+    if (venueError || !venue) {
+      console.error("Error fetching venue:", venueError);
+      return JsonErrors.notFound("Venue not found");
+    }
+  }
+
+  if (!partialConcert.timestamp) {
+    return JsonErrors.badRequest("Timestamp is required");
+  }
+
+  const id = await generateConcertId(supabase, partialConcert.timestamp);
+  partialConcert.id = id;
+
   // Validate the concert data
-  const validation = ConcertSchema.safeParse(concert);
+  const validation = ConcertCreateSchema.safeParse(partialConcert);
   if (!validation.success) {
-    console.error("Validation error:", validation.error);
-    return JsonErrors.badRequest(validation.error.message);
+    const validationError = FromZodError(validation.error);
+    console.error("Validation error:", validationError);
+    return JsonErrors.badRequest(validationError.message);
   }
 
-  const { data: venue, error: venueError } = await supabase
-    .from("venues")
-    .select("name")
-    .eq("id", concert.venue_id!)
-    .single();
-
-  if (venueError) {
-    console.error("Error fetching venue:", venueError);
-    return JsonErrors.notFound("Venue not found");
-  }
-
-  const id = await generateConcertId(supabase, concert.timestamp);
-
-  concert.id = id;
+  const concert = validation.data as Database["public"]["Tables"]["concerts"]["Insert"];
 
   const { data, error } = await supabase.from("concerts").insert([concert]).select().single();
 
