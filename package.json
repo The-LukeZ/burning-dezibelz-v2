@@ -23,7 +23,7 @@
     "@testing-library/svelte": "^5.2.4",
     "@types/pikaday": "^1.7.9",
     "cross-env": "^7.0.3",
-    "daisyui": "^5.0.35",
+    "daisyui": "^5.0.43",
     "jsdom": "^26.0.0",
     "prettier": "^3.5.3",
     "prettier-plugin-svelte": "^3.4.0",
