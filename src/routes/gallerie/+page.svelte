@@ -8,7 +8,7 @@
   let { data: pageData } = $props();
   let { supabase } = page.data;
   let loading = $state(true);
-  let images = $state<Image[]>([]);
+  let images = $state<DBImage[]>([]);
   let imageCount = $derived(pageData.imageCount || 0);
   const IMAGE_LIMIT = 15;
 
@@ -59,17 +59,17 @@
     <p class="text-gray-500">Hier ist's ziemlich leer...</p>
   {:else if !loading && images.length > 0}
     {#each images as image}
-      <div id={image.id} class="image-card">
+      <div id={image.id} class="image-card dy-skeleton">
         <img
-          src={buildImageUrl(image.filename, { width: 400, height: 400, fit: "cover" })}
-          alt={image.filename}
+          src={buildImageUrl(image.r2_key, { width: 600, height: 600, fit: "cover", quality: 80 })}
+          alt={image.name}
           loading="lazy"
         />
         <div class="card-actions">
-          <p class="truncate p-2 text-sm text-white">{image.filename}</p>
+          <p class="truncate p-2 text-sm text-white">{image.name}</p>
           <a
             class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
-            href={buildImageUrl(image.filename)}
+            href={buildImageUrl(image.r2_key)}
             target="_blank"
           >
             Öffnen
@@ -77,7 +77,7 @@
           </a>
           <a
             class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
-            href={buildImageUrl(image.filename, { download: true })}
+            href={buildImageUrl(image.r2_key, { download: true })}
             target="_blank"
           >
             Download
