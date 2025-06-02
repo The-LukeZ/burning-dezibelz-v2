@@ -33,8 +33,6 @@
         url: venue.url,
       };
 
-      console.log("venueData:", venueData);
-
       const response = await fetch(`/api/venues/${venue.id}`, {
         method: "PUT",
         headers: {
@@ -45,11 +43,11 @@
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Failed to create venue");
+        throw new Error(errorData.error?.message || "Failed to update venue");
       }
 
       const data = await response.json();
-      console.log("Venue created:", data);
+      console.log("Venue updated:", data);
       eventStore.venues.set(data.id, data);
 
       // Navigate back to concerts list on success
