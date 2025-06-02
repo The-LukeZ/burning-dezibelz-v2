@@ -1,4 +1,5 @@
 {
+  "$schema": "./about.schema.json",
   "about": [
     "Die Band wurde 2023 in Zwickau gegründet. Wir spezialisieren uns seitdem auf Rock und Metal und spielten am 21.12.2023 im [Rocks](https://www.facebook.com/ontherocks.zwickau) unser Debut.",
     "Kurz darauf folgte schon der erst Bandmitgliederwechsel. Max, _ehem. Schlagzeuger_,  verließ im Frühjahr 2024 die Band, woraufhin [Luca](#luca) dazu kam; Er ist bis heute dabei.",
@@ -9,9 +10,10 @@
     {
       "id": "jan",
       "name": "Jan Mehlhorn",
+      "shortName": "Jan",
       "roles": ["Gesang", "Gitarre"],
       "image": "/members/jan.jpg",
-      "link": "",
+      "links": [],
       "bio": [
         "Seit 1983 lasse ich die Saiten meiner Gitarre glühen und habe nie aufgehört, die Bühne zu meiner zweiten Heimat zu machen. Meine musikalischen Wurzeln liegen bei den Giganten des Heavy Metal und Hard Rock - AC/DC, Motörhead, Iron Maiden, Saxon und viele mehr haben mich geprägt und treiben mich bis heute an. Mein Stil? Laut, wild und heavy - genau so, wie es sein muss.",
         "Wenn ich gerade mal nicht auf der Bühne stehe oder im Proberaum bin, genieße ich das Leben in vollen Zügen. Musik war schon immer mein ständiger Begleiter - ob bei meinen früheren Bands wie Phonetik, Zyklon oder Bölk oder jetzt bei Burning Dezibel'z, meiner aktuellen musikalischen Familie. Die Chemie zwischen uns passt einfach - bei uns läuft alles wie geschmiert, und das spürt man bei jedem Gig.",
@@ -21,9 +23,10 @@
     {
       "id": "robert",
       "name": "Robert Hertel",
+      "shortName": "Robert",
       "roles": ["Gesang", "Bass"],
       "image": "/members/robert.jpg",
-      "link": "",
+      "links": [],
       "bio": [
         "Musik begleitet mich seit ich vier Jahre alt bin, als ich mit dem Akkordeon angefangen habe. Gitarre, Keyboard, Schlagzeug, Bass und diverse andere Instrumente habe ich mir später selbst beigebracht. Den Bass spiele ich jetzt seit zwei Jahren.",
         "Mein Stil? Muss laut sein! Inspiriert werde ich von Künstlern wie Iron Maiden, Cradle of Filth, Mr. Hurley und Das Niveau. Wenn ich nicht gerade Musik mache, bleibt mir nur noch Zeit zum Atmen... und Essen.",
@@ -34,9 +37,10 @@
     {
       "id": "micha",
       "name": "Michael \"Maikel Dee\" Dörste",
+      "shortName": "Micha",
       "roles": ["Gesang", "Gitarre"],
       "image": "/members/micha.jpg",
-      "link": "",
+      "links": [],
       "bio": [
         "Ich bin in Altenburg geboren, aber meine Wurzeln liegen im lebhaften Dörfchen Bornshain. Musik begleitet mich seit etwa 2010 - und richtig los ging es, nachdem ich mein erstes AC/DC-Konzert erlebt habe. Von diesem Moment an wusste ich, dass Rock'n'Roll mein Weg ist.",
         "Meine Einflüsse? Klassiker wie AC/DC, Led Zeppelin, Airbourne, Böhse Onkelz und Black Sabbath prägen meinen Sound. Mein Stil lässt sich ganz einfach in drei Worten beschreiben: Rock And Roll - pur, direkt und kraftvoll.",
@@ -49,9 +53,16 @@
     {
       "id": "luca",
       "name": "Luca Hentschel",
+      "shortName": "Luca",
       "roles": ["Schlagzeug"],
       "image": "/members/luca.jpg",
-      "link": "",
+      "links": [
+        {
+          "type": "youtube",
+          "url": "https://youtube.com/@The_LukeZ",
+          "text": "@The_LukeZ"
+        }
+      ],
       "bio": [
         "Geboren in Aue, aufgewachsen in Wilkau-Haßlau und seitdem dort ansässig, begleitet mich Musik seit meinem vierten Lebensjahr. In Bands spiele ich seit ca. 2018-2019, und bei den Burning Dezibelz bin ich seit Anfang 2024 hinter den Drums am Start.",
         "Meine musikalische Reise begann mit den Firebirds und ihrer Mischung aus Rockabilly und Rock 'n Roll, doch erst 2019/2020, als ich Sabaton entdeckte, wurde mir klar: Rock und Metal sind mein Ding. Trotzdem hat auch Country einen wichtigen Einfluss auf meinen Stil. Wenn ich meinen Sound in drei Worten beschreiben müsste, wären das: Dynamik, Rhythmus, Vielfalt. Ich spiele nicht falsch, ich spiele es wie Lars Ulrich.",
