@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import ChevronDown from "$lib/assets/ChevronDown.svelte";
-  import { eventStore, getVenueById, serializeConcerts } from "$lib/stores/events.svelte.js";
+  import { EventMetadata, EventStore, getVenueById, serializeConcerts } from "$lib/stores/events.svelte.js";
   import { formatGermanDateTime } from "$lib/utils/concerts";
 
   let banner = $state<HTMLDivElement>();
@@ -64,11 +64,11 @@
       <div class="container mx-auto">
         {@render heading("konzerte", "Konzerte", "/konzerte")}
         <!-- Usually,  checking the metadata is enough, but we need it for svelte to update it when the data changes -->
-        {#if !eventStore.metadata.concertsLoaded && eventStore.concerts.size === 0}
+        {#if !EventMetadata.concertsLoaded && EventStore.concerts.size === 0}
           <div class="flex w-full items-center justify-center">
             <div class="loading loading-spinner loading-lg"></div>
           </div>
-        {:else if eventStore.metadata.concertsLoaded && eventStore.concerts.size === 0}
+        {:else if EventMetadata.concertsLoaded && EventStore.concerts.size === 0}
           <div class="text-center text-lg font-semibold">Keine Konzerte gefunden.</div>
         {:else}
           <div class="concert-grid">
@@ -108,7 +108,7 @@
               </a>
             {/each}
           </div>
-          {#if eventStore.concerts.size > 5}
+          {#if EventStore.concerts.size > 5}
             <div class="mt-3 flex justify-center">
               <a href="/konzerte" class="dy-btn dy-btn-soft dy-btn-primary">Mehr</a>
             </div>

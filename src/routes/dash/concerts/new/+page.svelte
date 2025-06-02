@@ -7,7 +7,7 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import ImageSelector from "$lib/components/ImageSelector.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
-  import { eventStore } from "$lib/stores/events.svelte";
+  import { EventStore } from "$lib/stores/events.svelte";
   import type { Database } from "$lib/supabase";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
@@ -63,7 +63,7 @@
   }
 
   async function handleSubmit() {
-    if (!eventStore.concerts) return console.error("Concert Map null???");
+    if (!EventStore.concerts) return console.error("Concert Map null???");
     loading = true;
     error = null;
 
@@ -113,11 +113,11 @@
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Failed to create concert");
+        throw new Error(errorData.error?.message || errorData.error || "Failed to create concert");
       }
 
       const newConcert = (await response.json()) as Concert;
-      eventStore.concerts.set(newConcert.id, newConcert);
+      EventStore.concerts.set(newConcert.id, newConcert);
 
       // Navigate back to concerts list on success
       goto("/dash/concerts");
@@ -214,7 +214,7 @@
           <div class="dy-input dy-input-warning items-center pr-1">
             {#key concert.venue_id}
               {#if concert.venue_id}
-                {@const venue = eventStore.venues.get(concert.venue_id)}
+                {@const venue = EventStore.venues.get(concert.venue_id)}
                 {venue ? venue.name : "Venue not found"}
               {:else}
                 Select a venue

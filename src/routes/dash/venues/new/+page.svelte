@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { eventStore } from "$lib/stores/events.svelte";
+  import { EventStore } from "$lib/stores/events.svelte";
   import type { Database } from "$lib/supabase";
 
   let venueDetails = $state<Database["public"]["Tables"]["venues"]["Insert"]>({
@@ -17,7 +17,7 @@
   let error = $state(null);
 
   async function handleSubmit() {
-    if (!eventStore.venues) return console.error("Venue Map null???");
+    if (!EventStore.venues) return console.error("Venue Map null???");
     loading = true;
     error = null;
 
@@ -50,7 +50,7 @@
 
       const data = await response.json();
       console.log("Venue created:", data);
-      eventStore.venues.set(data.id, data);
+      EventStore.venues.set(data.id, data);
 
       // Navigate back to concerts list on success
       goto("/dash/venues");

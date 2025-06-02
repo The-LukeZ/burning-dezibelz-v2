@@ -4,7 +4,6 @@
   import { navItems as _navitems } from "$lib/data/navigationData";
   import { goto } from "$app/navigation";
   const navItems = _navitems.private;
-  console.log("User", page.data.user);
 </script>
 
 <section class="dy-prose mx-auto px-4 py-8">

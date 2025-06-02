@@ -1,5 +1,5 @@
 import { normalizeName } from "$lib";
-import { eventStore } from "$lib/stores/events.svelte";
+import { EventStore } from "$lib/stores/events.svelte";
 
 export function getConcertDisplayName(concert: Concert): string {
   if (concert.name) {
@@ -7,7 +7,7 @@ export function getConcertDisplayName(concert: Concert): string {
   }
   let displayName = concert.type === "closed" ? "Closed" : "Unknown";
   if (concert.venue_id) {
-    displayName = eventStore.venues?.get(concert.venue_id)?.name || "Unknown Venue";
+    displayName = EventStore.venues?.get(concert.venue_id)?.name || "Unknown Venue";
   }
   return displayName;
 }

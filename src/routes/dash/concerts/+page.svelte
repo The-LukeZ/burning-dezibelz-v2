@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { copyConcertLink } from "$lib";
-  import { eventStore, serializeConcerts } from "$lib/stores/events.svelte.js";
+  import { EventMetadata, EventStore, serializeConcerts } from "$lib/stores/events.svelte.js";
   import { formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
 
   let loading = $state(false);
@@ -17,7 +17,7 @@
     });
 
     if (res.ok) {
-      eventStore.concerts.delete(concertId);
+      EventStore.concerts.delete(concertId);
     } else {
       const error = await res.json();
       console.error("Error deleting concert:", error);
@@ -26,9 +26,12 @@
   }
 </script>
 
-<div class="flex flex-row">
-  <h1 class="mb-4 text-2xl font-bold">Concert Management</h1>
-  <a href="/dash/concerts/new" class="dy-btn dy-btn-soft ml-auto">Add Concert</a>
+<div class="flex flex-row items-center justify-between gap-2">
+  <h1 class="mb-4 text-2xl font-bold">Concert Management (Upcoming)</h1>
+  <a href="/dash/concerts/archive" class="dy-btn dy-btn-soft dy-btn-success dy-btn-sm ml-auto">
+    📦 Archived Concerts
+  </a>
+  <a href="/dash/concerts/new" class="dy-btn dy-btn-soft">Add Concert</a>
 </div>
 
 <div class="overflow-x-auto">
@@ -43,7 +46,7 @@
       </tr>
     </thead>
     <tbody>
-      {#if eventStore.metadata.concertsLoaded && eventStore.concerts.size > 0}
+      {#if EventMetadata.concertsLoaded && EventStore.concerts.size > 0}
         {#each serializeConcerts() as concert}
           <tr
             id={concert.id}
@@ -58,7 +61,7 @@
               <td>{getConcertDisplayName(concert)}</td>
               <td>
                 {concert.venue_id
-                  ? (eventStore.venues?.get(concert.venue_id)?.name ?? "Unknown Venue")
+                  ? (EventStore.venues?.get(concert.venue_id)?.name ?? "Unknown Venue")
                   : "No Venue"}
               </td>
             {:else}
@@ -83,7 +86,7 @@
                   e.stopPropagation();
                   await copyConcertLink(
                     concert.id,
-                    concert.venue_id ? eventStore.venues.get(concert.venue_id)?.name : null,
+                    concert.venue_id ? EventStore.venues.get(concert.venue_id)?.name : null,
                   );
                 }}
               >
@@ -92,7 +95,7 @@
             </td>
           </tr>
         {/each}
-      {:else if eventStore.metadata.concertsLoaded && eventStore.concerts.size === 0}
+      {:else if EventMetadata.concertsLoaded && EventStore.concerts.size === 0}
         <tr>
           <td colspan="5" class="text-center">No concerts found.</td>
         </tr>

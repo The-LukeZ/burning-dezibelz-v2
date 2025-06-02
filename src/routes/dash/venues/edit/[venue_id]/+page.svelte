@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
-  import { eventStore } from "$lib/stores/events.svelte";
+  import { EventStore } from "$lib/stores/events.svelte";
   import type { Database } from "$lib/supabase";
   import { fade } from "svelte/transition";
 
@@ -13,7 +13,7 @@
   let error = $state(pageData.error || null);
 
   async function handleSubmit() {
-    if (!eventStore.venues || !venue) {
+    if (!EventStore.venues || !venue) {
       console.error("Venue Map or venue data is null");
       error = "Venue data is not available.";
       return;
@@ -48,7 +48,7 @@
 
       const data = await response.json();
       console.log("Venue updated:", data);
-      eventStore.venues.set(data.id, data);
+      EventStore.venues.set(data.id, data);
 
       // Navigate back to concerts list on success
       goto("/dash/venues");

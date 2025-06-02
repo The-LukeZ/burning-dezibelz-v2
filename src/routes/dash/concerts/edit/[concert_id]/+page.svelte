@@ -8,7 +8,7 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import ImageSelector from "$lib/components/ImageSelector.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
-  import { eventStore } from "$lib/stores/events.svelte";
+  import { EventStore } from "$lib/stores/events.svelte";
   import type { Database } from "$lib/supabase";
   import { formatDateTimeLocal } from "$lib/utils/concerts.js";
   import { onMount } from "svelte";
@@ -60,9 +60,9 @@
   }
 
   async function handleSubmit() {
-    if (!eventStore.concerts || !concert) {
+    if (!EventStore.concerts || !concert) {
       error = "Concert data is not available???";
-      console.error("Concert data is not available???", eventStore.concerts, concert);
+      console.error("Concert data is not available???", EventStore.concerts, concert);
       return;
     }
     loading = true;
@@ -116,8 +116,8 @@
       }
 
       const newConcert = (await response.json()) as Concert;
-      eventStore.concerts.delete(concert.id); // Remove old concert if it exists (ID can change)
-      eventStore.concerts.set(newConcert.id, newConcert);
+      EventStore.concerts.delete(concert.id); // Remove old concert if it exists (ID can change)
+      EventStore.concerts.set(newConcert.id, newConcert);
 
       // Navigate back to concerts list on success
       goto("/dash/concerts");
@@ -149,7 +149,7 @@
 
 {#if concert}
   <div class="container mx-auto flex h-full max-w-xl flex-col gap-3">
-    <a href="/dash/concerts" class="dy-btn dy-btn-soft dy-btn-sm dy-btn-info w-fit">
+    <a href={pageData.backUrl} class="dy-btn dy-btn-soft dy-btn-sm dy-btn-info w-fit">
       <ChevronLeft />
       Go back
     </a>
@@ -215,7 +215,7 @@
             <div class="dy-input dy-input-warning items-center pr-1">
               {#key concert.venue_id}
                 {#if concert.venue_id}
-                  {@const venue = eventStore.venues.get(concert.venue_id)}
+                  {@const venue = EventStore.venues.get(concert.venue_id)}
                   {venue ? venue.name : "Venue not found"}
                 {:else}
                   Select a venue

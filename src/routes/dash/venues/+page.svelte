@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { eventStore, serializeVenues } from "$lib/stores/events.svelte.js";
+  import { EventMetadata, EventStore, serializeVenues } from "$lib/stores/events.svelte.js";
 
   let loading = $state(false);
 
@@ -11,7 +11,7 @@
     });
 
     if (res.ok) {
-      eventStore.venues?.delete(venueId);
+      EventStore.venues?.delete(venueId);
     } else {
       const error = await res.json();
       console.error("Error deleting venue:", error);
@@ -39,7 +39,7 @@
       </tr>
     </thead>
     <tbody>
-      {#if eventStore.venues.size > 0}
+      {#if EventStore.venues.size > 0}
         {#each serializeVenues() as venue}
           <tr
             class="hover:bg-primary/15 cursor-pointer transition-colors duration-75"
@@ -63,7 +63,7 @@
             </td>
           </tr>
         {/each}
-      {:else if eventStore.metadata.venuesLoaded && eventStore.venues.size === 0}
+      {:else if EventMetadata.venuesLoaded && EventStore.venues.size === 0}
         <tr>
           <td colspan="5" class="text-center">No venues found.</td>
         </tr>
