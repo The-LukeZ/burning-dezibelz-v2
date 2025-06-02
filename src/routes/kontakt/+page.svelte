@@ -34,7 +34,7 @@
       required
     />
     <textarea
-      class="dy-textarea mt-[3px] field-sizing-content max-h-80 w-full font-sans text-white"
+      class="dy-textarea mt-[3px] h-72 w-full resize-none font-sans text-white"
       style="font-family: Poppins, sans-serif;"
       placeholder="Deine Nachricht"
       bind:value={mailData.body}
