@@ -1,10 +1,10 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import { copyConcertLink } from "$lib";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
   import ContentContainer from "$lib/components/ContentContainer.svelte";
-  import ShareConcertBtn from "$lib/components/ShareConcertBtn.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts";
   import { fade, slide } from "svelte/transition";
 
@@ -13,7 +13,7 @@
   let concert = $derived(data.concert ?? null);
   let venue = $derived(data.venue ?? null);
   let image = $derived(data.image ?? null);
-  let imageUrl = $derived(image ? `/cdn/${image.filename}` : null);
+  let imageUrl = $derived(image ? `/cdn/${image.name}` : null);
   let error = $state<string | null>(data.error ?? null);
   let backUrl = $derived(page.url.searchParams.get("back") ?? "/konzerte");
 </script>
@@ -42,13 +42,15 @@
           Zurück
         </a>
 
-        <ShareConcertBtn
-          btnType="success"
-          concertData={concert}
-          small={false}
-          additionalClasses="ml-auto"
-          btnText="Teilen"
-        />
+        <button
+          class="dy-btn dy-btn-sm dy-btn-info dy-btn-outline w-auto"
+          onclick={async (e) => {
+            e.stopPropagation();
+            await copyConcertLink(concert.id, venue?.name ?? null);
+          }}
+        >
+          Share
+        </button>
       </div>
     {/if}
     <div class="big-concert-card">
