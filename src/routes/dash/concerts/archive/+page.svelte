@@ -46,12 +46,12 @@
   });
 </script>
 
-<div class="flex flex-row items-center justify-between gap-2">
-  <h1 class="mb-4 text-2xl font-bold">Concert Management (Archive)</h1>
-  <a href="/dash/concerts" class="dy-btn dy-btn-soft dy-btn-success dy-btn-sm ml-auto">
-    📅 Upcoming Concerts
-  </a>
-  <a href="/dash/concerts/new?back=archive" class="dy-btn dy-btn-soft">Add Concert</a>
+<div class="flex flex-col items-center justify-between gap-2 md:flex-row">
+  <h1 class="text-2xl font-bold">Concert Management (Archive)</h1>
+  <div class="grid grid-cols-1 gap-2 md:grid-cols-2 items-center ml-auto">
+    <a href="/dash/concerts" class="dy-btn dy-btn-soft dy-btn-success dy-btn-sm"> 📅 Upcoming Concerts </a>
+    <a href="/dash/concerts/new?back=archive" class="dy-btn dy-btn-soft">Add Concert</a>
+  </div>
 </div>
 
 <div class="overflow-x-auto">
