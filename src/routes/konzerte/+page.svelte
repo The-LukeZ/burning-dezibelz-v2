@@ -1,9 +1,9 @@
 <script lang="ts">
-  import SiteHeader from "$lib/components/SiteHeader.svelte";
   import { buildImageUrl } from "$lib";
   import Lock from "$lib/assets/Lock.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
-  import { eventStore, serializeConcerts } from "$lib/stores/events.svelte";
+  import SiteHeader from "$lib/components/SiteHeader.svelte";
+  import { EventMetadata, EventStore, serializeConcerts } from "$lib/stores/events.svelte";
   import { concertHref, filterConcerts, formatGermanDateTime } from "$lib/utils/concerts";
 
   const filteredConcerts = $derived<ConcertWithDetails[]>(
@@ -12,19 +12,24 @@
       limit: 100,
     }).map((concert) => ({
       ...concert,
-      venue: concert.venue_id ? (eventStore.venues.get(concert.venue_id) ?? null) : null,
+      venue: concert.venue_id ? (EventStore.venues.get(concert.venue_id) ?? null) : null,
     })),
   );
 
-  let concertsLoaded = $derived(eventStore.metadata.concertsLoaded);
+  let concertsLoaded = $derived(EventMetadata.concertsLoaded);
 </script>
 
 <SiteHeader title="Anstehende Konzerte" />
+<div class="mb-4 flex justify-center">
+  <a href="/konzerte/archiv" class="dy-btn dy-btn-outline dy-btn-sm dy-btn-primary">
+    📦 Archivierte Konzerte ansehen
+  </a>
+</div>
 
 <section>
-  {#if !concertsLoaded && eventStore.concerts.size === 0}
+  {#if !concertsLoaded && EventStore.concerts.size === 0}
     <span class="dy-loading dy-loading-dots mx-auto my-3"></span>
-  {:else if concertsLoaded && eventStore.concerts.size === 0}
+  {:else if concertsLoaded && EventStore.concerts.size === 0}
     <p class="mx-auto my-3">Keine anstehenden Konzerte gefunden.</p>
   {:else}
     {#each filteredConcerts as concert}
