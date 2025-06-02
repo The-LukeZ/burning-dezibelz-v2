@@ -3,26 +3,31 @@
   import { page } from "$app/state";
   import { buildImageUrl } from "$lib";
   import ChevronDown from "$lib/assets/ChevronDown.svelte";
+  import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
   import Trashcan from "$lib/assets/Trashcan.svelte";
   import XIcon from "$lib/assets/XIcon.svelte";
   import ImageSelector from "$lib/components/ImageSelector.svelte";
   import SelectVenue from "$lib/components/SelectVenue.svelte";
   import { eventStore } from "$lib/stores/events.svelte";
   import type { Database } from "$lib/supabase";
+  import { formatDateTimeLocal } from "$lib/utils/concerts.js";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
 
   let { supabase } = page.data;
-  let { data } = $props();
-  let concert = $state(data.concert); // Yes, concert can be null, but since error handling is done, we can safely assume it's not null here.
+  let { data: pageData } = $props();
+
+  // Yes, concert can be null, but since error handling is done, we can safely assume it's not null here.
+  let concert = $state(pageData.concert);
   let ticketModes = $state({
     online: false,
     abendkasse: false,
     free: false,
   });
+
   let venueSelector = $state({ open: false });
   let loading = $state(false);
-  let error = $state<string | null>(data.error || null);
+  let error = $state<string | null>(pageData.error || null);
   let images = $state<DBImage[]>([]);
   let imageSelect = $state<{
     open: boolean;
@@ -55,7 +60,11 @@
   }
 
   async function handleSubmit() {
-    if (!eventStore.concerts) return console.error("Concert Map null???");
+    if (!eventStore.concerts || !concert) {
+      error = "Concert data is not available???";
+      console.error("Concert data is not available???", eventStore.concerts, concert);
+      return;
+    }
     loading = true;
     error = null;
 
@@ -80,7 +89,7 @@
 
     try {
       // Convert datetime-local to ISO string
-      const concertData: Omit<Database["public"]["Tables"]["concerts"]["Insert"], "id"> = {
+      const concertData: Database["public"]["Tables"]["concerts"]["Update"] = {
         name: concert.name,
         type: concert.type,
         venue_id: concert.venue_id,
@@ -95,8 +104,8 @@
 
       console.log("Concert Data", concertData);
 
-      const response = await fetch("/api/concerts", {
-        method: "POST",
+      const response = await fetch(`/api/concerts/${concert.id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -109,6 +118,7 @@
       }
 
       const newConcert = (await response.json()) as Concert;
+      eventStore.concerts.delete(concert.id); // Remove old concert if it exists (ID can change)
       eventStore.concerts.set(newConcert.id, newConcert);
 
       // Navigate back to concerts list on success
@@ -121,7 +131,7 @@
   }
 
   onMount(async () => {
-    if (data.error) return;
+    if (pageData.error) return;
     // Fetch images for the ImageSelector
     const { data: _images, error: fetchError } = await supabase
       .from("images")
@@ -141,6 +151,10 @@
 
 {#if concert}
   <div class="container mx-auto flex h-full max-w-xl flex-col gap-3">
+    <a href="/dash/concerts" class="dy-btn dy-btn-soft dy-btn-sm dy-btn-info w-fit">
+      <ChevronLeft />
+      Go back
+    </a>
     <h1 class="text-2xl font-bold">Edit Concert</h1>
 
     <!-- Switch concert type -->
@@ -173,9 +187,12 @@
       <legend class="dy-fieldset-legend">Date & Time</legend>
       <input
         type="datetime-local"
-        bind:value={concert.timestamp}
+        value={formatDateTimeLocal(concert.timestamp)}
         class="dy-input dy-input-warning"
         placeholder="Select date and time"
+        onchange={(e) => {
+          concert.timestamp = e.currentTarget.value;
+        }}
       />
     </fieldset>
 
@@ -385,8 +402,17 @@
     <div class="dy-alert dy-alert-error">
       <span>{error}</span>
     </div>
-    <a href="/dash/concerts" class="dy-btn dy-btn-soft dy-btn-sm dy-btn-info"> Go back </a>
   </div>
 {/if}
 
 <ImageSelector {images} onselect={handleImageSelect} bind:show={imageSelect.open} />
+
+<div class="hidden">
+  {#each images as image}
+    <img
+      src={buildImageUrl(image.r2_key, { width: 128, height: 96, fit: "cover" })}
+      alt={image.name || "Image"}
+      class="dy-skeleton h-32 w-44 object-cover"
+    />
+  {/each}
+</div>
