@@ -5,12 +5,17 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [sentrySvelteKit({
-    sourceMapsUploadOptions: {
-      org: "supportmail",
-      project: "burning-dezibelz"
-    }
-  }), tailwindcss(), sveltekit()],
+  plugins: [
+    sentrySvelteKit({
+      sourceMapsUploadOptions: {
+        org: "supportmail",
+        project: "burning-dezibelz",
+      },
+    }),
+    tailwindcss(),
+    sveltekit(),
+  ],
+
   test: {
     workspace: [
       {
@@ -36,6 +41,7 @@ export default defineConfig({
       },
     ],
   },
+
   server: {
     port: 9999,
   },
