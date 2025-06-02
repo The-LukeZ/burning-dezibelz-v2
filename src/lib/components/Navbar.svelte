@@ -1,12 +1,12 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import { isCurrentPage } from "$lib";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
-  import { eventStore, fetchConcerts, fetchVenues } from "$lib/stores/events.svelte";
-  import { onMount } from "svelte";
   import { getItemsForPath } from "$lib/data/navigationData";
-  import { goto } from "$app/navigation";
+  import { EventMetadata, EventStore, fetchConcerts, fetchVenues } from "$lib/stores/events.svelte";
   import equal from "fast-deep-equal";
+  import { onMount } from "svelte";
 
   let isDashboard = $derived(page.url.pathname.startsWith("/dash"));
   let oldItems: NavItem[] = [];
@@ -21,12 +21,21 @@
   });
 
   onMount(async () => {
-    if (eventStore.metadata.concertsLoaded === false) {
-      await fetchConcerts({
+    if (EventMetadata.concertsLoaded === false) {
+      const res = await fetchConcerts({
         after: new Date(),
       });
+
+      if (Array.isArray(res)) {
+        for (const concert of res) {
+          EventStore.concerts.set(concert.id, concert);
+        }
+        console.log("Fetched concerts:", EventStore.concerts);
+        EventMetadata.concertsLoaded = true;
+      }
     }
-    if (eventStore.metadata.venuesLoaded === false) {
+
+    if (EventMetadata.venuesLoaded === false) {
       await fetchVenues();
     }
   });
