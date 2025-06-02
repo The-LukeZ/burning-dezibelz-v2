@@ -68,7 +68,7 @@
 
 <style>
   .page-container {
-    min-height: calc(100vh - var(--navbar-height));
+    min-height: calc(100vh - var(--navbar-height) - 4rem);
     width: 100%;
     overflow: hidden;
     margin-top: 0;
