@@ -51,7 +51,7 @@
               <button
                 class="dy-btn dy-btn-sm dy-btn-error dy-btn-outline w-full sm:w-auto"
                 disabled={loading}
-                onclick={async (e) => {
+                onclickcapture={async (e) => {
                   e.stopPropagation();
                   if (confirm("Are you sure you want to delete this venue?\nID: " + venue.id)) {
                     await handleDelete(venue.id);
