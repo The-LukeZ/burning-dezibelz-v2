@@ -47,7 +47,7 @@
         {#each serializeConcerts() as concert}
           <tr
             id={concert.id}
-            class="hover:bg-primary/15 transition-colors duration-75"
+            class="hover:bg-primary/15 cursor-pointer transition-colors duration-75"
             onclickcapture={() => showConcertDetails(concert.id)}
           >
             <td>{formatGermanDateTime(concert.timestamp)}</td>
@@ -65,12 +65,6 @@
               <td colspan="2" class="dy-glass border-0 text-center">Privates Konzert</td>
             {/if}
             <td class="flex w-min flex-row gap-1">
-              <span
-                class="dy-btn dy-btn-primary dy-btn-sm dy-btn-outline w-auto"
-                class:dy-btn-disabled={loading}
-              >
-                Edit
-              </span>
               <button
                 class="dy-btn dy-btn-sm dy-btn-error dy-btn-outline w-auto"
                 disabled={loading}
