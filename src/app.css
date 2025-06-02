@@ -43,7 +43,7 @@
 
 @layer base {
   :root {
-    --color-light-base-100: color-mix(in oklab, var(--color-base-100) 95%, white);
+    --color-light-base-100: color-mix(in oklab, var(--color-base-100) 92.5%, var(--color-neutral-content));
     --navbar-height: 64px;
     --footer-height: 320px;
   }
