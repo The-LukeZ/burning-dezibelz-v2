@@ -32,9 +32,9 @@
 </script>
 
 <ContentContainer>
-  <section class="dy-prose flex flex-col-reverse items-center justify-center gap-4 lg:flex-row">
+  <section class="flex flex-col-reverse items-center justify-center gap-4 lg:flex-row">
     <div class="max-w-2xl text-center">
-      <h2>Über uns</h2>
+      <h2 class="text-base-content">Über uns</h2>
       {#each aboutUs as line}
         <p>{@html line}</p>
       {/each}
