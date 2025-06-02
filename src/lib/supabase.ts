@@ -189,7 +189,7 @@ export type Database = {
     };
     Functions: {
       count_concerts_on_date: {
-        Args: { date_param: string };
+        Args: { p_date: string };
         Returns: number;
       };
       delete_allowed_user: {
@@ -198,28 +198,7 @@ export type Database = {
       };
       get_full_concert: {
         Args: { p_concert_id: string };
-        Returns: {
-          concert_id: string;
-          concert_name: string;
-          concert_timestamp: string;
-          concert_type: string;
-          concert_notes: string;
-          concert_price: number;
-          concert_ticket_url: string;
-          concert_abendkasse: boolean;
-          concert_free: boolean;
-          venue_id: string;
-          venue_name: string;
-          venue_address: string;
-          venue_city: string;
-          venue_postal_code: string;
-          venue_state: string;
-          venue_country: string;
-          venue_url: string;
-          image_id: string;
-          image_name: string;
-          image_r2_key: string;
-        };
+        Returns: Database["public"]["CompositeTypes"]["concert_full_info"];
       };
       insert_allowed_user: {
         Args: {
@@ -256,7 +235,28 @@ export type Database = {
       UserRole: "admin" | "editor" | "user";
     };
     CompositeTypes: {
-      [_ in never]: never;
+      concert_full_info: {
+        concert_id: string | null;
+        concert_name: string | null;
+        concert_timestamp: string | null;
+        concert_type: string | null;
+        concert_notes: string | null;
+        concert_price: number | null;
+        concert_ticket_url: string | null;
+        concert_abendkasse: boolean | null;
+        concert_free: boolean | null;
+        venue_id: string | null;
+        venue_name: string | null;
+        venue_address: string | null;
+        venue_city: string | null;
+        venue_postal_code: string | null;
+        venue_state: string | null;
+        venue_country: string | null;
+        venue_url: string | null;
+        image_id: string | null;
+        image_name: string | null;
+        image_r2_key: string | null;
+      };
     };
   };
 };
