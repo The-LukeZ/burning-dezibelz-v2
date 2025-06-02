@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
   import dayjs from "dayjs";
-  import Modal from "./Modal.svelte";
   import Instagram from "../assets/social/Instagram.svelte";
   import Youtube from "../assets/social/Youtube.svelte";
 
@@ -33,11 +32,22 @@
       ],
     },
   ];
-
-  let alertOpen = $state(false);
 </script>
 
-<div class="footer-container bg-base-200 text-base-content p-14">
+<div class="footer-container bg-base-300 text-base-content mt-auto px-10 py-5">
+  <footer class="dy-footer dy-footer-horizontal bg-base-300 dy-footer-center p-1">
+    <!-- Made by Luca -->
+    <aside>
+      <a
+        href="https://github.com/The-LukeZ"
+        target="_blank"
+        class="un text-primary w-full cursor-pointer text-center no-underline transition hover:opacity-80"
+      >
+        Seite erstellt von Luca
+      </a>
+    </aside>
+  </footer>
+  <div class="dy-divider my-2"></div>
   <footer class="dy-footer md:dy-footer-horizontal">
     {#each footerItems as section}
       <nav>
@@ -65,24 +75,17 @@
   </footer>
 </div>
 
-<Modal bind:open={alertOpen} class="w-64">
-  <div class="dy-alert dy-alert-error mt-10 w-full">
-    <p>
-      Sorry, dieses Social Media Profil ist noch in Arbeit...<br />Schau doch bald mal wieder vorbei!
-    </p>
-  </div>
-</Modal>
-
 <style>
   .footer-container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
     box-shadow: 0 -30px 30px -10px rgba(0, 0, 0, 0.33);
-  }
 
-  footer {
-    max-width: 1200px;
-    margin: 0 auto;
+    > * {
+      max-width: 1200px;
+      width: 100%;
+      margin-inline: auto;
+    }
   }
 </style>
