@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "About Data Schema",
+  "description": "Schema for the about.json file, containing information about the band and its members.",
+  "type": "object",
+  "properties": {
+    "about": {
+      "description": "An array of paragraphs describing the band.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "members": {
+      "description": "An array of objects, each representing a band member.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the member.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Full name of the band member.",
+            "type": "string"
+          },
+          "shortName": {
+            "description": "Short name of a band member, used for display purposes.",
+            "type": "string"
+          },
+          "roles": {
+            "description": "An array of roles the member has in the band.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "image": {
+            "description": "Path to the member's image.",
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "links": {
+            "description": "An array of social media or other relevant links for the member.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["website", "youtube", "instagram", "facebook", "other"]
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "url"]
+            }
+          },
+          "bio": {
+            "description": "An array of paragraphs for the member's biography.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "name", "shortName", "roles", "image", "bio"]
+      }
+    }
+  },
+  "required": ["about", "members"]
+}
