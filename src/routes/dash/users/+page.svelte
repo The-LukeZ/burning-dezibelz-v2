@@ -112,7 +112,6 @@
       error = "Failed to load users.";
     } else {
       users = data || [];
-      console.log("Fetched users:", $state.snapshot(users));
     }
     loading = false;
   });
