@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import ShareConcertBtn from "$lib/components/ShareConcertBtn.svelte";
+  import { copyConcertLink } from "$lib";
   import { eventStore, serializeConcerts } from "$lib/stores/events.svelte.js";
   import { formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
 
@@ -48,7 +48,7 @@
           <tr
             id={concert.id}
             class="hover:bg-primary/15 cursor-pointer transition-colors duration-75"
-            onclickcapture={() => showConcertDetails(concert.id)}
+            onclick={() => showConcertDetails(concert.id)}
           >
             <td>{formatGermanDateTime(concert.timestamp)}</td>
             <td>
@@ -68,7 +68,7 @@
               <button
                 class="dy-btn dy-btn-sm dy-btn-error dy-btn-outline w-auto"
                 disabled={loading}
-                onclick={async (e) => {
+                onclickcapture={async (e) => {
                   e.stopPropagation();
                   if (confirm("Are you sure you want to delete this concert?\nID: " + concert.id)) {
                     await handleDelete(concert.id);
@@ -77,12 +77,18 @@
               >
                 Delete
               </button>
-              <ShareConcertBtn
-                concertData={concert}
-                btnType="info"
-                small={true}
-                additionalClasses={"dy-btn-outline"}
-              />
+              <button
+                class="dy-btn dy-btn-sm dy-btn-info dy-btn-outline w-auto"
+                onclickcapture={async (e) => {
+                  e.stopPropagation();
+                  await copyConcertLink(
+                    concert.id,
+                    concert.venue_id ? eventStore.venues.get(concert.venue_id)?.name : null,
+                  );
+                }}
+              >
+                Share
+              </button>
             </td>
           </tr>
         {/each}
