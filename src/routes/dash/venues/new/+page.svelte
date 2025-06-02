@@ -1,8 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { eventStore } from "$lib/stores/events.svelte";
+  import type { Database } from "$lib/supabase";
 
-  let venueDetails = $state<Omit<VenueDetails, "id">>({
+  let venueDetails = $state<Database["public"]["Tables"]["venues"]["Insert"]>({
     name: "",
     address: "",
     city: "",
