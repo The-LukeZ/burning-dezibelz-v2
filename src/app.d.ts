@@ -58,6 +58,20 @@ declare global {
 
   type PartialDBImage = Omit<DBImage, "created_at" | "created_by" | "status">;
 
+  type BandMember = {
+    id: string;
+    name: string;
+    shortName: string;
+    roles: string[];
+    image: string;
+    links: {
+      type: "youtube" | "facebook" | "instagram" | "spotify" | "other";
+      url: string;
+      text: string;
+    }[];
+    bio: string[];
+  };
+
   type NavItem = {
     href: string;
     label: string;
