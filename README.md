@@ -6,14 +6,9 @@
 
 ## TODO
 
-- Add security rules (maybe ratelimits?) to images route to prevent abuse
+- Add archive
 
-  - What is the best way to do this?
-  - Maybe look into arcjet again?
+  - Add button on /konzerte to go to the archive page
+  - Maybe fetch archived concerts from supabase instead of filtering on the frontend
 
-- Ask in svelte Discord, how to manage state with "before now data" and "after now data"
-
-  - Two pages, one with the current data and one with the past data
-  - Since current data is more important, should past data be in its own store on the page?
-
-- Find out why bulk deletion of images doesn't work
+- Add bulk deletion of images by selecting them in the gallery
