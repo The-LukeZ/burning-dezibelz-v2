@@ -20,9 +20,9 @@
   // Yes, concert can be null, but since error handling is done, we can safely assume it's not null here.
   let concert = $state(pageData.concert);
   let ticketModes = $state({
-    online: false,
-    abendkasse: false,
-    free: false,
+    online: concert?.ticket_url ? true : false,
+    abendkasse: concert?.abendkasse ? true : false,
+    free: concert?.free ? true : false,
   });
 
   let venueSelector = $state({ open: false });
@@ -102,8 +102,6 @@
         image: concert.type === "closed" ? null : (concert.image ?? null),
       };
 
-      console.log("Concert Data", concertData);
-
       const response = await fetch(`/api/concerts/${concert.id}`, {
         method: "PUT",
         headers: {
@@ -114,7 +112,7 @@
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Failed to create concert");
+        throw new Error(errorData.error?.message || "Failed to update concert");
       }
 
       const newConcert = (await response.json()) as Concert;
@@ -155,7 +153,7 @@
       <ChevronLeft />
       Go back
     </a>
-    <h1 class="text-2xl font-bold">Edit Concert</h1>
+    <h1 class="text-2xl font-bold">Update Concert</h1>
 
     <!-- Switch concert type -->
     <div class="dy-join">
@@ -391,7 +389,7 @@
     <div class="mt-2 flex flex-row justify-end gap-4">
       <button class="dy-btn dy-btn-error" onclick={() => goto("/dash/concerts")}>Cancel</button>
       <button class="dy-btn dy-btn-primary" disabled={loading} onclick={handleSubmit}>
-        {loading ? "Creating..." : "Create Concert"}
+        {loading ? "Updating..." : "Update Concert"}
       </button>
     </div>
   </div>
