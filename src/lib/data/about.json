@@ -88,6 +88,11 @@
           "type": "youtube",
           "url": "https://youtube.com/@The_LukeZ",
           "text": "@The_LukeZ"
+        },
+        {
+          "type": "spotify",
+          "url": "https://stats.fm/lukez",
+          "text": "Meine Spotify Statistiken"
         }
       ],
       "bio": [
