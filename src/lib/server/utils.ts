@@ -14,7 +14,7 @@ export async function generateConcertId(
   const dateString = isoTimestamp.split("T")[0];
 
   // Get amount of concerts on that date
-  const { data: count, error } = await supabase.rpc("count_concerts_on_date", { date_param: dateString });
+  const { data: count, error } = await supabase.rpc("count_concerts_on_date", { p_date: dateString });
   if (error || count === null) {
     console.log("Count of concerts on date:", count);
     console.error("Error counting concerts on date:", error);
