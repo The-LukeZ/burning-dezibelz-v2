@@ -56,6 +56,8 @@ declare global {
 
   type DBImage = Database["public"]["Tables"]["images"]["Row"];
 
+  type PartialDBImage = Omit<DBImage, "created_at" | "created_by" | "status">;
+
   type NavItem = {
     href: string;
     label: string;
@@ -66,7 +68,7 @@ declare global {
      * - "exact" means the path must match the current URL exactly (e.g., "/dash" does not match "/dash/concerts")
      *
      * This is useful for navigation items that should only be highlighted when the user is on a specific page.
-     * 
+     *
      * @default "partial"
      */
     pathMatching?: "partial" | "exact";
