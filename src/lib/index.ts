@@ -41,7 +41,7 @@ export function markdownToHtml(markdown: string, infoLink = false): string {
   return html;
 }
 
-export function buildImageUrl(filename: string, params: ImageParams & { download?: boolean } = {}) {
+export function buildImageUrl(r2Key: string, params: ImageParams & { download?: boolean } = {}) {
   const _params = new URLSearchParams();
   if (params.width) _params.set("w", params.width.toString());
   if (params.height) _params.set("h", params.height.toString());
@@ -50,7 +50,7 @@ export function buildImageUrl(filename: string, params: ImageParams & { download
   if (params.download) _params.set("download", "true");
   _params.set("f", params.format || "webp");
 
-  return `/cdn/${encodeURIComponent(filename)}${_params.size ? "?" + _params.toString() : ""}`;
+  return `/cdn/${encodeURIComponent(r2Key)}${_params.size ? "?" + _params.toString() : ""}`;
 }
 
 /**
