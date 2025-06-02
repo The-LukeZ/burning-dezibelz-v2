@@ -9,6 +9,7 @@
   import SelectVenue from "$lib/components/SelectVenue.svelte";
   import { EventStore } from "$lib/stores/events.svelte";
   import type { Database } from "$lib/supabase";
+  import dayjs from "dayjs";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
 
@@ -117,7 +118,10 @@
       }
 
       const newConcert = (await response.json()) as Concert;
-      EventStore.concerts.set(newConcert.id, newConcert);
+      if (new Date(newConcert.timestamp) > new Date()) {
+        // Only add to store if the concert is in the future
+        EventStore.concerts.set(newConcert.id, newConcert);
+      }
 
       // Navigate back to concerts list on success
       goto("/dash/concerts");
