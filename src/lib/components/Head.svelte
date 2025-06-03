@@ -9,7 +9,7 @@
    * 
    * Adapted from https://github.com/spences10/svead
    */
-  interface SeoConfig {
+  export interface SeoConfig {
     /**
      * The title of the web page.
      * Used in the <title> tag, og:title, and twitter:title properties.
