@@ -4,7 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
-import { env } from "$env/dynamic/private";
+import { HOST, NODE_ENV, ORIGIN, PORT, R2_ENDPOINT, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
 
 Sentry.init({
@@ -13,14 +13,14 @@ Sentry.init({
 });
 
 export async function init() {
-  console.debug("NODE_ENV:", env.NODE_ENV);
-  console.debug("Set ORIGIN:", env.ORIGIN);
-  console.debug("Set HOST:", env.HOST);
-  console.debug("Set PORT:", env.PORT);
+  console.debug("NODE_ENV:", NODE_ENV);
+  console.debug("Set ORIGIN:", ORIGIN);
+  console.debug("Set HOST:", HOST);
+  console.debug("Set PORT:", PORT);
   console.debug("PUBLIC_SENTRY_DSN:", PUBLIC_SENTRY_DSN);
   console.debug("PUBLIC_SUPABASE_URL:", PUBLIC_SUPABASE_URL);
-  console.debug("SUPABASE_SERVICE_ROLE_KEY:", env.SUPABASE_SERVICE_ROLE_KEY ? "set" : "not set");
-  console.debug("S3 Client endpoint:", env.R2_ENDPOINT);
+  console.debug("SUPABASE_SERVICE_ROLE_KEY:", SUPABASE_SERVICE_ROLE_KEY ? "set" : "not set");
+  console.debug("S3 Client endpoint:", R2_ENDPOINT);
 }
 
 const devToolsCheck: Handle = async ({ event, resolve }) => {
@@ -37,7 +37,7 @@ const supabase: Handle = async ({ event, resolve }) => {
    *
    * The Supabase client gets the Auth token from the request cookies.
    */
-  event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+  event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     cookies: {
       getAll: () => event.cookies.getAll(),
       setAll: (cookiesToSet) => {
@@ -128,7 +128,7 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
 export const handle = sequence(Sentry.sentryHandle(), devToolsCheck, supabase, authGuard, authUserMiddleware);
 
 export const handleError =
-  env.NODE_ENV === "production"
+  NODE_ENV === "production"
     ? Sentry.handleErrorWithSentry()
     : ({ error }: any) => {
         console.error("Error occurred:", error);
