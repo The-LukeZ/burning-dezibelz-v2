@@ -44,5 +44,9 @@ export default defineConfig({
 
   server: {
     port: 9999,
+    host: "localhost",
+    cors: {
+      credentials: true,
+    },
   },
 });
