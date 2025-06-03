@@ -1,21 +1,40 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import type { SeoConfig } from "$lib/components/Head.svelte";
 
-  let songs = $state<Song[]>([]);
-  let loading = $state<boolean>(true);
-  let error = $state<string | null>(null);
+  let { data } = $props();
+  let error = $state<string | null>(data.error || null);
 
-  onMount(async () => {
-    const response = await fetch("/api/songs");
-    if (response.ok) {
-      const data = (await response.json()) as Song[];
-      songs = data;
-      loading = false;
-    } else {
-      error = `Failed to fetch songs: ${response.statusText}`;
-      loading = false;
-    }
-  });
+  const seo_config: SeoConfig = {
+    title: "Burning Dezibelz - Über Uns",
+    description:
+      "Entdecke die Burning Dezibelz, eine junge Rock- und Metal-Band aus Zwickau. Konzerte, Musik, Gallerie und mehr!",
+    url: "https://burningdezibelz.de",
+    author_name: "Burning Dezibelz",
+    language: "de",
+    open_graph_image: "https://burningdezibelz.de/band_bild_2025-05-28.jpg",
+    open_graph_image_alt: "Burning Dezibelz Banner",
+    site_name: "Burning Dezibelz",
+    twitter_card_type: "summary_large_image",
+    website: "https://burningdezibelz.de",
+  };
+
+  const schema_org: SchemaOrgSchema = {
+    "@context": "https://schema.org",
+    "@type": "MusicPlaylist",
+    name: "Burning Dezibelz Setlist",
+    description: "Die Setlist der Band Burning Dezibelz.",
+    url: "https://burningdezibelz.de/setlist",
+    track:
+      data.songs?.map((song) => ({
+        "@type": "MusicRecording",
+        name: song.title,
+        byArtist: {
+          "@type": "MusicGroup",
+          name: song.artist,
+        },
+        citation: song.is_own ? "Eigener Song" : "Kein eigener Song",
+      })) || [],
+  };
 </script>
 
 <div class="mx-auto mb-10 max-w-[800px] overflow-x-auto">
@@ -28,16 +47,12 @@
       </tr>
     </thead>
     <tbody>
-      {#if loading}
-        <tr>
-          <td colspan="3" class="text-center">Laden...</td>
-        </tr>
-      {:else if songs.length === 0}
+      {#if data.error || !data.songs || data.songs.length === 0}
         <tr>
           <td colspan="3" class="bg-info text-info-content rounded-b text-center">Keine Songs gefunden.</td>
         </tr>
       {:else}
-        {#each songs as song}
+        {#each data.songs as song}
           <tr class="transition duration-75 hover:bg-(--color-light-base-100)">
             <td>{song.title}</td>
             <td>{song.artist}</td>
