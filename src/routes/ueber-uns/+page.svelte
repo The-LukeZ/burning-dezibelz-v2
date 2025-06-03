@@ -7,6 +7,7 @@
   import Youtube from "$lib/assets/social/Youtube.svelte";
   import ContentContainer from "$lib/components/ContentContainer.svelte";
   import Modal from "$lib/components/Modal.svelte";
+  import AboutSchemaOrg from "$lib/components/SchemaOrgs/About.svelte";
 
   let { data } = $props();
   let bandMembers = $derived<BandMember[]>(data.members);
@@ -29,6 +30,8 @@
     }
   }
 </script>
+
+<AboutSchemaOrg />
 
 <ContentContainer>
   <section class="flex flex-col-reverse items-center justify-center gap-4 lg:flex-row">

@@ -3,6 +3,9 @@
   import ChevronDown from "$lib/assets/ChevronDown.svelte";
   import { EventMetadata, EventStore, getVenueById, serializeConcerts } from "$lib/stores/events.svelte.js";
   import { formatGermanDateTime } from "$lib/utils/concerts";
+  import type { SeoConfig } from "$lib/components/Head.svelte";
+  import Head from "$lib/components/Head.svelte";
+  import AboutSchemaOrg from "$lib/components/SchemaOrgs/About.svelte";
 
   let banner = $state<HTMLDivElement>();
   let firstSection = $state<HTMLElement>();
@@ -20,7 +23,24 @@
   }
 
   $effect(handleScroll);
+
+  const seo_config: SeoConfig = {
+    title: "Burning Dezibelz - Rock & Metal Band aus Zwickau",
+    description:
+      "Entdecke die Burning Dezibelz, eine junge Rock- und Metal-Band aus Zwickau. Konzerte, Musik, Gallerie und mehr!",
+    url: "https://burningdezibelz.de",
+    author_name: "Burning Dezibelz",
+    language: "de",
+    open_graph_image: "https://burningdezibelz.de/burningdezibelz-banner.png",
+    open_graph_image_alt: "Burning Dezibelz Banner",
+    site_name: "Burning Dezibelz",
+    twitter_card_type: "summary_large_image",
+    website: "https://burningdezibelz.de",
+  };
 </script>
+
+<Head {seo_config} />
+<AboutSchemaOrg />
 
 <svelte:window bind:scrollY />
 
