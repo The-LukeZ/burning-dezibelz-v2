@@ -31,7 +31,7 @@
     url: "https://burningdezibelz.de",
     author_name: "Burning Dezibelz",
     language: "de",
-    open_graph_image: "https://burningdezibelz.de/burningdezibelz-banner.png",
+    open_graph_image: "https://burningdezibelz.de/band_bild_2025-05-28.jpg",
     open_graph_image_alt: "Burning Dezibelz Banner",
     site_name: "Burning Dezibelz",
     twitter_card_type: "summary_large_image",
