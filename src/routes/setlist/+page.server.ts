@@ -1,4 +1,4 @@
-export async function load({ params, locals: { supabase } }) {
+export async function load({ locals: { supabase } }) {
   const songs = await supabase.from("songs").select("*").order("title", { ascending: true });
 
   if (songs.error) {
