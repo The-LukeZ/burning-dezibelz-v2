@@ -1,3 +1,5 @@
+export const prerender = true;
+
 import { markdownToHtml } from "$lib";
 import aboutData from "$lib/data/about.json";
 

@@ -1,3 +1,5 @@
+export const prerender = false; // Disable globally
+
 export async function load({ locals, cookies }) {
   const { session, user } = await locals.safeGetSession();
   return {
