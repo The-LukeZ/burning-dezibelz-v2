@@ -6,6 +6,8 @@
   import Spotify from "$lib/assets/social/Spotify.svelte";
   import Youtube from "$lib/assets/social/Youtube.svelte";
   import ContentContainer from "$lib/components/ContentContainer.svelte";
+  import type { SeoConfig } from "$lib/components/Head.svelte";
+  import Head from "$lib/components/Head.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import AboutSchemaOrg from "$lib/components/SchemaOrgs/About.svelte";
 
@@ -29,8 +31,23 @@
       memberSelection.member = bandMembers.find((m) => m.id === memberId)!;
     }
   }
+
+  const seo_config: SeoConfig = {
+    title: "Über Uns | Burning Dezibelz",
+    description:
+      "Entdecke die Burning Dezibelz, eine junge Rock- und Metal-Band aus Zwickau. Konzerte, Musik, Gallerie und mehr!",
+    url: "https://burningdezibelz.de",
+    author_name: "Burning Dezibelz",
+    language: "de",
+    open_graph_image: "https://burningdezibelz.de/band_bild_2025-05-28.jpg",
+    open_graph_image_alt: "Burning Dezibelz Banner",
+    site_name: "Burning Dezibelz",
+    twitter_card_type: "summary_large_image",
+    website: "https://burningdezibelz.de",
+  };
 </script>
 
+<Head {seo_config} />
 <AboutSchemaOrg />
 
 <ContentContainer>

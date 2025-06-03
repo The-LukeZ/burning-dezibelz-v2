@@ -1,11 +1,13 @@
 <script lang="ts">
+  import Head from "$lib/components/Head.svelte";
   import type { SeoConfig } from "$lib/components/Head.svelte";
+  import JsonLd from "$lib/components/JsonLd.svelte";
 
   let { data } = $props();
   let error = $state<string | null>(data.error || null);
 
   const seo_config: SeoConfig = {
-    title: "Burning Dezibelz - Über Uns",
+    title: "Setlist | Burning Dezibelz",
     description:
       "Entdecke die Burning Dezibelz, eine junge Rock- und Metal-Band aus Zwickau. Konzerte, Musik, Gallerie und mehr!",
     url: "https://burningdezibelz.de",
@@ -36,6 +38,9 @@
       })) || [],
   };
 </script>
+
+<Head {seo_config} />
+<JsonLd item={schema_org} />
 
 <div class="mx-auto mb-10 max-w-[800px] overflow-x-auto">
   <table class="dy-table dy-table-zebra min-w-[400px]">
