@@ -4,7 +4,6 @@
   import JsonLd from "$lib/components/JsonLd.svelte";
 
   let { data } = $props();
-  let error = $state<string | null>(data.error || null);
 
   const seo_config: SeoConfig = {
     title: "Setlist | Burning Dezibelz",
