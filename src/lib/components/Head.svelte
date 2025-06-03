@@ -123,7 +123,8 @@
 </script>
 
 <svelte:head>
-  <!-- Canonical URL is already handled in root layout -->
+  <link rel="canonical" href={seo_config.url} />
+
   <!-- Basic Meta Tags -->
   <title>{seo_config.title}</title>
   <meta name="title" content={seo_config.title} />
