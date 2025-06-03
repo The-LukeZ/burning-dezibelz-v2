@@ -10,6 +10,6 @@ const s3Client = new S3Client({
   },
 });
 
-console.log("S3 Client initialized with endpoint:", env.R2_ENDPOINT);
+console.log("Env keys:", Array.from(Object.keys(env)));
 
 export { s3Client as S3 };
