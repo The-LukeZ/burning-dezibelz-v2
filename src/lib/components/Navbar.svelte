@@ -42,41 +42,40 @@
 </script>
 
 {#snippet navbarLinks()}
-  {#if isDashboard && page.url.pathname !== "/dash/login"}
-    {#each navItems as item}
-      <li>
-        <a
-          href={item.href}
-          class="nav-btn"
-          class:active-link={isCurrentPage(item, page.url)}
-          class:hidden={item.requiresAdmin && !page.data.isAdmin}
-        >
-          {item.label}
-        </a>
-      </li>
-    {/each}
-    <button
-      class="dy-btn dy-btn-error dy-btn-outline"
-      onclick={() => goto("/dash/logout")}
-      aria-label="Logout"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+  {#each navItems as item}
+    <li>
+      <a
+        href={item.href}
+        class="nav-btn"
+        class:active-link={isCurrentPage(item, page.url)}
+        class:hidden={item.requiresAdmin && !page.data.isAdmin}
       >
-        <path d="m16 17 5-5-5-5" />
-        <path d="M21 12H9" />
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      </svg>
-    </button>
-  {/if}
+        {item.label}
+      </a>
+    </li>
+  {/each}
+  <button
+    class="dy-btn dy-btn-error dy-btn-outline"
+    class:hidden={!isDashboard || (isDashboard && page.url.pathname !== "/dash/login")}
+    onclick={() => goto("/dash/logout")}
+    aria-label="Logout"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="m16 17 5-5-5-5" />
+      <path d="M21 12H9" />
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    </svg>
+  </button>
 {/snippet}
 
 <nav class="dy-navbar fixed top-0 right-0 left-0 z-50 h-(--navbar-height) bg-black/15 backdrop-blur-md">
@@ -102,7 +101,9 @@
           ? 'md:flex'
           : 'sm:flex'}"
       >
-        {@render navbarLinks()}
+        {#if page.url.pathname !== "/dash/login"}
+          {@render navbarLinks()}
+        {/if}
       </ul>
       <div class="dy-dropdown dy-dropdown-end {isDashboard ? 'md:hidden' : 'sm:hidden'}">
         <div tabindex="0" role="button" class="dy-btn dy-btn-primary dy-btn-soft dy-btn-square">
@@ -126,7 +127,9 @@
           tabindex="0"
           class="dy-dropdown-content dy-menu dy-menu-xl bg-base-200 rounded-box mobile-menu z-100 mt-3 p-2 drop-shadow-lg"
         >
-          {@render navbarLinks()}
+          {#if page.url.pathname !== "/dash/login"}
+            {@render navbarLinks()}
+          {/if}
         </ul>
       </div>
     </div>

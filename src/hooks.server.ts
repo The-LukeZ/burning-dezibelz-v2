@@ -4,13 +4,21 @@ import type { User } from "@supabase/supabase-js";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
-import { NODE_ENV, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
+import { NODE_ENV, R2_ENDPOINT, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
 
 Sentry.init({
   dsn: PUBLIC_SENTRY_DSN,
   tracesSampleRate: 1,
 });
+
+export async function init() {
+  console.debug("NODE_ENV:", NODE_ENV);
+  console.debug("PUBLIC_SENTRY_DSN:", PUBLIC_SENTRY_DSN);
+  console.debug("PUBLIC_SUPABASE_URL:", PUBLIC_SUPABASE_URL);
+  console.debug("SUPABASE_SERVICE_ROLE_KEY:", SUPABASE_SERVICE_ROLE_KEY ? "set" : "not set");
+  console.debug("S3 Client initialized with endpoint:", R2_ENDPOINT);
+}
 
 const devToolsCheck: Handle = async ({ event, resolve }) => {
   if (event.url.pathname.startsWith("/.well-known/appspecific/com.chrome.devtools")) {
