@@ -2,6 +2,7 @@
   import { buildImageUrl } from "$lib";
   import Lock from "$lib/assets/Lock.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
+  import Head from "$lib/components/Head.svelte";
   import SiteHeader from "$lib/components/SiteHeader.svelte";
   import { EventMetadata, EventStore, serializeConcerts } from "$lib/stores/events.svelte";
   import { concertHref, filterConcerts, formatGermanDateTime } from "$lib/utils/concerts";
@@ -15,9 +16,18 @@
       venue: concert.venue_id ? (EventStore.venues.get(concert.venue_id) ?? null) : null,
     })),
   );
-
-  let concertsLoaded = $derived(EventMetadata.concertsLoaded);
 </script>
+
+<Head
+  seo_config={{
+    title: "Anstehende Konzerte | Burning Dezibelz",
+    description: "Verpasse keine Konzerte der Burning Dezibelz!",
+    url: "https://burningdezibelz.de/konzerte",
+    site_name: "Anstehende Konzerte | Burning Dezibelz",
+    author_name: "Burning Dezibelz",
+    language: "de",
+  }}
+/>
 
 <SiteHeader title="Anstehende Konzerte" />
 <div class="mb-4 flex justify-center">
@@ -27,15 +37,17 @@
 </div>
 
 <section>
-  {#if !concertsLoaded && EventStore.concerts.size === 0}
+  {#if !EventMetadata.concertsLoaded && EventStore.concerts.size === 0}
     <span class="dy-loading dy-loading-dots mx-auto my-3"></span>
-  {:else if concertsLoaded && EventStore.concerts.size === 0}
+  {:else if EventMetadata.concertsLoaded && EventStore.concerts.size === 0}
     <p class="mx-auto my-3">Keine anstehenden Konzerte gefunden.</p>
   {:else}
     {#each filteredConcerts as concert}
       {@const isPublic = concert.type === "public"}
       {@const concertTitle = isPublic ? concert.name : "Privates Konzert"}
-      <div class="dy-card bg-(--color-light-base-100) w-full max-w-96 shadow-sm transition duration-150 hover:-translate-y-1">
+      <div
+        class="dy-card w-full max-w-96 bg-(--color-light-base-100) shadow-sm transition duration-150 hover:-translate-y-1"
+      >
         <figure class="relative aspect-video">
           {#if concert.image}
             <img src={buildImageUrl(concert.image)} alt={concertTitle} class="size-full" />

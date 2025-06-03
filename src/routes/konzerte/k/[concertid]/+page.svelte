@@ -1,11 +1,12 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { copyConcertLink } from "$lib";
+  import { copyConcertLink, normalizeName } from "$lib";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
   import ContentContainer from "$lib/components/ContentContainer.svelte";
-  import { formatGermanDateTime } from "$lib/utils/concerts";
+  import Head from "$lib/components/Head.svelte";
+  import { buildConcertDescription, buildConcertTitle, formatGermanDateTime } from "$lib/utils/concerts";
   import { fade, slide } from "svelte/transition";
 
   let { data } = $props();
@@ -16,6 +17,16 @@
   let imageUrl = $derived(image ? `/cdn/${image.name}` : null);
   let error = $state<string | null>(data.error ?? null);
 </script>
+
+<Head
+  seo_config={{
+    title: buildConcertTitle(data.concert ?? null),
+    description: buildConcertDescription(data.concert ?? null, data.venue?.city),
+    url: page.url.origin + page.url.pathname + (venue ? `#${normalizeName(venue.name)}` : ""),
+    author_name: "Burning Dezibelz",
+    language: "de",
+  }}
+/>
 
 {#snippet backBtn()}
   <a

@@ -3,6 +3,7 @@
   import { buildImageUrl } from "$lib";
   import Lock from "$lib/assets/Lock.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
+  import Head from "$lib/components/Head.svelte";
   import SiteHeader from "$lib/components/SiteHeader.svelte";
   import { EventStore, fetchConcerts, serializeConcerts } from "$lib/stores/events.svelte";
   import { concertHref, formatGermanDateTime } from "$lib/utils/concerts";
@@ -36,6 +37,17 @@
     }
   });
 </script>
+
+<Head
+  seo_config={{
+    title: "Konzertarchiv | Burning Dezibelz",
+    description: "Verpasse keine Konzerte der Burning Dezibelz!",
+    url: "https://burningdezibelz.de/konzerte/archiv",
+    site_name: "Konzertarchiv | Burning Dezibelz",
+    author_name: "Burning Dezibelz",
+    language: "de",
+  }}
+/>
 
 <SiteHeader title="Konzertarchiv" />
 <div class="mb-4 flex justify-center">
