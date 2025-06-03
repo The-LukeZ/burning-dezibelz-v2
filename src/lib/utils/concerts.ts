@@ -5,16 +5,16 @@ export function getConcertDisplayName(concert: Concert): string {
   if (concert.name) {
     return concert.name;
   }
-  let displayName = concert.type === "closed" ? "Closed" : "Unknown";
+  let displayName = concert.type === "closed" ? "Geschlossene Veranstaltung" : "Unbekannte Veranstaltung";
   if (concert.venue_id) {
-    displayName = EventStore.venues?.get(concert.venue_id)?.name || "Unknown Venue";
+    displayName = EventStore.venues?.get(concert.venue_id)?.name || "Unbekannter Veranstaltungsort";
   }
   return displayName;
 }
 
 export function formatGermanDateTime(dateString: string | null, onlyDate = false): string {
   if (!dateString) {
-    return "Invalid Date";
+    return "Ungültiges Datum";
   }
 
   try {
@@ -53,6 +53,37 @@ export function formatDateTimeLocal(dateString: string): string {
   } catch (e) {
     return "";
   }
+}
+
+export function buildConcertTitle(concert: Concert | null): string {
+  if (!concert) {
+    return "Konzert nicht gefunden";
+  }
+
+  if (concert.type === "closed") {
+    return `Privates Konzert | ${formatGermanDateTime(concert.timestamp, true)}`;
+  }
+
+  const displayName = getConcertDisplayName(concert);
+  const date = formatGermanDateTime(concert.timestamp, true);
+  return `Konzert am ${date} | ${displayName}`;
+}
+
+export function buildConcertDescription(concert: Concert | null, venueCity: string | null = null): string {
+  if (!concert) {
+    return "Konzert nicht gefunden.";
+  }
+
+  if (concert.type === "closed") {
+    return `Privates Konzert am ${formatGermanDateTime(concert.timestamp, true)}`;
+  }
+
+  const displayName = getConcertDisplayName(concert);
+  const date = formatGermanDateTime(concert.timestamp, true);
+  const venue =
+    venueCity ||
+    (concert.venue_id ? EventStore.venues?.get(concert.venue_id)?.city : "Unbekannter Veranstaltungsort");
+  return `${displayName} am ${date} | ${venue}`;
 }
 
 interface FetchConcertOptions {
