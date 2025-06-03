@@ -9,7 +9,7 @@
     title: "Setlist | Burning Dezibelz",
     description:
       "Entdecke die Burning Dezibelz, eine junge Rock- und Metal-Band aus Zwickau. Konzerte, Musik, Gallerie und mehr!",
-    url: "https://burningdezibelz.de",
+    url: "https://burningdezibelz.de/setlist",
     author_name: "Burning Dezibelz",
     language: "de",
     open_graph_image: "https://burningdezibelz.de/band_bild_2025-05-28.jpg",
