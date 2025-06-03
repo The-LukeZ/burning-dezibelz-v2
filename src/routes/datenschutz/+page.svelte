@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
+  import Head from "$lib/components/Head.svelte";
   import { onMount } from "svelte";
 
   let deleted = $state<boolean>(false);
@@ -14,6 +15,16 @@
     }
   });
 </script>
+
+<Head
+  seo_config={{
+    title: "Datenschutz | Burning Dezibelz",
+    description: "Datenschutzbestimmungen der Burning Dezibelz",
+    url: "https://burningdezibelz.de/datenschutz",
+    author_name: "Burning Dezibelz",
+    language: "de",
+  }}
+/>
 
 <div class="dy-prose mx-auto w-full max-w-[1000px] items-center justify-between p-[1rem] py-5">
   <h1 class="text-3xl font-bold">Datenschutz</h1>

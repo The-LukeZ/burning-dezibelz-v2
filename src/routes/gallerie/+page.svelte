@@ -3,6 +3,7 @@
   import { buildImageUrl } from "$lib";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
   import Download from "$lib/assets/Download.svelte";
+  import Head from "$lib/components/Head.svelte";
   import { onMount } from "svelte";
 
   let { data: pageData } = $props();
@@ -48,6 +49,16 @@
     loading = false;
   });
 </script>
+
+<Head
+  seo_config={{
+    title: "Gallerie | Burning Dezibelz",
+    description: "Entdecke die Bilder unserer Konzerte und Events.",
+    url: "https://burningdezibelz.de/gallerie",
+    author_name: "Burning Dezibelz",
+    language: "de",
+  }}
+/>
 
 <h1 class="mx-auto my-3 w-fit text-3xl font-bold">Gallerie</h1>
 
