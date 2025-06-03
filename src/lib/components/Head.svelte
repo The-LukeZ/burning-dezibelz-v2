@@ -6,7 +6,7 @@
    * including meta tags and social media properties.
    * The properties in this interface can be used to generate the
    * necessary HTML meta tags.
-   * 
+   *
    * Adapted from https://github.com/spences10/svead
    */
   export interface SeoConfig {
@@ -123,8 +123,7 @@
 </script>
 
 <svelte:head>
-  <link rel="canonical" href={seo_config.url} />
-
+  <!-- Canonical URL is already handled in root layout -->
   <!-- Basic Meta Tags -->
   <title>{seo_config.title}</title>
   <meta name="title" content={seo_config.title} />
