@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "local": "node build/index.js",
-    "start": "cross-env PORT=9999 HOST=localhost ORIGIN=https://burningdezibelz.de node build/index.js",
+    "local": "node --env-file=.env.local build/index.js",
+    "start": "node --env-file=.env.production build/index.js",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
