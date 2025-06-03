@@ -1,3 +1,21 @@
+<script>
+  import Head from "$lib/components/Head.svelte";
+</script>
+
+<svelte:head>
+  <meta name="robots" content="index, nofollow" />
+</svelte:head>
+
+<Head
+  seo_config={{
+    title: "Impressum | Burning Dezibelz",
+    description: "Impressum der Burning Dezibelz",
+    url: "https://burningdezibelz.de/impressum",
+    author_name: "Burning Dezibelz",
+    language: "de",
+  }}
+/>
+
 <div class="dy-prose mx-auto w-full max-w-[1000px] items-center justify-between p-[1rem] py-5">
   <h1 class="text-3xl font-bold">Impressum</h1>
   <span class="dy-divider"></span>

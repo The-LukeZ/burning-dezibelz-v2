@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Head from "$lib/components/Head.svelte";
   import SiteHeader from "$lib/components/SiteHeader.svelte";
 
   let mailData = $state({
@@ -6,6 +7,16 @@
     body: "",
   });
 </script>
+
+<Head
+  seo_config={{
+    title: "Kontakt | Burning Dezibelz",
+    description: "Kontaktiere uns über dieses Formular.",
+    url: "https://burningdezibelz.de/kontakt",
+    author_name: "Burning Dezibelz",
+    language: "de",
+  }}
+/>
 
 <SiteHeader title={"Kontakt"} />
 <p class="text-base-content/65 mx-auto mb-2 text-center text-sm">Kontaktiere uns hier!</p>
