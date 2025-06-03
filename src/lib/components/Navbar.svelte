@@ -42,19 +42,19 @@
 </script>
 
 {#snippet navbarLinks()}
-  {#each navItems as item}
-    <li>
-      <a
-        href={item.href}
-        class="nav-btn"
-        class:active-link={isCurrentPage(item, page.url)}
-        class:hidden={item.requiresAdmin && !page.data.isAdmin}
-      >
-        {item.label}
-      </a>
-    </li>
-  {/each}
   {#if isDashboard && page.url.pathname !== "/dash/login"}
+    {#each navItems as item}
+      <li>
+        <a
+          href={item.href}
+          class="nav-btn"
+          class:active-link={isCurrentPage(item, page.url)}
+          class:hidden={item.requiresAdmin && !page.data.isAdmin}
+        >
+          {item.label}
+        </a>
+      </li>
+    {/each}
     <button
       class="dy-btn dy-btn-error dy-btn-outline"
       onclick={() => goto("/dash/logout")}
