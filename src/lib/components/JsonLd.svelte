@@ -19,10 +19,10 @@
      */
     item: Graph | WithContext<Thing>;
     /**
-     * Optional. Adds indentation, white space, and line break characters to JSON-LD output.
-     * This is passed to `JSON.stringify` as the second argument.
+     * Optional JSON.stringify options.
+     * This can be used to format the JSON-LD output to be more readable.
      */
-    space?: string | number;
+    space?: number;
   }
 
   let { item, space }: Props = $props();
@@ -80,11 +80,8 @@
   /**
    * Produces necessary props for a script tag that includes JSON-LD.
    */
-  function jsonLdScriptProps(item: Graph | WithContext<Thing>, options: JsonLdOptions = {}) {
-    return {
-      type: "application/ld+json" as const,
-      innerHTML: JSON.stringify(item, safeJsonLdReplacer, options.space),
-    };
+  function processJsonLd(item: Graph | WithContext<Thing>, options: JsonLdOptions = {}) {
+    return JSON.stringify(item, safeJsonLdReplacer, options.space);
   }
 
   /**
@@ -103,13 +100,9 @@
     };
   }
 
-  const scriptProps = $state<ReturnType<typeof jsonLdScriptProps>>(jsonLdScriptProps(item, { space }));
+  const processed_schema = processJsonLd(item, { space });
 
-  $effect(() => {
-    const data = jsonLdScriptProps(item, { space });
-    scriptProps.type = data.type;
-    scriptProps.innerHTML = data.innerHTML;
-  });
+  const jsonLdData = `<script type="application/ld+json">${processed_schema}</scr` + `ipt>`;
 </script>
 
 <!--
@@ -133,5 +126,5 @@ Usage example:
 -->
 
 <svelte:head>
-  <script {...scriptProps}></script>
+  {@html jsonLdData}
 </svelte:head>
