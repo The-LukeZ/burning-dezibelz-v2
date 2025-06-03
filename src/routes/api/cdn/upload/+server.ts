@@ -1,6 +1,5 @@
-import { env } from "$env/dynamic/private";
-import { PUBLIC_R2_BUCKET_NAME } from "$env/static/public";
-import { getFileExtension, normalizeName, removeExtension } from "$lib";
+import { env as pubEnv } from "$env/dynamic/public";
+import { normalizeName } from "$lib";
 import { JsonErrors } from "$lib/constants.js";
 import { S3 } from "$lib/server/s3.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -20,7 +19,7 @@ export async function POST({ request, locals: { supabase } }) {
     const objectKey = `images/${Date.now().toString()}-${normalizeName(fileName)}`;
 
     const command = new PutObjectCommand({
-      Bucket: PUBLIC_R2_BUCKET_NAME,
+      Bucket: pubEnv.PUBLIC_R2_BUCKET_NAME,
       Key: objectKey,
       ContentType: fileType,
       ACL: "public-read",

@@ -1,7 +1,6 @@
-import { json } from "@sveltejs/kit";
 import { S3 } from "$lib/server/s3";
 import { CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { PUBLIC_R2_BUCKET_NAME } from "$env/static/public";
+import { env as pubEnv } from "$env/dynamic/public";
 import { JsonErrors } from "$lib/constants.js";
 
 export async function POST({ request, locals: { supabase } }) {
@@ -30,8 +29,8 @@ export async function POST({ request, locals: { supabase } }) {
 
     // Copy object with new key
     const copyCommand = new CopyObjectCommand({
-      Bucket: PUBLIC_R2_BUCKET_NAME,
-      CopySource: `${PUBLIC_R2_BUCKET_NAME}/${oldKey}`,
+      Bucket: pubEnv.PUBLIC_R2_BUCKET_NAME,
+      CopySource: `${pubEnv.PUBLIC_R2_BUCKET_NAME}/${oldKey}`,
       Key: newKey,
     });
 
@@ -49,7 +48,7 @@ export async function POST({ request, locals: { supabase } }) {
     if (updateError) {
       // Rollback: delete the copied object
       const deleteNewCommand = new DeleteObjectCommand({
-        Bucket: PUBLIC_R2_BUCKET_NAME,
+        Bucket: pubEnv.PUBLIC_R2_BUCKET_NAME,
         Key: newKey,
       });
       await S3.send(deleteNewCommand);
@@ -59,7 +58,7 @@ export async function POST({ request, locals: { supabase } }) {
 
     // Delete old object
     const deleteOldCommand = new DeleteObjectCommand({
-      Bucket: PUBLIC_R2_BUCKET_NAME,
+      Bucket: pubEnv.PUBLIC_R2_BUCKET_NAME,
       Key: oldKey,
     });
 

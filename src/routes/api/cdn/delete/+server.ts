@@ -1,6 +1,6 @@
 import { S3 } from "$lib/server/s3.js";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { PUBLIC_R2_BUCKET_NAME } from "$env/static/public";
+import { env as pubEnv } from "$env/dynamic/public";
 import { JsonErrors } from "$lib/constants.js";
 import * as Sentry from "@sentry/sveltekit";
 
@@ -27,7 +27,7 @@ export async function POST({ request, locals: { supabase } }) {
     const deletePromises = images.map((image) =>
       S3.send(
         new DeleteObjectCommand({
-          Bucket: PUBLIC_R2_BUCKET_NAME,
+          Bucket: pubEnv.PUBLIC_R2_BUCKET_NAME,
           Key: image.r2_key,
         }),
       ),

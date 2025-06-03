@@ -1,4 +1,4 @@
-import { PUBLIC_R2_BUCKET_NAME } from "$env/static/public";
+import { env as pubEnv } from "$env/dynamic/public";
 import { JsonErrors } from "$lib/constants.js";
 import { S3 } from "$lib/server/s3.js";
 import { HeadObjectCommand } from "@aws-sdk/client-s3";
@@ -21,7 +21,7 @@ export async function POST({ request, locals: { supabase } }) {
     try {
       await S3.send(
         new HeadObjectCommand({
-          Bucket: PUBLIC_R2_BUCKET_NAME,
+          Bucket: pubEnv.PUBLIC_R2_BUCKET_NAME,
           Key: imageData.r2_key,
         }),
       );

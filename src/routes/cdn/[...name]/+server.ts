@@ -1,4 +1,4 @@
-import { PUBLIC_R2_BUCKET_NAME } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import { JsonErrors } from "$lib/constants";
 import { RateLimiter } from "$lib/server/ratelimiter";
 import { S3 } from "$lib/server/s3";
@@ -129,7 +129,7 @@ function hasTransformations(options: TransformOptions): boolean {
 }
 
 // --- GET Request Handler ---
-export async function GET({ params, request, getClientAddress, url }) {
+export async function GET({ params, getClientAddress, url }) {
   const imageName = params.name;
 
   if (!imageName) {
@@ -176,7 +176,7 @@ export async function GET({ params, request, getClientAddress, url }) {
 
   try {
     const command = new GetObjectCommand({
-      Bucket: PUBLIC_R2_BUCKET_NAME,
+      Bucket: env.PUBLIC_R2_BUCKET_NAME,
       Key: imageName,
     });
     const s3Response = await S3.send(command).catch((err) => {
