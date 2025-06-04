@@ -11,7 +11,16 @@ export async function load({ locals, url }) {
     redirect(303, url.searchParams.get("next")!);
   }
 
+  // Check if user is admin
+  const { data: users } = await locals.supabase.from("allowed_users").select("*");
+  const allowedUser = users?.find((u) => u.email === locals.user!.email) ?? null;
+  const isAdmin = allowedUser?.role === "admin";
+
+  console.debug(
+    `User ${locals.user.user_metadata.full_name} is authorized as ${allowedUser?.role} for admin routes`,
+  );
+
   return {
-    isAdmin: locals.isAdmin,
+    isAdmin,
   };
 }
