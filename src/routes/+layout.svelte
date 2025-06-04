@@ -1,6 +1,6 @@
 <script lang="ts">
   import "../app.css";
-  import { beforeNavigate, goto, invalidateAll } from "$app/navigation";
+  import { afterNavigate, beforeNavigate, goto, invalidateAll } from "$app/navigation";
   import { onMount } from "svelte";
   import { page } from "$app/state";
   import Navbar from "$lib/components/Navbar.svelte";
@@ -12,12 +12,13 @@
   let { supabase, session } = $derived(data);
   let pageLoading = $state(false);
 
-  beforeNavigate((nav) => {
+  beforeNavigate(async () => {
     pageLoading = true;
+  });
 
-    nav.complete.then(() => {
-      pageLoading = false;
-    });
+  afterNavigate(async () => {
+    // Reset pageLoading after navigation
+    pageLoading = false;
   });
 
   onMount(() => {
@@ -56,7 +57,10 @@
   {#if !pageLoading}
     {@render children()}
   {:else}
-    <div class="relative grid min-h-full w-full place-items-center">
+    <div
+      class="relative grid min-h-full w-full place-items-center"
+      transition:slide={{ duration: 200, axis: "y" }}
+    >
       <span class="dy-loading dy-loading-spinner w-20"></span>
     </div>
   {/if}

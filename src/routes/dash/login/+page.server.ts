@@ -1,11 +1,20 @@
 import { fail, redirect } from "@sveltejs/kit";
 
+export async function load({ locals }) {
+  if (locals.user && locals.session) {
+    // User is already authenticated, redirect to home
+    redirect(303, "/dash/home");
+  }
+
+  return {};
+}
+
 export const actions = {
   login: async ({ url, locals: { supabase } }) => {
     const { data, error: err } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${url.origin}/api/google-auth/callback?next=/dash`,
+        redirectTo: `${url.origin}/api/google-auth/callback?next=${url.searchParams.get("next") || "/dash/home"}`,
         skipBrowserRedirect: true,
       },
     });
