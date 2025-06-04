@@ -11,7 +11,7 @@
     email: "burningdezibelz@gmail.com",
     description:
       "Entdecke die Burning Dezibelz, eine junge Rock- und Metal-Band aus Zwickau. Konzerte, Musik, Gallerie und mehr!",
-    image: "https://burningdezibelz.de/burningdezibelz-banner.png",
+    image: "https://burningdezibelz.de/burningdezibelz-banner.webp",
     sameAs: ["https://www.youtube.com/@BurningDezibelz", "https://www.instagram.com/burning_dezibelz"],
     logo: {
       "@type": "ImageObject",

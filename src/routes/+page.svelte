@@ -64,7 +64,7 @@
       <span class="h-8 w-full bg-black"></span>
       <img
         id="banner-image"
-        src="/burningdezibelz-banner.png"
+        src="/burningdezibelz-banner.webp"
         alt="Burning Dezibelz Banner"
         class="mx-auto max-h-screen w-full object-contain"
       />
@@ -141,7 +141,7 @@
       {@render heading("ueber", "Über uns")}
       <div class="dy-card sm:dy-card-side bg-base-100 container mx-auto max-w-[1000px] shadow-sm">
         <figure class="sm:max-w-1/2">
-          <img src="/ringkeller_1748128961.png" alt="Im Ringkeller, März 2025" />
+          <img src="/ringkeller_1748128961.webp" alt="Im Ringkeller, März 2025" />
         </figure>
         <div class="dy-card-body short-about justify-around sm:text-lg">
           <h2 class="dy-card-title block text-2xl font-bold text-balance">
