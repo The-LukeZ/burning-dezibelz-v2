@@ -30,7 +30,10 @@
     </div>
   {/if}
 
-  <form method="POST" action="?/login">
+  <form
+    method="POST"
+    action="?/login&next={encodeURIComponent(page.url.searchParams.get('next') ?? '/dash/home')}"
+  >
     <button
       type="submit"
       class="dy-btn dy-btn-lg gap-2 bg-white px-4 text-black hover:bg-[#3b3b3b] hover:text-white"
