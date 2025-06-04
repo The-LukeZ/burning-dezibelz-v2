@@ -11,6 +11,7 @@ export async function load({ locals }) {
 
 export const actions = {
   login: async ({ url, locals: { supabase } }) => {
+    console.log("URL:", url.toString());
     const { data, error: err } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
