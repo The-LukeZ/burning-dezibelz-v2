@@ -17,9 +17,6 @@ export async function PUT({ params: { venue_id }, request, locals: { supabase } 
     url = url.replace(/\/+$/, "");
   }
 
-  console.log("Updating venue with ID:", venue_id);
-  console.log("Request body:", { name, address, city, postal_code, state, country, url });
-
   const { data, error } = await supabase
     .from("venues")
     .update({ name, address, city, postal_code, state, country, url })
@@ -32,8 +29,6 @@ export async function PUT({ params: { venue_id }, request, locals: { supabase } 
     return Response.json({ error }, { status: 500 });
   }
 
-  console.log("Updated venue data:", data);
-
   return Response.json(data);
 }
 
@@ -44,8 +39,6 @@ export async function DELETE({ params: { venue_id }, locals: { supabase } }) {
     console.error("Error deleting venue:", error);
     return Response.json({ error }, { status: 500 });
   }
-
-  console.log("Deleted venue with ID:", venue_id);
 
   return new Response(null, { status: 204 });
 }

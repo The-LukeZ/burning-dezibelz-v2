@@ -55,7 +55,6 @@
       return;
     }
 
-    console.log("User updated successfully:", upUser);
     users = users.map((u) => (u.email === user.email ? upUser : u));
   }
 
@@ -72,7 +71,6 @@
     }
 
     users = users.filter((user) => user.email !== email);
-    console.log("User deleted successfully:", email);
   }
 
   async function createUser() {
@@ -96,7 +94,6 @@
     }
 
     users.push(newUser);
-    console.log("User created successfully:", newUser);
     newUserData.user = null;
     loading = false;
   }

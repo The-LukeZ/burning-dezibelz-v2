@@ -148,8 +148,6 @@
     }
 
     images = _images || [];
-
-    console.log("Fetched images:", images);
   });
 
   onDestroy(async () => {

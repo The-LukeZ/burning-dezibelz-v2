@@ -117,7 +117,5 @@ export async function POST({ request, locals: { supabase } }) {
     return Response.json({ error }, { status: 500 });
   }
 
-  console.log("Inserted concert:", data);
-
   return Response.json(data, { status: 201 });
 }

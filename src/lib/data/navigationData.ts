@@ -18,7 +18,6 @@ const navItems = {
 };
 
 function getItemsForPath(pathname: string): NavItem[] {
-  console.log("getItemsForPath", pathname);
   if (pathname.startsWith("/dash")) return navItems.private;
   return navItems.public;
 }

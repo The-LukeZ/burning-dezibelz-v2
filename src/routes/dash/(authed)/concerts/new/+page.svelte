@@ -102,8 +102,6 @@
         image: concert.type === "closed" ? null : (concert.image ?? null),
       };
 
-      console.log("Concert Data", concertData);
-
       const response = await fetch("/api/concerts", {
         method: "POST",
         headers: {

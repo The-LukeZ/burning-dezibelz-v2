@@ -106,6 +106,7 @@ export async function fetchVenues() {
   for (const venue of venues) {
     EventStore.venues.set(venue.id, venue);
   }
+
   console.log("Fetched venues:", EventStore.venues);
   EventMetadata.venuesLoaded = true;
 }

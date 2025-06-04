@@ -47,7 +47,7 @@
       }
 
       const data = await response.json();
-      console.log("Venue updated:", data);
+
       EventStore.venues.set(data.id, data);
 
       // Navigate back to concerts list on success

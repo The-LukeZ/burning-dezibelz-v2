@@ -9,8 +9,6 @@ export async function GET({ params: { concert_id }, locals: { supabase } }) {
     return Response.json({ error }, { status: 500 });
   }
 
-  console.log("Fetched concert:", data);
-
   return Response.json(data, { status: 200 });
 }
 
@@ -73,8 +71,6 @@ export async function PUT({ request, locals: { supabase }, params: { concert_id 
     return Response.json({ error }, { status: 500 });
   }
 
-  console.log("Updated concert:", data);
-
   return Response.json(data, { status: 200 });
 }
 
@@ -86,8 +82,6 @@ export async function DELETE({ locals: { supabase }, params: { concert_id } }) {
     console.error("Error deleting concert:", error);
     return Response.json({ error }, { status: 500 });
   }
-
-  console.log("Deleted concert with ID:", concert_id);
 
   return new Response(null, { status: 204 });
 }

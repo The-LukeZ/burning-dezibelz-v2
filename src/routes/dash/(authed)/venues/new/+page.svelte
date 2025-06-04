@@ -33,7 +33,7 @@
         url: venueDetails.url,
       };
 
-      console.log("venueData:", venueData);
+
 
       const response = await fetch("/api/venues", {
         method: "POST",
@@ -49,7 +49,7 @@
       }
 
       const data = await response.json();
-      console.log("Venue created:", data);
+
       EventStore.venues.set(data.id, data);
 
       // Navigate back to concerts list on success

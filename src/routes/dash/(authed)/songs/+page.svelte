@@ -88,7 +88,6 @@
     songs = [...oldSongs];
     deletedSongs.length = 0; // Clear deleted songs
     updateUniqueArtists();
-    console.log("Reverted changes to old songs:", $state.snapshot(songs));
   }
 
   onMount(async () => {
@@ -99,7 +98,6 @@
       songs = data;
       loading = false;
       updateUniqueArtists();
-      console.log("Fetched songs:", $state.snapshot(songs));
     } else {
       console.error("Failed to fetch songs:", response.statusText);
     }
