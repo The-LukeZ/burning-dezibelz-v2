@@ -1,4 +1,6 @@
 <script lang="ts">
+  import AdblockAlert from './AdblockAlert.svelte';
+
   import "../app.css";
   import { afterNavigate, beforeNavigate, goto, invalidateAll } from "$app/navigation";
   import { onMount } from "svelte";
@@ -78,31 +80,7 @@
 {/if}
 
 <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
-  {#await testSentryConnection() then isBlocked}
-    {@const adblockState = { showBanner: isBlocked, isBlocked }}
-    {#if adblockState.showBanner}
-      <div class="dy-alert dy-alert-warning dy-alert-vertical" transition:slide={{ duration: 200 }}>
-        <p class="text-center">
-          Du nutzt einen Adblocker. Wir bitten dich höflich, ihn zu deaktivieren, da wir <strong
-            >keine Werbung</strong
-          >
-          nutzen.
-          <br />
-          Jedoch nutzen wir ein Tool, um <strong>Fehler</strong> zu protokollieren, welches leider von vielen
-          Adblockern blockiert wird. Dies ist wichtig für die <strong>Wartung der Seite</strong> und das
-          <strong>Beheben von Fehlern</strong>.
-          <br />
-          <strong>Vielen Dank für dein Verständnis!</strong>
-        </p>
-        <button
-          class="dy-btn dy-btn-primary dy-btn-sm dy-btn-soft"
-          onclick={() => (adblockState.showBanner = false)}
-        >
-          OK
-        </button>
-      </div>
-    {/if}
-  {/await}
+  <AdblockAlert  />
   {#if showCookieBanner}
     <div class="dy-alert dy-alert-info dy-alert-vertical w-fit" transition:slide={{ duration: 200 }}>
       <div class="flex flex-col gap-1">
