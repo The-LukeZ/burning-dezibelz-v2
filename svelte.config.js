@@ -1,4 +1,4 @@
-import adapter from "@sveltejs/adapter-node";
+import adapter from "@sveltejs/adapter-vercel";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import * as child_process from "node:child_process";
 
@@ -9,7 +9,6 @@ const config = {
     adapter: adapter(),
     csrf: { checkOrigin: true },
     version: { name: child_process.execSync("npm pkg get version").toString().trim(), pollInterval: 10_000 },
-    env: { dir: "env" },
   },
 };
 

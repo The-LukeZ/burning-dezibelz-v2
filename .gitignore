@@ -16,3 +16,10 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Ignore environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
