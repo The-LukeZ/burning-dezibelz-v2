@@ -6,6 +6,11 @@ export async function load({ locals, url }) {
     redirect(303, "/dash/login?next=" + url.pathname);
   }
 
+  if (url.searchParams.has("next")) {
+    console.debug("Redirecting to next:", url.searchParams.get("next"));
+    redirect(303, url.searchParams.get("next")!);
+  }
+
   return {
     isAdmin: locals.isAdmin,
   };

@@ -1,3 +1,5 @@
+import { redirect } from "@sveltejs/kit";
+
 export async function load({ locals, url }) {
   if (!locals.user || !locals.session) {
     return { isAdmin: false };
@@ -11,6 +13,11 @@ export async function load({ locals, url }) {
   console.debug(
     `User ${locals.user.user_metadata.full_name} is authorized as ${allowedUser?.role} for admin routes`,
   );
+
+  if (url.searchParams.has("next")) {
+    console.debug("Redirecting to next:", url.searchParams.get("next"));
+    redirect(303, url.searchParams.get("next")!);
+  }
 
   return {
     isAdmin,
