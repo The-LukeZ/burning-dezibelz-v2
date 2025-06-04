@@ -8,12 +8,13 @@
   import "$lib/stores/events.svelte.js";
   import Footer from "$lib/components/Footer.svelte";
   import { slide } from "svelte/transition";
+  import { testSentryConnection } from "$lib/utils/sentryDetect";
 
   let { data, children } = $props();
   let { supabase, session } = $derived(data);
   let pageLoading = $state(false);
   let showCookieBanner = $state(false);
-  let shouldDisableAdblock = $state<boolean>(data.sentryIsBlocked);
+  let shouldDisableAdblock = $state<boolean>(false);
 
   beforeNavigate(async () => {
     pageLoading = true;
@@ -52,6 +53,9 @@
 
     if (browser) {
       showCookieBanner = localStorage.getItem("cookie-banner-accepted") !== "true";
+      testSentryConnection().then((isBlocked) => {
+        shouldDisableAdblock = isBlocked;
+      });
     }
 
     return () => subscription.unsubscribe();
@@ -93,7 +97,7 @@
   </button>
 {/snippet}
 
-{#if showCookieBanner || data.sentryIsBlocked}
+{#if showCookieBanner || shouldDisableAdblock}
   <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
     {#if shouldDisableAdblock}
       <div class="dy-alert dy-alert-warning dy-alert-vertical" transition:slide={{ duration: 200 }}>

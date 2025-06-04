@@ -17,6 +17,7 @@
     "test:unit": "vitest",
     "test": "npm run test:unit -- --run"
   },
+
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.2.12",
     "@sveltejs/adapter-vercel": "^5.7.2",
