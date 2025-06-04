@@ -1,36 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage - highest priority -->
   <url>
     <loc>https://burningdezibelz.de/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <lastmod>2025-01-05</lastmod>
   </url>
+  
+  <!-- Main content pages - high priority -->
   <url>
     <loc>https://burningdezibelz.de/konzerte</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <lastmod>2025-01-05</lastmod>
   </url>
+  
   <url>
-    <loc>https://burningdezibelz.de/about</loc>
-    <changefreq>yearly</changefreq>
-    <changefreq>2025-01-05</changefreq>
+    <loc>https://burningdezibelz.de/ueber-uns</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <lastmod>2025-01-05</lastmod>
   </url>
+  
   <url>
     <loc>https://burningdezibelz.de/setlist</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
+    <lastmod>2025-01-05</lastmod>
   </url>
+  
+  <url>
+    <loc>https://burningdezibelz.de/gallerie</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-01-05</lastmod>
+  </url>
+  
+  <!-- Archive page -->
+  <url>
+    <loc>https://burningdezibelz.de/konzerte/archiv</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2025-01-05</lastmod>
+  </url>
+  
+  <!-- Contact page -->
   <url>
     <loc>https://burningdezibelz.de/kontakt</loc>
     <changefreq>yearly</changefreq>
-    <changefreq>2025-01-05</changefreq>
     <priority>0.5</priority>
+    <lastmod>2025-01-05</lastmod>
   </url>
+  
+  <!-- Legal pages - lower priority -->
   <url>
     <loc>https://burningdezibelz.de/impressum</loc>
     <changefreq>yearly</changefreq>
-    <changefreq>2025-01-05</changefreq>
-    <priority>0.5</priority>
+    <priority>0.3</priority>
+    <lastmod>2025-01-05</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://burningdezibelz.de/datenschutz</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <lastmod>2025-01-05</lastmod>
   </url>
 </urlset>
