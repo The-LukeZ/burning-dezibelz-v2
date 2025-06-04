@@ -33,7 +33,7 @@
         for (const concert of res) {
           EventStore.concerts.set(concert.id, concert);
         }
-        console.log("Fetched concerts:", EventStore.concerts);
+        console.log("Fetched concerts:", $state.snapshot(EventStore.concerts));
         EventMetadata.concertsLoaded = true;
       }
     }
