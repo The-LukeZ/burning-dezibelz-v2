@@ -13,7 +13,7 @@
   let { supabase, session } = $derived(data);
   let pageLoading = $state(false);
   let showCookieBanner = $state(false);
-  let disableAdblock = $state<null | boolean>(data.sentryIsBlocked);
+  let shouldDisableAdblock = $state<boolean>(data.sentryIsBlocked);
 
   beforeNavigate(async () => {
     pageLoading = true;
@@ -85,7 +85,7 @@
         showCookieBanner = false;
         localStorage.setItem("cookie-banner-accepted", "true");
       } else {
-        disableAdblock = false;
+        shouldDisableAdblock = false;
       }
     }}
   >
@@ -95,7 +95,7 @@
 
 {#if showCookieBanner || data.sentryIsBlocked}
   <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
-    {#if disableAdblock !== null ? disableAdblock : !data.sentryIsBlocked}
+    {#if shouldDisableAdblock}
       <div class="dy-alert dy-alert-warning dy-alert-vertical" transition:slide={{ duration: 200 }}>
         <p class="text-center">
           Du nutzt einen Adblocker. Wir bitten dich höflich, ihn zu deaktivieren, da wir <strong
