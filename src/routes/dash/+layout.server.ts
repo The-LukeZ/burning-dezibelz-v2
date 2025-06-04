@@ -10,5 +10,7 @@ export async function load({ locals, url }) {
     redirect(303, url.searchParams.get("next")!);
   }
 
-  return {};
+  return {
+    isAdmin: locals.isAdmin,
+  };
 }

@@ -94,13 +94,14 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
   // Authorize user role for API routes only
   const isUsersApiRoute = event.url.pathname.startsWith("/api/users");
 
-  if (event.locals.user && isUsersApiRoute) {
+  if (event.locals.user) {
     const { data: users } = await event.locals.supabase.from("allowed_users").select("*");
     const allowedUser = users?.find((u) => u.email === event.locals.user!.email) ?? null;
 
-    if (!allowedUser || allowedUser.role !== "admin") {
+    if (isUsersApiRoute && (!allowedUser || allowedUser.role !== "admin")) {
       return Response.json({ error: "No Permission" }, { status: 403 });
     }
+    event.locals.isAdmin = allowedUser?.role === "admin";
   }
 
   return resolve(event);
