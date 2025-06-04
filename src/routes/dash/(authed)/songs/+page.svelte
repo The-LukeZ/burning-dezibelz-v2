@@ -3,7 +3,7 @@
   import Trashcan from "$lib/assets/Trashcan.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import { onMount } from "svelte";
-  import type { SongBatchPayload } from "../../api/songs/+server";
+  import type { SongBatchPayload } from "../../../api/songs/+server";
 
   let oldSongs: Song[] = [];
   let songs = $state<Song[]>([]);
