@@ -12,6 +12,8 @@
     author_name: "Burning Dezibelz",
     language: "de",
     twitter_card_type: "summary",
+    site_name: "Burning Dezibelz",
+    website: "https://burningdezibelz.de/",
   }}
 />
 
