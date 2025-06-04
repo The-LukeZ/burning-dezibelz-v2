@@ -14,9 +14,12 @@
 
   // To prevent unnecessary re-renders, we only update navItems if the items for the current path change
   $effect(() => {
-    if (!equal(oldItems, getItemsForPath(page.url.pathname))) {
-      oldItems = getItemsForPath(page.url.pathname);
-      navItems = [...oldItems];
+    const currentPath = page.url.pathname;
+    const newItems = getItemsForPath(currentPath);
+    if (!equal(oldItems, newItems)) {
+      console.log("Updating nav items for path:", currentPath);
+      oldItems = newItems;
+      navItems = [...newItems];
     }
   });
 
