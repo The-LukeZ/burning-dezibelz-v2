@@ -8,7 +8,7 @@ const config = {
   kit: {
     adapter: adapter(),
     csrf: { checkOrigin: true },
-    version: { name: child_process.execSync("npm pkg get version").toString().trim(), pollInterval: 10_000 },
+    version: { name: child_process.execSync("npm pkg get version").toString().trim(), pollInterval: 60_000 },
   },
 };
 
