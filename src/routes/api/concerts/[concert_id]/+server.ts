@@ -35,6 +35,7 @@ export async function PUT({ request, locals: { supabase }, params: { concert_id 
     concertData.ticket_url = null;
     concertData.price = null;
     concertData.name = "";
+    concertData.image = null;
   } else if (cleanedData.type === "public") {
     if (!cleanedData.name || cleanedData.name.length === 0) {
       return Response.json({ error: "Name is required for public concerts." }, { status: 400 });
