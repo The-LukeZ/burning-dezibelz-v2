@@ -14,7 +14,6 @@
   let { supabase, session } = $derived(data);
   let pageLoading = $state(false);
   let showCookieBanner = $state(false);
-  let shouldDisableAdblock = $state<boolean>(false);
 
   beforeNavigate(async () => {
     pageLoading = true;
@@ -53,9 +52,6 @@
 
     if (browser) {
       showCookieBanner = localStorage.getItem("cookie-banner-accepted") !== "true";
-      testSentryConnection().then((isBlocked) => {
-        shouldDisableAdblock = isBlocked;
-      });
     }
 
     return () => subscription.unsubscribe();
@@ -81,25 +77,10 @@
   <Footer />
 {/if}
 
-{#snippet acceptBannerBtn(btnType: "cookie" | "adblocker")}
-  <button
-    class="dy-btn dy-btn-primary dy-btn-sm dy-btn-soft"
-    onclick={() => {
-      if (btnType === "cookie") {
-        showCookieBanner = false;
-        localStorage.setItem("cookie-banner-accepted", "true");
-      } else {
-        shouldDisableAdblock = false;
-      }
-    }}
-  >
-    OK
-  </button>
-{/snippet}
-
-{#if showCookieBanner || shouldDisableAdblock}
-  <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
-    {#if shouldDisableAdblock}
+<div class="dy-toast dy-toast-bottom dy-toast-center items-center">
+  {#await testSentryConnection() then isBlocked}
+    {@const adblockState = { accepted: isBlocked }}
+    {#if adblockState.accepted}
       <div class="dy-alert dy-alert-warning dy-alert-vertical" transition:slide={{ duration: 200 }}>
         <p class="text-center">
           Du nutzt einen Adblocker. Wir bitten dich höflich, ihn zu deaktivieren, da wir <strong
@@ -113,23 +94,36 @@
           <br />
           <strong>Vielen Dank für dein Verständnis!</strong>
         </p>
-        {@render acceptBannerBtn("adblocker")}
+        <button
+          class="dy-btn dy-btn-primary dy-btn-sm dy-btn-soft"
+          onclick={() => (adblockState.accepted = true)}
+        >
+          OK
+        </button>
       </div>
     {/if}
-    {#if showCookieBanner}
-      <div class="dy-alert dy-alert-info dy-alert-vertical w-fit" transition:slide={{ duration: 200 }}>
-        <div class="flex flex-col gap-1">
-          <h3 class="text-base font-semibold">Cookies</h3>
-          <p class="text-sm">
-            Diese Website verwendet nur notwendige Cookies.<br />
-            <a href="/datenschutz" class="dy-link">Datenschutzerklärung</a>
-          </p>
-        </div>
-        {@render acceptBannerBtn("cookie")}
+  {/await}
+  {#if showCookieBanner}
+    <div class="dy-alert dy-alert-info dy-alert-vertical w-fit" transition:slide={{ duration: 200 }}>
+      <div class="flex flex-col gap-1">
+        <h3 class="text-base font-semibold">Cookies</h3>
+        <p class="text-sm">
+          Diese Website verwendet nur notwendige Cookies.<br />
+          <a href="/datenschutz" class="dy-link">Datenschutzerklärung</a>
+        </p>
       </div>
-    {/if}
-  </div>
-{/if}
+      <button
+        class="dy-btn dy-btn-primary dy-btn-sm dy-btn-soft"
+        onclick={() => {
+          showCookieBanner = false;
+          localStorage.setItem("cookie-banner-accepted", "true");
+        }}
+      >
+        OK
+      </button>
+    </div>
+  {/if}
+</div>
 
 <style>
   .page-container {
