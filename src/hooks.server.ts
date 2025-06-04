@@ -4,7 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { type Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
-import { HOST, NODE_ENV, ORIGIN, PORT, R2_ENDPOINT, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
+import { NODE_ENV, R2_ENDPOINT, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
 
 Sentry.init({
@@ -15,9 +15,9 @@ Sentry.init({
 
 export async function init() {
   console.debug("NODE_ENV:", NODE_ENV);
-  console.debug("Set ORIGIN:", ORIGIN);
-  console.debug("Set HOST:", HOST);
-  console.debug("Set PORT:", PORT);
+  // console.debug("Set ORIGIN:", ORIGIN);
+  // console.debug("Set HOST:", HOST);
+  // console.debug("Set PORT:", PORT);
   console.debug("PUBLIC_SENTRY_DSN:", PUBLIC_SENTRY_DSN);
   console.debug("PUBLIC_SUPABASE_URL:", PUBLIC_SUPABASE_URL);
   console.debug("SUPABASE_SERVICE_ROLE_KEY:", SUPABASE_SERVICE_ROLE_KEY ? "set" : "not set");
