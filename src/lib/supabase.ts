@@ -106,6 +106,7 @@ export type Database = {
         Row: {
           created_at: string;
           created_by: string | null;
+          folder: string | null;
           id: string;
           name: string;
           r2_key: string;
@@ -114,6 +115,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           created_by?: string | null;
+          folder?: string | null;
           id?: string;
           name: string;
           r2_key: string;
@@ -122,6 +124,7 @@ export type Database = {
         Update: {
           created_at?: string;
           created_by?: string | null;
+          folder?: string | null;
           id?: string;
           name?: string;
           r2_key?: string;
