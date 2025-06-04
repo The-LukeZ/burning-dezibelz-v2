@@ -1,4 +1,4 @@
-import { RateLimiterMemory, RateLimiterRes } from "rate-limiter-flexible";
+import { RateLimiterMemory, type RateLimiterRes } from "rate-limiter-flexible";
 
 interface RateLimiterDecisionOptions {
   allowed: boolean;
