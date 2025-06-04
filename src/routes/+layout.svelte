@@ -79,8 +79,8 @@
 
 <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
   {#await testSentryConnection() then isBlocked}
-    {@const adblockState = { accepted: isBlocked }}
-    {#if adblockState.accepted}
+    {@const adblockState = { showBanner: isBlocked, isBlocked }}
+    {#if adblockState.showBanner}
       <div class="dy-alert dy-alert-warning dy-alert-vertical" transition:slide={{ duration: 200 }}>
         <p class="text-center">
           Du nutzt einen Adblocker. Wir bitten dich höflich, ihn zu deaktivieren, da wir <strong
@@ -96,7 +96,7 @@
         </p>
         <button
           class="dy-btn dy-btn-primary dy-btn-sm dy-btn-soft"
-          onclick={() => (adblockState.accepted = true)}
+          onclick={() => (adblockState.showBanner = false)}
         >
           OK
         </button>
