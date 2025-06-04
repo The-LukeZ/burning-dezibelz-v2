@@ -80,7 +80,7 @@
 {/if}
 
 <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
-  <AdblockAlert  />
+  <!-- TODO: Add Adblock Alert (doesn't really work atm) -->
   {#if showCookieBanner}
     <div class="dy-alert dy-alert-info dy-alert-vertical w-fit" transition:slide={{ duration: 200 }}>
       <div class="flex flex-col gap-1">
