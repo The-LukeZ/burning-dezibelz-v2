@@ -8,13 +8,13 @@
   import "$lib/stores/events.svelte.js";
   import Footer from "$lib/components/Footer.svelte";
   import { slide } from "svelte/transition";
-  import { isSentryLoaded } from "$lib/utils/sentryDetect";
+  import { testSentryConnection } from "$lib/utils/sentryDetect";
 
   let { data, children } = $props();
   let { supabase, session } = $derived(data);
   let pageLoading = $state(false);
   let showCookieBanner = $state(false);
-  let showAdblockerBanner = $state(false);
+  let showAdblockerBanner = $state<null | boolean>(null);
 
   beforeNavigate(async () => {
     pageLoading = true;
@@ -53,9 +53,6 @@
 
     if (browser) {
       showCookieBanner = localStorage.getItem("cookie-banner-accepted") !== "true";
-      if (!isSentryLoaded) {
-        showAdblockerBanner = true;
-      }
     }
 
     return () => subscription.unsubscribe();
@@ -81,16 +78,15 @@
   <Footer />
 {/if}
 
-{#snippet acceptBannerBtn(localStorageKey: string, bannerType: "cookie" | "adblocker")}
+{#snippet acceptBannerBtn(btnType: "cookie" | "adblocker")}
   <button
     class="dy-btn dy-btn-primary dy-btn-sm dy-btn-soft"
     onclick={() => {
-      if (bannerType === "cookie") {
+      if (btnType === "cookie") {
         showCookieBanner = false;
-        localStorage.setItem(localStorageKey, "true");
+        localStorage.setItem("cookie-banner-accepted", "true");
       } else {
         showAdblockerBanner = false;
-        localStorage.setItem(localStorageKey, "true");
       }
     }}
   >
@@ -98,36 +94,41 @@
   </button>
 {/snippet}
 
-{#if showCookieBanner}
-  <div class="dy-toast dy-toast-bottom dy-toast-right">
-    <div
-      class="dy-alert dy-alert-info dy-alert-vertical sm:dy-alert-horizontal"
-      transition:slide={{ duration: 200 }}
-    >
-      <div class="flex flex-col gap-1">
-        <h3 class="text-base font-semibold">Cookies</h3>
-        <p class="text-sm">
-          Diese Website verwendet nur notwendige Cookies.<br />
-          <a href="/datenschutz" class="dy-link">Datenschutzerklärung</a>
-        </p>
-      </div>
-      {@render acceptBannerBtn("cookie-banner-accepted", "cookie")}
+{#await testSentryConnection() then sentryConnectionIsDa}
+  {#if showCookieBanner || !sentryConnectionIsDa}
+    <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
+      {#if showAdblockerBanner !== null ? showAdblockerBanner : !sentryConnectionIsDa}
+        <div class="dy-alert dy-alert-warning dy-alert-vertical" transition:slide={{ duration: 200 }}>
+          <p class="text-center">
+            Du nutzt einen Adblocker. Wir bitten dich höflich, ihn zu deaktivieren, da wir <strong
+              >keine Werbung</strong
+            >
+            nutzen.
+            <br />
+            Jedoch nutzen wir ein Tool, um <strong>Fehler</strong> zu protokollieren, welches leider von
+            vielen Adblockern blockiert wird. Dies ist wichtig für die <strong>Wartung der Seite</strong> und
+            das <strong>Beheben von Fehlern</strong>.
+            <br />
+            <strong>Vielen Dank für dein Verständnis!</strong>
+          </p>
+          {@render acceptBannerBtn("adblocker")}
+        </div>
+      {/if}
+      {#if showCookieBanner}
+        <div class="dy-alert dy-alert-info dy-alert-vertical w-fit" transition:slide={{ duration: 200 }}>
+          <div class="flex flex-col gap-1">
+            <h3 class="text-base font-semibold">Cookies</h3>
+            <p class="text-sm">
+              Diese Website verwendet nur notwendige Cookies.<br />
+              <a href="/datenschutz" class="dy-link">Datenschutzerklärung</a>
+            </p>
+          </div>
+          {@render acceptBannerBtn("cookie")}
+        </div>
+      {/if}
     </div>
-    {#if showAdblockerBanner}
-      <div class="dy-alert dy-alert-warning">
-        <p>
-          Du nutzt einen Adblocker. Wir bitten dich höflich, ihn zu deaktivieren, da wir keine Werbung haben.
-          <br />
-          Jedoch nutzen wir ein Tool, um Fehler zu protokollieren, welches leider von vielen Adblockern blockiert
-          wird. Dies ist wichtig für die Wartung der Seite und das Beheben von Fehlern.
-          <br />
-          Vielen Dank für dein Verständnis!
-        </p>
-        {@render acceptBannerBtn("adblocker-banner-accepted", "adblocker")}
-      </div>
-    {/if}
-  </div>
-{/if}
+  {/if}
+{/await}
 
 <style>
   .page-container {
