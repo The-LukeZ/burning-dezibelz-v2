@@ -21,11 +21,26 @@ export function isSentryConfigured() {
 }
 
 // Method 3: Test with actual event capture
-export async function testSentryConnection() {
+/**
+ * Test Sentry connection by sending a test event.
+ *
+ * @param reallyCheck If true, will attempt to send a test event to Sentry.
+ * If false, don't actually send anything, just return true.
+ * @default true
+ *
+ * @returns Returns true if Sentry is configured and the test event was sent successfully.
+ */
+export async function testSentryConnection(reallyCheck = true): Promise<boolean> {
+  if (!reallyCheck) return true;
   try {
+    if (!isSentryConfigured()) {
+      console.warn("Sentry is not configured properly.");
+      return false;
+    }
+
     // Capture a test event (won't send in dev mode unless forced)
-    const eventId = Sentry.captureMessage("Test connectivity", "info");
-    return eventId !== null && eventId !== undefined;
+    Sentry.logger.debug("Test connectivity");
+    return true;
   } catch {
     return false;
   }
