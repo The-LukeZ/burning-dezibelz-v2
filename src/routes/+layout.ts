@@ -1,4 +1,6 @@
+import { browser } from "$app/environment";
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from "$env/static/public";
+import { testSentryConnection } from "$lib/utils/sentryDetect.js";
 import { createBrowserClient, createServerClient, isBrowser } from "@supabase/ssr";
 
 export const load = async ({ fetch, data }) => {
@@ -26,5 +28,10 @@ export const load = async ({ fetch, data }) => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  return { session, supabase, user };
+
+  let sentryIsBlocked = false;
+  if (browser) {
+    sentryIsBlocked = await testSentryConnection();
+  }
+  return { session, supabase, user, sentryIsBlocked };
 };
