@@ -11,6 +11,7 @@
     url: "https://burningdezibelz.de/dash",
     author_name: "Burning Dezibelz",
     language: "de",
+    twitter_card_type: "summary",
   }}
 />
 
