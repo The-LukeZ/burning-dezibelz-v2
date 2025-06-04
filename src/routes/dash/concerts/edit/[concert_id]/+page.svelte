@@ -11,6 +11,7 @@
   import { EventStore } from "$lib/stores/events.svelte";
   import type { Database } from "$lib/supabase";
   import { formatDateTimeLocal } from "$lib/utils/concerts.js";
+  import equal from "fast-deep-equal";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
 
@@ -18,7 +19,9 @@
   let { data: pageData } = $props();
 
   // Yes, concert can be null, but since error handling is done, we can safely assume it's not null here.
+  let oldConcert: Concert | null = null;
   let concert = $state(pageData.concert);
+  let changes = $state(false);
   let ticketModes = $state({
     online: concert?.ticket_url ? true : false,
     abendkasse: concert?.abendkasse ? true : false,
@@ -127,6 +130,17 @@
       loading = false;
     }
   }
+
+  $effect(() => {
+    const current = $state.snapshot(concert);
+    const changesMade = !equal(oldConcert, current);
+    if (oldConcert !== null && changesMade) {
+      changes = true;
+    } else if (oldConcert === null && current) {
+      oldConcert = structuredClone(current);
+      changes = false;
+    }
+  });
 
   onMount(async () => {
     if (pageData.error) return;
@@ -348,43 +362,46 @@
       ></textarea>
     </fieldset>
 
-    <fieldset class="dy-fieldset">
-      <legend class="dy-fieldset-legend">Concert Image</legend>
-      {#if imageSelect.image && concert.type !== "closed"}
-        {@const addOpacity = (e: { currentTarget: HTMLDivElement }) =>
-          e.currentTarget.classList.add("opacity-100", "bg-black/30")}
-        {@const removeOpacity = (e: { currentTarget: HTMLDivElement }) =>
-          e.currentTarget.classList.remove("opacity-100", "bg-black/30")}
-        <div class="relative h-32 w-44 overflow-hidden rounded-lg shadow-md">
-          <img
-            src={buildImageUrl(imageSelect.image.r2_key, { width: 128, height: 96, fit: "cover" })}
-            alt={imageSelect.image.name || "Concert Image"}
-            class="dy-skeleton h-full w-full object-cover"
-          />
-          <div
-            class="absolute top-0 right-0 bottom-0 left-0 grid place-items-center opacity-0 transition-opacity duration-150"
-            role="button"
-            tabindex="0"
-            onmouseover={addOpacity}
-            onmouseout={removeOpacity}
-            onfocus={addOpacity}
-            onblur={removeOpacity}
-          >
-            <button
-              class="dy-btn dy-btn-circle transition"
-              onclick={() => {
-                concert.image = null;
-                imageSelect.image = null;
-              }}
+    {#if concert.type !== "closed"}
+      <fieldset class="dy-fieldset">
+        <legend class="dy-fieldset-legend">Concert Image</legend>
+        {#if imageSelect.image !== null}
+          {@const addOpacity = (e: { currentTarget: HTMLDivElement }) =>
+            e.currentTarget.classList.add("opacity-100", "bg-black/30")}
+          {@const removeOpacity = (e: { currentTarget: HTMLDivElement }) =>
+            e.currentTarget.classList.remove("opacity-100", "bg-black/30")}
+          <div class="relative h-32 w-44 overflow-hidden rounded-lg shadow-md">
+            <img
+              src={buildImageUrl(imageSelect.image.r2_key, { width: 128, height: 96, fit: "cover" })}
+              alt={imageSelect.image.name || "Concert Image"}
+              class="dy-skeleton h-full w-full object-cover"
+            />
+            <div
+              class="absolute top-0 right-0 bottom-0 left-0 grid place-items-center opacity-0 transition-opacity duration-150"
+              role="button"
+              tabindex="0"
+              onmouseover={addOpacity}
+              onmouseout={removeOpacity}
+              onfocus={addOpacity}
+              onblur={removeOpacity}
             >
-              <XIcon />
-            </button>
+              <button
+                class="dy-btn dy-btn-circle transition"
+                onclick={() => {
+                  concert.image = null;
+                  imageSelect.image = null;
+                }}
+              >
+                <XIcon />
+              </button>
+            </div>
           </div>
-        </div>
-      {:else}
-        <button class="dy-btn dy-btn-outline" onclick={() => (imageSelect.open = true)}>Select Image</button>
-      {/if}
-    </fieldset>
+        {:else}
+          <button class="dy-btn dy-btn-outline" onclick={() => (imageSelect.open = true)}>Select Image</button
+          >
+        {/if}
+      </fieldset>
+    {/if}
 
     <div class="mt-2 flex flex-row justify-end gap-4">
       <button class="dy-btn dy-btn-error" onclick={() => goto("/dash/concerts")}>Cancel</button>
