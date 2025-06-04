@@ -6,7 +6,7 @@
   const navItems = _navitems.private;
 </script>
 
-<section class="dy-prose mx-auto px-4 py-8">
+<section class="dy-prose mx-auto cursor-default px-4 py-8">
   <div
     class="dy-avatar dy-avatar-placeholder mb-4 aspect-square size-24 rounded-full shadow-xl shadow-gray-600/25 select-none"
   >
