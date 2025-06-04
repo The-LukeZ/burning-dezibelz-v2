@@ -1,7 +1,7 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { testSentryConnection } from "$lib/utils/sentryDetect";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   let showBannerOverride = $state<boolean | null>(null);
 
@@ -14,9 +14,13 @@
       console.log("No adblocker detected, banner override not shown");
     }
   });
+
+  onDestroy(() => {
+    showBannerOverride = null;
+  });
 </script>
 
-{#if showBannerOverride !== null && showBannerOverride}
+{#if showBannerOverride}
   <div class="dy-alert dy-alert-warning dy-alert-vertical" transition:slide={{ duration: 200 }}>
     <p class="text-center">
       Du nutzt einen Adblocker. Wir bitten dich höflich, ihn zu deaktivieren, da wir <strong
