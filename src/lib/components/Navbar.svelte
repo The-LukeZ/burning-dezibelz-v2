@@ -9,8 +9,13 @@
   import { onMount } from "svelte";
 
   let isDashboard = $derived(page.url.pathname.startsWith("/dash"));
+  let userIsAdmin = $derived(page.data.isAdmin);
   let oldItems: NavItem[] = [];
   let navItems = $state<NavItem[]>([]);
+
+  $effect(() => {
+    console.log("Is user admin?", $state.snapshot(userIsAdmin));
+  });
 
   // To prevent unnecessary re-renders, we only update navItems if the items for the current path change
   $effect(() => {
@@ -51,17 +56,16 @@
         href={item.href}
         class="nav-btn"
         class:active-link={isCurrentPage(item, page.url)}
-        class:hidden={item.requiresAdmin && !page.data.isAdmin}
+        class:hidden={item.requiresAdmin && !userIsAdmin}
       >
         {item.label}
       </a>
     </li>
   {/each}
 
-  {#if page.url.pathname !== "/dash/login"}
+  {#if isDashboard && page.url.pathname !== "/dash/login"}
     <button
       class="dy-btn dy-btn-error dy-btn-outline"
-      class:hidden={!isDashboard || (isDashboard && page.url.pathname !== "/dash/login")}
       onclick={() => goto("/dash/logout")}
       aria-label="Logout"
     >
