@@ -9,6 +9,7 @@ import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
 
 Sentry.init({
   dsn: PUBLIC_SENTRY_DSN,
+  _experiments: { enableLogs: true },
   tracesSampleRate: 1,
 });
 
