@@ -10,6 +10,7 @@ export default defineConfig({
       sourceMapsUploadOptions: {
         org: "supportmail",
         project: "burning-dezibelz",
+        authToken: process.env.SENTRY_AUTH_TOKEN,
       },
     }),
     tailwindcss(),
