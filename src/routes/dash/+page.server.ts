@@ -1,5 +1,5 @@
 import { redirect } from "@sveltejs/kit";
 
 export async function load() {
-  redirect(303, "/dash/home");
+  redirect(301, "/dash/home");
 }
