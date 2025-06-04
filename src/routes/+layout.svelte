@@ -14,7 +14,7 @@
   let { supabase, session } = $derived(data);
   let pageLoading = $state(false);
   let showCookieBanner = $state(false);
-  let showAdblockerBanner = $state<null | boolean>(null);
+  let disableAdblock = $state<null | boolean>(null);
 
   beforeNavigate(async () => {
     pageLoading = true;
@@ -86,7 +86,7 @@
         showCookieBanner = false;
         localStorage.setItem("cookie-banner-accepted", "true");
       } else {
-        showAdblockerBanner = false;
+        disableAdblock = false;
       }
     }}
   >
@@ -97,7 +97,7 @@
 {#await testSentryConnection() then sentryConnectionIsDa}
   {#if showCookieBanner || !sentryConnectionIsDa}
     <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
-      {#if showAdblockerBanner !== null ? showAdblockerBanner : !sentryConnectionIsDa}
+      {#if disableAdblock !== null ? disableAdblock : !sentryConnectionIsDa}
         <div class="dy-alert dy-alert-warning dy-alert-vertical" transition:slide={{ duration: 200 }}>
           <p class="text-center">
             Du nutzt einen Adblocker. Wir bitten dich höflich, ihn zu deaktivieren, da wir <strong
