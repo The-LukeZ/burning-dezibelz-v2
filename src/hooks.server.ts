@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/sveltekit";
 import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
-import { type Handle, redirect } from "@sveltejs/kit";
+import { type Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
 import { HOST, NODE_ENV, ORIGIN, PORT, R2_ENDPOINT, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
@@ -81,51 +81,37 @@ const supabase: Handle = async ({ event, resolve }) => {
   });
 };
 
-const authGuard: Handle = async ({ event, resolve }) => {
+const userSessionMiddleware: Handle = async ({ event, resolve }) => {
   const { session, user } = await event.locals.safeGetSession();
   event.locals.session = session;
   event.locals.user = user;
-
-  if (!(event.locals.session && event.locals.user) && event.url.pathname.startsWith("/dash")) {
-    if (event.url.pathname !== "/dash/login") redirect(303, "/dash/login");
-    return resolve(event);
-  }
-
-  if (event.locals.session && event.url.pathname === "/dash/login") {
-    redirect(303, "/dash");
-  }
 
   return resolve(event);
 };
 
 const authUserMiddleware: Handle = async ({ event, resolve }) => {
-  // Authorize user role for specific routes
+  // Authorize user role for API routes only
   const isUsersApiRoute = event.url.pathname.startsWith("/api/users");
-  const isUsersDashRoute = event.url.pathname === "/dash/users";
-  const isAdminRoute = isUsersApiRoute || isUsersDashRoute;
 
-  if (event.locals.user) {
+  if (event.locals.user && isUsersApiRoute) {
     const { data: users } = await event.locals.supabase.from("allowed_users").select("*");
-
     const allowedUser = users?.find((u) => u.email === event.locals.user!.email) ?? null;
-    if (isAdminRoute && (!allowedUser || allowedUser.role !== "admin")) {
-      if (isUsersApiRoute) {
-        return Response.json({ error: "No Permission" }, { status: 403 });
-      }
-    }
 
-    console.debug(
-      `User ${event.locals.user!.user_metadata.full_name} is authorized as ${allowedUser?.role} for admin routes`,
-    );
-    event.locals.isAdmin = allowedUser?.role === "admin";
-  } else {
-    event.locals.isAdmin = false;
+    if (!allowedUser || allowedUser.role !== "admin") {
+      return Response.json({ error: "No Permission" }, { status: 403 });
+    }
   }
 
   return resolve(event);
 };
 
-export const handle = sequence(Sentry.sentryHandle(), devToolsCheck, supabase, authGuard, authUserMiddleware);
+export const handle = sequence(
+  Sentry.sentryHandle(),
+  devToolsCheck,
+  supabase,
+  userSessionMiddleware,
+  authUserMiddleware,
+);
 
 export const handleError =
   NODE_ENV === "production"
