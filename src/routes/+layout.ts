@@ -29,9 +29,9 @@ export const load = async ({ fetch, data }) => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let sentryIsBlocked = false;
+  let sentryIsDa = false;
   if (browser) {
-    sentryIsBlocked = await testSentryConnection();
+    sentryIsDa = await testSentryConnection();
   }
-  return { session, supabase, user, sentryIsBlocked };
+  return { session, supabase, user, sentryIsBlocked: !sentryIsDa };
 };
