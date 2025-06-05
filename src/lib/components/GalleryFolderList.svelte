@@ -4,7 +4,7 @@
   type Props = {
     folders: { name: string; count: number }[];
     activeFolder?: string;
-    onFolderClick?: (folder: string) => void;
+    onFolderClick?: (folder: string) => void | Promise<void>;
     innerWidth?: number;
     /**
      * Indicates if the component is being used on a mobile device.
@@ -34,9 +34,9 @@
           <button
             class="dy-btn dy-btn-soft dy-btn-primary"
             class:dy-btn-active={activeFolder === name}
-            onclick={() => {
+            onclick={async () => {
               activeFolder = name;
-              onFolderClick?.(name);
+              await onFolderClick?.(name);
             }}
           >
             <span>{name}</span>
