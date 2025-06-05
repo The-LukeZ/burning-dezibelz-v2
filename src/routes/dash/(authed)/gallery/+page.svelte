@@ -15,13 +15,23 @@
 
   let { supabase } = page.data;
   let siteLoading = $state(false);
-  let error = $state<string | null>(null);
+  let generalError = $state<string | null>(null);
   const upload = $state<{
     uploading: boolean;
     files: FileList | undefined;
+    folder: {
+      value: string;
+      isValid: boolean | null;
+    };
+    error: string | null;
   }>({
     uploading: false,
     files: undefined,
+    folder: {
+      value: "",
+      isValid: null,
+    },
+    error: null,
   });
   let selectedImages = $state<DBImage[]>([]);
   let fileInput: HTMLInputElement;
@@ -29,7 +39,10 @@
   // Folder-related state variables
   let activeFolder = $state<string>("Alle Bilder");
   let innerWidth = $state<number>(640);
-  let folderModalOpen = $state(false);
+  let modalsOpen = $state({
+    folderList: false,
+    uploadImage: false,
+  });
   let imagesByFolder = $state<Record<string, DBImage[]>>({
     "Alle Bilder": [],
   });
@@ -38,7 +51,11 @@
   let folders = $derived([
     {
       name: "Alle Bilder",
-      count: pageData.imageCount || 0,
+      count: pageData.imageCount,
+    },
+    {
+      name: "Ohne Ordner",
+      count: pageData.otherCount,
     },
     ...pageData.folders.map((folder) => ({
       name: folder.folder_name,
@@ -49,26 +66,97 @@
     activeFolder in imagesByFolder ? imagesByFolder[activeFolder] || [] : [],
   );
   let totalImages = $derived(pageData.imageCount || 0);
+  let filteredFolders = $state<string[]>(
+    pageData.folders.filter((f) => f.folder_name !== "Alle Bilder").map((f) => f.folder_name),
+  );
 
   // Constants
   const IMAGE_LIMIT = 20;
-
-  $effect(() => {
-    console.log("Files changed:", $state.snapshot(upload.files));
-  });
 
   function viewImage(imageId: string) {
     goto(`/dash/gallery/${imageId}`);
   }
 
+  // New folder-related functions
+  async function loadImagesForFolder(folder: string, offset: number = 0): Promise<DBImage[]> {
+    try {
+      return await loadFolderImages(supabase, folder, {
+        limit: IMAGE_LIMIT,
+        offset,
+      });
+    } catch (error) {
+      console.error(`Error loading images for folder "${folder}":`, error);
+      return [];
+    }
+  }
+
+  async function switchFolder(folder: string) {
+    if (!imagesByFolder[folder]) {
+      imagesByFolder[folder] = await loadImagesForFolder(folder);
+    }
+    activeFolder = folder;
+  }
+
+  async function loadMoreImages() {
+    siteLoading = true;
+    try {
+      const currentImages = imagesByFolder[activeFolder] || [];
+      const newImages = await loadImagesForFolder(activeFolder, currentImages.length);
+
+      if (newImages.length > 0) {
+        const updatedImages = currentImages.concat(...newImages);
+        imagesByFolder[activeFolder] = updatedImages;
+        currentImgs = updatedImages;
+      }
+    } catch (err: any) {
+      generalError = err.message;
+      console.error("Load more images failed:", err);
+    } finally {
+      siteLoading = false;
+    }
+  }
+
+  async function deleteImage(imageId: string) {
+    if (!confirm("Are you sure you want to delete this image?")) return;
+
+    try {
+      siteLoading = true;
+
+      // This should also delete from R2 in the backend
+      const response = await fetch("/api/cdn/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageIds: [imageId] }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete image");
+      }
+
+      // Remove from local state
+      currentImgs = currentImgs.filter((img) => img.id !== imageId);
+    } catch (err: any) {
+      generalError = err.message;
+      console.error("Delete failed:", err);
+    } finally {
+      siteLoading = false;
+    }
+  }
+
   async function handleFileSubmit(event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }) {
     event.preventDefault();
     siteLoading = true;
-    error = null;
+    generalError = null;
+    upload.error = null;
     upload.uploading = true;
 
     const file = upload.files?.[0];
-    if (!file) return;
+    if (!file) {
+      upload.error = "Please select a file to upload.";
+      upload.uploading = false;
+      siteLoading = false;
+      return;
+    }
 
     try {
       // Step 1: Get presigned URL and create DB record
@@ -112,77 +200,12 @@
       fileInput.value = "";
       upload.files = undefined;
       upload.uploading = false;
+      upload.folder.value = "";
 
       await invalidateAll();
     } catch (err: any) {
-      error = err.message;
+      generalError = err.message;
       console.error("Upload failed:", err);
-    } finally {
-      siteLoading = false;
-    }
-  }
-
-  // New folder-related functions
-  async function loadImagesForFolder(folder: string, offset: number = 0): Promise<DBImage[]> {
-    try {
-      return await loadFolderImages(supabase, folder, {
-        limit: IMAGE_LIMIT,
-        offset,
-      });
-    } catch (error) {
-      console.error(`Error loading images for folder "${folder}":`, error);
-      return [];
-    }
-  }
-
-  async function switchFolder(folder: string) {
-    if (!imagesByFolder[folder]) {
-      imagesByFolder[folder] = await loadImagesForFolder(folder);
-    }
-    activeFolder = folder;
-  }
-
-  async function loadMoreImages() {
-    siteLoading = true;
-    try {
-      const currentImages = imagesByFolder[activeFolder] || [];
-      const newImages = await loadImagesForFolder(activeFolder, currentImages.length);
-
-      if (newImages.length > 0) {
-        const updatedImages = currentImages.concat(...newImages);
-        imagesByFolder[activeFolder] = updatedImages;
-        currentImgs = updatedImages;
-      }
-    } catch (err: any) {
-      error = err.message;
-      console.error("Load more images failed:", err);
-    } finally {
-      siteLoading = false;
-    }
-  }
-
-  async function deleteImage(imageId: string) {
-    if (!confirm("Are you sure you want to delete this image?")) return;
-
-    try {
-      siteLoading = true;
-
-      // This should also delete from R2 in the backend
-      const response = await fetch("/api/cdn/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageIds: [imageId] }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete image");
-      }
-
-      // Remove from local state
-      currentImgs = currentImgs.filter((img) => img.id !== imageId);
-    } catch (err: any) {
-      error = err.message;
-      console.error("Delete failed:", err);
     } finally {
       siteLoading = false;
     }
@@ -198,7 +221,7 @@
 
     if (fetchError) {
       console.error("Error fetching images:", fetchError);
-      error = fetchError.message;
+      generalError = fetchError.message;
       return;
     }
 
@@ -214,48 +237,10 @@
 <div class="flex w-full flex-col items-center justify-center space-y-4">
   <h1 class="text-center text-3xl font-bold">Upload and manage images</h1>
 
-  <div class="flex w-full flex-col items-center">
-    <form class="mx-auto flex w-full max-w-sm flex-col" onsubmit={handleFileSubmit}>
-      <fieldset class="dy-fieldset w-full text-center">
-        <legend class="dy-fieldset-legend">Pick an image</legend>
-        <label class="dy-label w-full">
-          <input
-            bind:this={fileInput}
-            bind:files={upload.files}
-            type="file"
-            class="dy-file-input dy-file-input-accent grow"
-            accept="image/*"
-          />
-          <button
-            class="dy-btn dy-btn-ghost dy-btn-circle dy-btn-sm hover:text-base-content"
-            class:hidden={!upload.files?.length}
-            onclick={() => {
-              fileInput.value = "";
-              upload.files = undefined;
-            }}
-          >
-            <XIcon />
-          </button>
-        </label>
-      </fieldset>
-      <div class="dy-join dy-join-vertical">
-        <progress
-          class="dy-join-item dy-progress dy-progress-secondary"
-          value={upload.uploading ? undefined : 0}
-        ></progress>
-        <button
-          class="dy-join-item dy-btn dy-btn-accent"
-          disabled={!upload.files?.length || upload.uploading}
-          type="submit"
-        >
-          {#if upload.uploading}
-            Uploading...
-          {:else}
-            Upload
-          {/if}
-        </button>
-      </div>
-    </form>
+  <div class="flex w-full flex-col items-end">
+    <button class="dy-btn dy-btn-primary dy-btn-soft" onclick={() => (modalsOpen.uploadImage = true)}>
+      Upload Image
+    </button>
   </div>
 </div>
 
@@ -268,7 +253,7 @@
     onFolderClick={async (newFolder) => {
       await switchFolder(newFolder);
       setTimeout(() => {
-        folderModalOpen = false;
+        modalsOpen.folderList = false;
       }, 200);
     }}
   />
@@ -346,7 +331,7 @@
   {#if innerWidth < 640}
     <button
       class="dy-btn dy-btn-warning dy-btn-soft"
-      onclick={() => (folderModalOpen = true)}
+      onclick={() => (modalsOpen.folderList = true)}
       transition:slide={{ duration: 200, axis: "x" }}
     >
       Ordner anzeigen
@@ -382,7 +367,7 @@
   {/if}
 </div>
 
-<Modal title="Ordner" bind:open={folderModalOpen} closeOnBackdropClick={false}>
+<Modal title="Ordner" bind:open={modalsOpen.folderList} closeOnBackdropClick={false}>
   <div class="flex w-full justify-center">
     <GalleryFolderList
       {folders}
@@ -390,14 +375,127 @@
       onFolderClick={async (newFolder) => {
         await switchFolder(newFolder);
         setTimeout(() => {
-          folderModalOpen = false;
+          modalsOpen.folderList = false;
         }, 200);
       }}
     />
   </div>
 </Modal>
 
+<Modal
+  title="Upload Image"
+  bind:open={modalsOpen.uploadImage}
+  class="space-y-2"
+  onClose={() => {
+    upload.files = undefined;
+    upload.folder.value = "";
+    upload.folder.isValid = null;
+    upload.uploading = false;
+    upload.error = null;
+  }}
+>
+  <form class="mx-auto flex w-full max-w-sm flex-col gap-2" onsubmit={handleFileSubmit}>
+    <fieldset class="dy-fieldset border-base-300 rounded-box bg-base-200 w-full border p-4 text-center">
+      <legend class="dy-fieldset-legend">Pick an image</legend>
+      <label class="dy-label w-full items-center">
+        <input
+          bind:this={fileInput}
+          bind:files={upload.files}
+          type="file"
+          accept="image/*"
+          class="dy-file-input dy-file-input-accent grow"
+        />
+        <button
+          class="dy-btn dy-btn-soft dy-btn-circle dy-btn-sm dy-btn-warning"
+          class:hidden={!upload.files?.length}
+          onclick={() => {
+            fileInput.value = "";
+            upload.files = undefined;
+          }}
+        >
+          <XIcon />
+        </button>
+      </label>
+    </fieldset>
+    <fieldset class="dy-fieldset border-base-300 rounded-box bg-base-200 w-full border p-4 text-center">
+      <legend class="dy-fieldset-legend">Select Folder</legend>
+      <div class="flex flex-col justify-center gap-1">
+        <label class="dy-label w-full">
+          <input
+            type="text"
+            bind:value={upload.folder.value}
+            placeholder="Select a folder or type a new one"
+            class="dy-input dy-input-accent w-full grow"
+            class:dy-input-error={!upload.folder.isValid && upload.folder.value.length > 0}
+            class:dy-input-success={upload.folder.isValid}
+            minlength="3"
+            maxlength="64"
+            list="folder-list"
+            oninput={(e) => {
+              const value = e.currentTarget.value.trim();
+              upload.folder.value = value;
+              upload.folder.isValid =
+                /^[A-Za-z0-9_\-.öäüß ]+$/.test(value) && value.length >= 3 && value.length <= 64;
+            }}
+          />
+          <datalist id="folder-list">
+            {#each filteredFolders as folder}
+              <option value={folder}></option>
+            {/each}
+          </datalist>
+          <button
+            type="button"
+            class="dy-btn dy-btn-soft dy-btn-circle dy-btn-sm dy-btn-warning"
+            class:hidden={!upload.folder.value}
+            onclick={() => {
+              upload.folder.value = "";
+              upload.folder.isValid = null;
+            }}
+          >
+            <XIcon />
+          </button>
+        </label>
+        <p class="dy-validator-hint">Only alphanumeric characters, underscores, spaces and dashes!</p>
+      </div>
+    </fieldset>
+    <div class="dy-join dy-join-vertical">
+      <progress
+        class="dy-join-item dy-progress dy-progress-secondary"
+        value={upload.uploading ? undefined : 0}
+      ></progress>
+      <button
+        class="dy-join-item dy-btn dy-btn-accent"
+        disabled={!upload.files?.length || upload.uploading}
+        type="submit"
+      >
+        {#if upload.uploading}
+          Uploading...
+        {:else}
+          Upload
+        {/if}
+      </button>
+    </div>
+  </form>
+  {#if upload.error}
+    <div class="dy-alert dy-alert-error justify-center">
+      <span>{upload.error}</span>
+    </div>
+  {/if}
+</Modal>
+
+<div class="dy-toast dy-toast-center z-[1000]">
+  {#if generalError}
+    <div class="dy-alert dy-alert-error">
+      <span class="dy-alert-text">{generalError}</span>
+    </div>
+  {/if}
+</div>
+
 <style>
+  section {
+    padding: 1rem;
+  }
+
   .image-grid-item {
     flex: 0 1 350px;
 
