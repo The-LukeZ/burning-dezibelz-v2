@@ -80,7 +80,7 @@
           <p class="truncate p-2 text-sm text-white">{image.name}</p>
           <a
             class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
-            href={buildImageUrl(image.r2_key, { format: "png" })}
+            href={buildImageUrl(image.r2_key)}
             target="_blank"
           >
             Öffnen
