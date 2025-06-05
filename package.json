@@ -17,7 +17,6 @@
     "test:unit": "vitest",
     "test": "npm run test:unit -- --run"
   },
-
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.2.12",
     "@sveltejs/adapter-vercel": "^5.7.2",
@@ -53,6 +52,7 @@
     "pikaday": "^1.8.2",
     "rate-limiter-flexible": "^7.1.1",
     "sharp": "^0.34.2",
+    "wildcard-match": "^5.1.4",
     "zod": "^3.25.17",
     "zod-validation-error": "^3.4.1"
   }
