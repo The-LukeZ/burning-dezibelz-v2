@@ -2,7 +2,7 @@
   // Package imports
   import { onMount } from "svelte";
   import { slide } from "svelte/transition";
-// $lib imports
+  // $lib imports
   import { page } from "$app/state";
   import { buildImageUrl, loadFolderImages } from "$lib";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
@@ -64,7 +64,6 @@
       if (newImages.length > 0) {
         const updatedImages = [...currentImages, ...newImages];
         imagesByFolder[activeFolder] = updatedImages;
-        currentImgs = updatedImages;
       } else {
         console.warn("No more images to load.");
       }
@@ -78,7 +77,6 @@
       imagesByFolder[folder] = await loadImagesForFolder(folder);
     }
     activeFolder = folder;
-    currentImgs = imagesByFolder[folder];
   }
 
   // onMount
@@ -119,10 +117,9 @@
 TODO:
 - Add disabled bindable to the gallery folder list component to disable the folder list when loading images
 - Add a loading state to the gallery folder list component
-- Find out why "Alle Bilder" is not loaded when switching back to it
 -->
 
-<div class="gallery-grid">
+<div class="gallery-grid ml-0 lg:ml-5">
   <GalleryFolderList
     {folders}
     bind:innerWidth
@@ -143,7 +140,7 @@ TODO:
       {:else if !loading && currentImgs.length === 0}
         <p class="text-gray-500">Hier ist's ziemlich leer...</p>
       {:else if !loading && currentImgs.length > 0}
-        {#key imagesByFolder}
+        {#key activeFolder}
           {#each currentImgs as image}
             <div id={image.id} class="image-card dy-skeleton">
               <img
