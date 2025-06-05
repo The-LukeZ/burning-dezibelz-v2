@@ -215,13 +215,13 @@
                   class="dy-input dy-validator w-full"
                   bind:value={updateData.folder}
                   placeholder="Folder"
-                  pattern="[A-Za-z0-9_\- ]+"
-                  title="Alphanumeric characters, underscores, and dashes only"
-                  minlength="1"
+                  pattern="[A-Za-z0-9_\-öäüß ]+"
+                  title="Alphanumeric characters, underscores, spaces and dashes only"
+                  minlength="3"
                   maxlength="64"
                 />
                 <span>The name of the folder in which the image is grouped.</span>
-                <p class="dy-validator-hint">Only alphanumeric characters, underscores, and dashes</p>
+                <p class="dy-validator-hint">Only alphanumeric characters, underscores, spaces and dashes!</p>
               </fieldset>
 
               <div class="flex justify-end space-x-2">
