@@ -1,19 +1,19 @@
+import { env as pubEnv } from "$env/dynamic/public";
+import { normalizeFolderName } from "$lib";
+import { JsonErrors } from "$lib/constants.js";
 import { S3 } from "$lib/server/s3";
 import { CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { env as pubEnv } from "$env/dynamic/public";
-import { JsonErrors } from "$lib/constants.js";
-import { normalizeFolderName } from "$lib";
 
 export async function POST({ request, locals: { supabase } }) {
   try {
     let { imageId, newName, newFolder } = (await request.json()) as {
       imageId: string;
       newName?: string;
-      newFolder?: string;
+      newFolder?: string | null;
     };
 
-    if (!imageId || !(newName || newFolder)) {
-      return JsonErrors.badRequest("imageId and at least newName or newFolder are required");
+    if (!imageId || (!newName && newFolder === undefined)) {
+      return JsonErrors.badRequest("imageId and at least one of newName or newFolder are required");
     }
 
     // Get current image record
@@ -72,24 +72,30 @@ export async function POST({ request, locals: { supabase } }) {
       await S3.send(deleteOldCommand);
     }
 
-    if (newFolder && newFolder !== image.folder) {
-      newFolder = normalizeFolderName(newFolder);
+    // Handle folder update - convert empty string to null
+    let finalFolder = newFolder === undefined ? image.folder : newFolder;
+    if (newFolder !== undefined) {
+      const folderValue = !newFolder ? null : normalizeFolderName(newFolder);
 
-      if (newFolder && !/^[a-zA-Z0-9-_. ]+$/.test(newFolder)) {
+      if (folderValue && !/^[a-zA-Z0-9-_. ]+$/.test(folderValue)) {
         return JsonErrors.badRequest("Invalid folder name");
       }
 
-      const { error: folderError } = await supabase
-        .from("images")
-        .update({ folder: newFolder })
-        .eq("id", imageId);
+      if (folderValue !== image.folder) {
+        const { error: folderError } = await supabase
+          .from("images")
+          .update({ folder: folderValue })
+          .eq("id", imageId);
 
-      if (folderError) {
-        return JsonErrors.serverError("Failed to update folder");
+        if (folderError) {
+          return JsonErrors.serverError("Failed to update folder");
+        }
       }
+
+      finalFolder = folderValue;
     }
 
-    return Response.json({ success: true, newKey, newFolder });
+    return Response.json({ success: true, r2_key: newKey, folder: finalFolder });
   } catch (error) {
     console.error("Rename error:", error);
     return JsonErrors.serverError("Internal server error");
