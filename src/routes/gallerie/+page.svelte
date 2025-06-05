@@ -176,5 +176,9 @@
   .gallery-grid {
     display: grid;
     grid-template-columns: auto 1fr;
+
+    @media screen and (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
