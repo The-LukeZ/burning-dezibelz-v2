@@ -199,7 +199,10 @@ export async function loadFolderImages(
     .order("created_at", { ascending: false })
     .range(opts.offset, opts.offset + (opts.limit || 15) - 1);
 
-  if (folder !== "Alle Bilder") {
+  if (folder === "Ohne Ordner") {
+    query.is("folder", null);
+  }
+  if (folder !== "Alle Bilder" && folder !== "Ohne Ordner") {
     query.eq("folder", folder);
   }
 
