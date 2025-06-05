@@ -1,5 +1,9 @@
+<!-- 
+Important note: we use goto() with { invalidateAll: true } to ensure that the page is fully reloaded (it's easer than to handle the state manually). 
+-->
+
 <script lang="ts">
-  import { goto, invalidateAll } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import { buildImageUrl, loadFolderImages } from "$lib";
   import Trashcan from "$lib/assets/Trashcan.svelte";
@@ -9,6 +13,8 @@
   import { formatGermanDateTime } from "$lib/utils/concerts.js";
   import { onDestroy, onMount } from "svelte";
   import { slide } from "svelte/transition";
+  import UploadState from "./UploadState.svelte.js";
+  import { allowedMimeTypes } from "$lib/constants.js";
 
   // Props
   let { data: pageData } = $props();
@@ -16,27 +22,12 @@
   let { supabase } = page.data;
   let siteLoading = $state(false);
   let generalError = $state<string | null>(null);
-  const upload = $state<{
-    uploading: boolean;
-    files: FileList | undefined;
-    folder: {
-      value: string;
-      isValid: boolean | null;
-    };
-    error: string | null;
-  }>({
-    uploading: false,
-    files: undefined,
-    folder: {
-      value: "",
-      isValid: null,
-    },
-    error: null,
-  });
+  const upload = new UploadState();
   let selectedImages = $state<DBImage[]>([]);
   let fileInput: HTMLInputElement;
 
   // Folder-related state variables
+  let totalImages = $state(pageData.imageCount || 0);
   let activeFolder = $state<string>("Alle Bilder");
   let innerWidth = $state<number>(640);
   let modalsOpen = $state({
@@ -51,7 +42,7 @@
   let folders = $derived([
     {
       name: "Alle Bilder",
-      count: pageData.imageCount,
+      count: totalImages,
     },
     {
       name: "Ohne Ordner",
@@ -62,11 +53,9 @@
       count: folder.image_count,
     })),
   ]);
-
   let currentImgs = $derived<DBImage[]>(
     activeFolder in imagesByFolder ? imagesByFolder[activeFolder] || [] : [],
   );
-  let totalImages = $derived(pageData.imageCount || 0);
   let filteredFolders = $state<string[]>(
     pageData.folders.filter((f) => f.folder_name !== "Alle Bilder").map((f) => f.folder_name),
   );
@@ -134,8 +123,7 @@
         throw new Error("Failed to delete image");
       }
 
-      // Remove from local state
-      currentImgs = currentImgs.filter((img) => img.id !== imageId);
+      await goto(page.url, { invalidateAll: true });
     } catch (err: any) {
       generalError = err.message;
       console.error("Delete failed:", err);
@@ -151,64 +139,84 @@
     upload.error = null;
     upload.uploading = true;
 
-    const file = upload.files?.[0];
-    if (!file) {
-      upload.error = "Please select a file to upload.";
+    const files = upload.files;
+    if (!files || files.length === 0) {
+      upload.error = "Please select at least one file to upload.";
       upload.uploading = false;
       siteLoading = false;
       return;
     }
 
+    if (!upload.folder.isValid && upload.folder.value.length > 0) {
+      upload.error =
+        "Invalid folder name. Only alphanumeric characters, underscores, spaces and dashes allowed.";
+      upload.uploading = false;
+      siteLoading = false;
+      return;
+    }
+
+    upload.progress.current = 0;
+    upload.progress.total = files.length;
+
     try {
-      // Step 1: Get presigned URL and create DB record
-      const uploadRes = await fetch("/api/cdn/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          mimeType: file.type,
-        }),
-      });
+      // Process each file sequentially
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        upload.progress.current = i;
 
-      if (!uploadRes.ok) {
-        throw new Error("Failed to initialize upload");
+        // Step 1: Get presigned URL and create DB record
+        const uploadRes = await fetch("/api/cdn/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: file.name,
+            mimeType: file.type,
+            folder: upload.folder.value || undefined,
+          }),
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error(`Failed to initialize upload for ${file.name}`);
+        }
+
+        const { presignedUrl, imageId } = await uploadRes.json();
+
+        // Step 2: Upload to R2
+        const r2Response = await fetch(presignedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+
+        if (!r2Response.ok) {
+          throw new Error(`Failed to upload ${file.name} to R2`);
+        }
+
+        // Step 3: Confirm upload success in database
+        await fetch("/api/cdn/upload/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageId,
+            fileSize: file.size,
+          }),
+        });
       }
 
-      const { presignedUrl, imageId } = await uploadRes.json();
-
-      // Step 2: Upload to R2
-      const r2Response = await fetch(presignedUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-
-      if (!r2Response.ok) {
-        throw new Error("Failed to upload to R2");
-      }
-
-      // Step 3: Confirm upload success in database
-      await fetch("/api/cdn/upload/confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageId,
-          fileSize: file.size,
-        }),
-      });
+      upload.progress.current = files.length;
 
       // Reset form
       fileInput.value = "";
-      upload.files = undefined;
-      upload.uploading = false;
-      upload.folder.value = "";
+      upload.reset();
+      modalsOpen.uploadImage = false;
 
-      await invalidateAll();
+      await goto(page.url, { invalidateAll: true });
     } catch (err: any) {
       generalError = err.message;
       console.error("Upload failed:", err);
     } finally {
       siteLoading = false;
+      upload.uploading = false;
     }
   }
 
@@ -230,7 +238,7 @@
   });
 
   onDestroy(async () => {
-    upload.files = undefined;
+    upload.reset();
     siteLoading = false;
   });
 </script>
@@ -240,7 +248,7 @@
 
   <div class="flex w-full flex-col items-end">
     <button class="dy-btn dy-btn-primary dy-btn-soft" onclick={() => (modalsOpen.uploadImage = true)}>
-      Upload Image
+      Upload Images
     </button>
   </div>
 </div>
@@ -384,26 +392,22 @@
 </Modal>
 
 <Modal
-  title="Upload Image"
+  title="Upload Images"
   bind:open={modalsOpen.uploadImage}
   class="space-y-2"
-  onClose={() => {
-    upload.files = undefined;
-    upload.folder.value = "";
-    upload.folder.isValid = null;
-    upload.uploading = false;
-    upload.error = null;
-  }}
+  onClose={() => upload.reset()}
 >
   <form class="mx-auto flex w-full max-w-sm flex-col gap-2" onsubmit={handleFileSubmit}>
     <fieldset class="dy-fieldset border-base-300 rounded-box bg-base-200 w-full border p-4 text-center">
-      <legend class="dy-fieldset-legend">Pick an image</legend>
+      <legend class="dy-fieldset-legend">Pick images</legend>
       <label class="dy-label w-full items-center">
         <input
           bind:this={fileInput}
           bind:files={upload.files}
           type="file"
-          accept="image/*"
+          accept={allowedMimeTypes.join(", ")}
+          multiple
+          maxlength="10"
           class="dy-file-input dy-file-input-accent grow"
         />
         <button
@@ -434,13 +438,7 @@
             list="folder-list"
             oninput={(e) => {
               const value = e.currentTarget.value.trim();
-              upload.folder.value = value;
-              if (!value) {
-                upload.folder.isValid = null;
-              } else {
-                upload.folder.isValid =
-                  /^[A-Za-z0-9_\-.öäüß ]+$/.test(value) && value.length >= 3 && value.length <= 64;
-              }
+              upload.validateFolder(value);
             }}
           />
           <datalist id="folder-list">
@@ -465,11 +463,54 @@
         </p>
       </div>
     </fieldset>
+    <fieldset class="dy-fieldset border-base-300 rounded-box bg-base-200 w-full border p-4 text-center">
+      <ul class="dy-list rounded-box shadow-md">
+        {#if upload.files && upload.files.length > 0}
+          {#if upload.files && upload.files.length > 0}
+            <li class="p-4 pb-2 text-xs tracking-wide opacity-60">
+              {upload.files.length} file{upload.files.length > 1 ? "s" : ""} selected
+            </li>
+          {/if}
+          {#each upload.files as file, index}
+            <li class="dy-list-row">
+              <div>
+                <img src={URL.createObjectURL(file)} alt={file.name} class="size-16 rounded object-cover" />
+              </div>
+              <div>
+                <div class="truncate">{file.name}</div>
+                <div class="text-xs font-semibold uppercase opacity-60">
+                  {file.size > 1024 ? `${(file.size / 1024).toFixed(2)} KB` : `${file.size} bytes`}
+                </div>
+              </div>
+              <button
+                type="button"
+                class="dy-btn dy-btn-soft dy-btn-circle dy-btn-sm dy-btn-warning"
+                onclick={() => {
+                  upload.removeFile(index);
+                }}
+              >
+                <XIcon />
+              </button>
+            </li>
+          {/each}
+        {/if}
+      </ul>
+    </fieldset>
     <div class="dy-join dy-join-vertical">
       <progress
         class="dy-join-item dy-progress dy-progress-secondary"
-        value={upload.uploading ? undefined : 0}
+        value={upload.uploading && upload.progress.total > 0
+          ? (upload.progress.current / upload.progress.total) * 100
+          : upload.uploading
+            ? undefined
+            : 0}
+        max="100"
       ></progress>
+      {#if upload.uploading && upload.progress.total > 0}
+        <p class="dy-join-item bg-accent text-accent-content p-1 text-center text-sm">
+          Uploading {upload.progress.current + 1} of {upload.progress.total}
+        </p>
+      {/if}
       <button
         class="dy-join-item dy-btn dy-btn-accent"
         disabled={!upload.files?.length || upload.uploading}
@@ -478,7 +519,9 @@
         {#if upload.uploading}
           Uploading...
         {:else}
-          Upload
+          Upload {upload.files?.length
+            ? `${upload.files.length} image${upload.files.length > 1 ? "s" : ""}`
+            : "Images"}
         {/if}
       </button>
     </div>
