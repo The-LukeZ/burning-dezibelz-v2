@@ -67,7 +67,27 @@
       "references": [
         {
           "name": "Tailwind Documentation",
-          "url": "https://tailwindcss.com/docs/v4-beta#using-plugins"
+          "url": "https://tailwindcss.com/docs/installation/using-vite#using-plugins"
+        }
+      ]
+    },
+    {
+      "name": "@theme",
+      "description": "Use the `@theme` directive to access theme values in your CSS. This is useful for applying theme values to custom properties or other CSS properties that don't have a direct Tailwind utility equivalent.",
+      "references": [
+        {
+          "name": "Tailwind Documentation",
+          "url": "https://tailwindcss.com/docs/functions-and-directives#theme-directive"
+        }
+      ]
+    },
+    {
+      "name": "@import",
+      "description": "Use the `@import` directive to import other CSS files into your Tailwind CSS file. This is useful for modularizing your styles or including third-party styles.",
+      "references": [
+        {
+          "name": "Tailwind Documentation",
+          "url": "https://tailwindcss.com/docs/functions-and-directives#import-directive"
         }
       ]
     }
