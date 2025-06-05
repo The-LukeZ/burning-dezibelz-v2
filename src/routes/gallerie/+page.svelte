@@ -27,7 +27,11 @@
   let folders = $derived([
     {
       name: "Alle Bilder",
-      count: pageData.imageCount || 0,
+      count: pageData.imageCount,
+    },
+    {
+      name: "Ohne Ordner",
+      count: pageData.otherCount,
     },
     ...pageData.folders.map((folder) => ({
       name: folder.folder_name,
