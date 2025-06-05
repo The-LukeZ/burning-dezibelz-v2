@@ -2,27 +2,24 @@ import { S3 } from "$lib/server/s3";
 import { CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { env as pubEnv } from "$env/dynamic/public";
 import { JsonErrors } from "$lib/constants.js";
+import { normalizeFolderName } from "$lib";
 
 export async function POST({ request, locals: { supabase } }) {
   try {
-    const { imageId, newName, newFolder } = (await request.json()) as {
+    let { imageId, newName, newFolder } = (await request.json()) as {
       imageId: string;
       newName?: string;
       newFolder?: string;
     };
 
     if (!imageId || !(newName || newFolder)) {
-      return JsonErrors.badRequest("Missing imageId, newName, or newFolder");
-    }
-
-    if (newFolder && !/^[a-zA-Z0-9-_]+$/.test(newFolder)) {
-      return JsonErrors.badRequest("Invalid folder name");
+      return JsonErrors.badRequest("imageId and at least newName or newFolder are required");
     }
 
     // Get current image record
     const { data: image, error: fetchError } = await supabase
       .from("images")
-      .select("*")
+      .select("r2_key")
       .eq("id", imageId)
       .maybeSingle();
 
@@ -76,6 +73,12 @@ export async function POST({ request, locals: { supabase } }) {
     }
 
     if (newFolder) {
+      newFolder = normalizeFolderName(newFolder);
+
+      if (newFolder && !/^[a-zA-Z0-9-_. ]+$/.test(newFolder)) {
+        return JsonErrors.badRequest("Invalid folder name");
+      }
+
       const { data: folderData, error: folderError } = await supabase
         .from("images")
         .update({ folder: newFolder })
