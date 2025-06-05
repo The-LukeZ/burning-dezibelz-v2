@@ -4,7 +4,7 @@
   import { buildImageUrl } from "$lib";
   import Trashcan from "$lib/assets/Trashcan.svelte";
   import XIcon from "$lib/assets/XIcon.svelte";
-  import { formatGermanDateTime } from "$lib/utils/concerts";
+  import { formatGermanDateTime } from "$lib/utils/concerts.js";
   import { onDestroy, onMount } from "svelte";
 
   let { supabase } = page.data;
@@ -45,7 +45,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fileName: file.name,
-          fileType: file.type,
+          mimeType: file.type,
         }),
       });
 
