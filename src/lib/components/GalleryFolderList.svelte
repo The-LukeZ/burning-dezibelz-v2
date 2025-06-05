@@ -53,7 +53,7 @@
 <style>
   .gallery-folder-wrapper {
     position: relative;
-    width: 10rem;
+    width: 11.5rem;
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
@@ -76,5 +76,6 @@
 
   .gallery-folder-list li button {
     width: 100%;
+    justify-content: space-between;
   }
 </style>
