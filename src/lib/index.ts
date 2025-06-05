@@ -1,5 +1,4 @@
-import { allowedImageExtensions } from "./constants";
-import { concertHref } from "./utils/concerts";
+import { allowedImageExtensions, allowedMimeTypes } from "./constants";
 
 /**
  * Checks if the provided href matches the current page's pathname.
@@ -116,7 +115,7 @@ export function mimeTypeToExtension(mimeType: ImageMimeType, withPeriod?: false)
  * mimeTypeToExtension("image/unknown"); // null
  */
 export function mimeTypeToExtension(mimeType: string, withPeriod: boolean = true) {
-  const match = mimeType.match(/image\/([a-z]+)/);
+  const match = mimeType.match(new RegExp(`^image/(${allowedImageExtensions.join("|")})$`));
   if (match && match[1]) {
     const ext = match[1] as ImageExtension;
     if (allowedImageExtensions.includes(ext)) {
@@ -169,11 +168,7 @@ export function normalizeFolderName(folderName: string) {
     .replace(/^[\s\-_.]+|[\s\-_.]+$/g, ""); // Remove leading and trailing spaces, dashes, underscores, and dots
 }
 
-export async function copyConcertLink(concertId: string, venueName: string | null = null) {
-  try {
-    await navigator.clipboard.writeText(`${window.location.origin}${concertHref(concertId, venueName)}`);
-    alert("✅ Konzert Link wurde in die Zwischenablage kopiert!");
-  } catch (error) {
-    console.error("Failed to copy concert link:", error);
-  }
+// Typeguards are goated
+export function isValidImageMimeType(mimeType: string): mimeType is (typeof allowedMimeTypes)[number] {
+  return allowedMimeTypes.includes(mimeType as any);
 }
