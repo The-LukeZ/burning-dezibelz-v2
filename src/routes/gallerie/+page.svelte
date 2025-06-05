@@ -11,6 +11,7 @@
   let { data: pageData } = $props();
   let { supabase } = page.data;
   let loading = $state(true);
+
   let images = $state<DBImage[]>([]);
   let folders = $derived(
     pageData.folders.map((folder) => ({
@@ -79,7 +80,15 @@
 </p>
 
 <div class="gallery-grid">
-  <GalleryFolderList {folders} bind:innerWidth mobile={false} />
+  <GalleryFolderList
+    {folders}
+    bind:innerWidth
+    bind:activeFolder
+    onFolderClick={() => {
+      folderModalOpen = false;
+    }}
+    mobile={false}
+  />
 
   <div class="flex flex-col gap-2">
     <!-- Gallery Section -->
@@ -141,9 +150,9 @@
     <GalleryFolderList
       {folders}
       mobile={true}
-      onFolderClick={(folder) => {
+      bind:activeFolder
+      onFolderClick={() => {
         folderModalOpen = false;
-        activeFolder = folder;
       }}
     />
   </div>
