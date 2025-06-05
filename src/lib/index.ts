@@ -48,9 +48,9 @@ export function buildImageUrl(r2Key: string, params: ImageParams & { download?: 
   if (params.quality) _params.set("q", params.quality.toString());
   if (params.fit) _params.set("fit", params.fit);
   if (params.download) _params.set("download", "true");
-  _params.set("f", params.format || "webp");
+  if (params.format) _params.set("f", params.format);
 
-  return `/cdn/${encodeURIComponent(r2Key)}${_params.size ? "?" + _params.toString() : ""}`;
+  return `/cdn/${r2Key}${_params.size ? "?" + _params.toString() : ""}`;
 }
 
 /**
@@ -100,13 +100,31 @@ export function getFileExtension(filename: string): ImageExtension | null {
   return match ? (match.groups?.ext as ImageExtension) : null;
 }
 
-export function mimeTypeToExtension(mimeType: string): ImageExtension | null {
+export function mimeTypeToExtension(mimeType: ImageMimeType, withPeriod: true): ImageExtensionWithDot;
+export function mimeTypeToExtension(mimeType: ImageMimeType, withPeriod?: false): ImageExtension;
+
+/**
+ *
+ * @param mimeType The MIME type to convert to an image extension.
+ * @returns The corresponding image extension, or null if not found.
+ *
+ * @example
+ * mimeTypeToExtension("image/jpeg"); // "jpg"
+ * mimeTypeToExtension("image/png"); // "png"
+ * mimeTypeToExtension("image/gif"); // "gif"
+ * mimeTypeToExtension("image/webp"); // "webp"
+ * mimeTypeToExtension("image/unknown"); // null
+ */
+export function mimeTypeToExtension(mimeType: string, withPeriod: boolean = true) {
   const match = mimeType.match(/image\/([a-z]+)/);
   if (match && match[1]) {
     const ext = match[1] as ImageExtension;
-    return allowedImageExtensions.includes(ext) ? ext : null;
+    if (allowedImageExtensions.includes(ext)) {
+      return withPeriod ? `.${ext}` : ext;
+    }
   }
-  return null;
+
+  throw new Error(`Unsupported MIME type: ${mimeType}`);
 }
 
 export function normalizeName(name: string) {
