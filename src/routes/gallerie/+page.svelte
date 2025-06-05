@@ -1,18 +1,29 @@
 <script lang="ts">
+  // Package imports
+  import { onMount } from "svelte";
+  import { slide } from "svelte/transition";
+// $lib imports
   import { page } from "$app/state";
-  import { buildImageUrl } from "$lib";
+  import { buildImageUrl, loadFolderImages } from "$lib";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
   import GalleryFolderList from "$lib/components/GalleryFolderList.svelte";
   import Head from "$lib/components/Head.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import { onMount } from "svelte";
-  import { slide } from "svelte/transition";
 
+  // Props, supabase, loading states
   let { data: pageData } = $props();
   let { supabase } = page.data;
   let loading = $state(true);
 
-  let images = $state<DBImage[]>([]);
+  // Other $state variables
+  let activeFolder = $state<string>("Alle Bilder");
+  let innerWidth = $state<number>(640);
+  let folderModalOpen = $state(false);
+  let imagesByFolder = $state<Record<string, DBImage[]>>({
+    "Alle Bilder": [],
+  });
+
+  // All $derived variables
   let folders = $derived([
     {
       name: "Alle Bilder",
@@ -23,40 +34,54 @@
       count: folder.image_count,
     })),
   ]);
-  let activeFolder = $state<string>("Alle Bilder");
-  let innerWidth = $state<number>(640);
-  let folderModalOpen = $state(false);
-  let imageCount = $derived(pageData.imageCount || 0);
+  let totalImages = $derived(pageData.imageCount || 0);
+  let currentImgs = $derived<DBImage[]>(
+    activeFolder in imagesByFolder ? imagesByFolder[activeFolder] || [] : [],
+  );
+
+  // Functions
   const IMAGE_LIMIT = 15;
+
+  async function loadImagesForFolder(folder: string, offset: number = 0): Promise<DBImage[]> {
+    try {
+      return await loadFolderImages(supabase, folder, {
+        limit: IMAGE_LIMIT,
+        offset,
+      });
+    } catch (error) {
+      console.error(`Error loading images for folder "${folder}":`, error);
+      return [];
+    }
+  }
 
   async function loadMoreImages(e: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
     e.currentTarget.disabled = true;
 
-    const query = supabase
-      .from("images")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .range(images.length, images.length + IMAGE_LIMIT - 1);
+    try {
+      const currentImages = imagesByFolder[activeFolder] || [];
+      const newImages = await loadImagesForFolder(activeFolder, currentImages.length);
 
-    if (activeFolder !== "Alle Bilder") {
-      query.eq("folder_name", activeFolder);
-    }
-
-    const { data: _images, error } = await query;
-
-    if (error) {
-      console.error("Error fetching more images:", error);
-    } else {
-      if (_images && _images.length > 0) {
-        images.push(..._images);
+      if (newImages.length > 0) {
+        const updatedImages = [...currentImages, ...newImages];
+        imagesByFolder[activeFolder] = updatedImages;
+        currentImgs = updatedImages;
       } else {
         console.warn("No more images to load.");
       }
+    } finally {
+      e.currentTarget.disabled = false;
     }
-
-    e.currentTarget.disabled = false;
   }
 
+  async function switchFolder(folder: string) {
+    if (!imagesByFolder[folder]) {
+      imagesByFolder[folder] = await loadImagesForFolder(folder);
+    }
+    activeFolder = folder;
+    currentImgs = imagesByFolder[folder];
+  }
+
+  // onMount
   onMount(async () => {
     const { data, error } = await supabase
       .from("images")
@@ -67,7 +92,7 @@
     if (error) {
       console.error("Error fetching images:", error);
     } else {
-      images = data || [];
+      imagesByFolder["Alle Bilder"] = data || [];
     }
     loading = false;
   });
@@ -90,12 +115,19 @@
   Du kannst die Bilder nach Ordnern filtern, um bestimmte Veranstaltungen zu finden.
 </p>
 
+<!-- 
+TODO:
+- Add disabled bindable to the gallery folder list component to disable the folder list when loading images
+- Add a loading state to the gallery folder list component
+- Find out why "Alle Bilder" is not loaded when switching back to it
+-->
+
 <div class="gallery-grid">
   <GalleryFolderList
     {folders}
     bind:innerWidth
-    bind:activeFolder
-    onFolderClick={() => {
+    onFolderClick={async (newFolder) => {
+      await switchFolder(newFolder);
       setTimeout(() => {
         folderModalOpen = false;
       }, 200);
@@ -108,40 +140,46 @@
     <section>
       {#if loading}
         <span class="dy-loading dy-loading-dots mx-auto my-5"></span>
-      {:else if !loading && images.length === 0}
+      {:else if !loading && currentImgs.length === 0}
         <p class="text-gray-500">Hier ist's ziemlich leer...</p>
-      {:else if !loading && images.length > 0}
-        {#each images as image}
-          <div id={image.id} class="image-card dy-skeleton">
-            <img
-              src={buildImageUrl(image.r2_key, { width: 600, height: 600, fit: "cover", quality: 80 })}
-              alt={image.name}
-              loading="lazy"
-            />
-            <div class="card-actions">
-              <p class="truncate p-2 text-sm text-white">{image.name}</p>
-              <a
-                class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
-                href={buildImageUrl(image.r2_key)}
-                target="_blank"
-              >
-                Öffnen
-                <ArrowUpRight class="size-5" />
-              </a>
+      {:else if !loading && currentImgs.length > 0}
+        {#key imagesByFolder}
+          {#each currentImgs as image}
+            <div id={image.id} class="image-card dy-skeleton">
+              <img
+                src={buildImageUrl(image.r2_key, { width: 600, height: 600, fit: "cover", quality: 80 })}
+                alt={image.name}
+                loading="lazy"
+              />
+              <div class="card-actions">
+                <p class="truncate p-2 text-sm text-white">{image.name}</p>
+                <a
+                  class="dy-btn dy-btn-primary dy-btn-dash dy-btn-sm w-28"
+                  href={buildImageUrl(image.r2_key)}
+                  target="_blank"
+                >
+                  Öffnen
+                  <ArrowUpRight class="size-5" />
+                </a>
+              </div>
             </div>
-          </div>
-        {/each}
+          {/each}
+        {/key}
       {/if}
     </section>
 
     <!-- Load more button -->
     <div class="mx-auto my-5 flex flex-col items-center justify-center gap-2">
-      {#if !loading && imageCount > images.length}
-        <p class="text-gray-500">{images.length} von {imageCount} Bildern geladen</p>
-        <button class="dy-btn dy-btn-primary dy-btn-soft" onclick={loadMoreImages}>Mehr laden</button>
-      {:else if !loading && images.length == imageCount}
-        <p class="text-gray-500">Alle Bilder wurden geladen.</p>
-      {/if}
+      {#key imagesByFolder}
+        {@const imageCount =
+          activeFolder === "Alle Bilder" ? totalImages : imagesByFolder[activeFolder]?.length || 0}
+        {#if !loading && imageCount > currentImgs.length}
+          <p class="text-gray-500">{currentImgs.length} von {imageCount} Bildern geladen</p>
+          <button class="dy-btn dy-btn-primary dy-btn-soft" onclick={loadMoreImages}>Mehr laden</button>
+        {:else if !loading && currentImgs.length == imageCount}
+          <p class="text-gray-500">Alle Bilder wurden geladen.</p>
+        {/if}
+      {/key}
     </div>
   </div>
 </div>
@@ -163,8 +201,8 @@
     <GalleryFolderList
       {folders}
       mobile={true}
-      bind:activeFolder
-      onFolderClick={() => {
+      onFolderClick={async (newFolder) => {
+        await switchFolder(newFolder);
         setTimeout(() => {
           folderModalOpen = false;
         }, 200);
