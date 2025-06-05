@@ -1,5 +1,5 @@
 import { env as pubEnv } from "$env/dynamic/public";
-import { normalizeName } from "$lib";
+import { isValidImageMimeType, mimeTypeToExtension, normalizeName, removeExtension } from "$lib";
 import { JsonErrors } from "$lib/constants.js";
 import { S3 } from "$lib/server/s3.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -7,21 +7,32 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export async function POST({ request, locals: { supabase } }) {
   try {
-    const { fileName, fileType } = (await request.json()) as {
+    let { fileName, mimeType } = (await request.json()) as {
       fileName: string | undefined;
-      fileType: string | undefined;
+      mimeType: string | undefined;
     };
 
-    if (!fileName || !fileType) {
-      return Response.json({ error: "File name or file type is missing" }, { status: 400 });
+    if (!fileName || !mimeType) {
+      return JsonErrors.badRequest("File name or file type is missing");
     }
 
-    const objectKey = `images/${Date.now().toString()}-${normalizeName(fileName)}`;
+    if (!isValidImageMimeType(mimeType)) {
+      return JsonErrors.badRequest("Unsupported file type");
+    }
+
+    try {
+      fileName = `${normalizeName(removeExtension(fileName))}${mimeTypeToExtension(mimeType, true)}` as const;
+    } catch (err: any) {
+      // mimeTypeToExtension might throw an error if the file type is invalid
+      return JsonErrors.badRequest(`Invalid file type: ${err.message}`);
+    }
+
+    const objectKey = `images/${Date.now().toString()}-${fileName}`;
 
     const command = new PutObjectCommand({
       Bucket: pubEnv.PUBLIC_R2_BUCKET_NAME,
       Key: objectKey,
-      ContentType: fileType,
+      ContentType: mimeType,
       ACL: "public-read",
       Metadata: {
         "x-amz-meta-original-filename": fileName,
@@ -36,6 +47,7 @@ export async function POST({ request, locals: { supabase } }) {
       .from("images")
       .insert({
         name: fileName,
+        mime_type: mimeType,
         r2_key: objectKey,
         status: "pending",
       })
