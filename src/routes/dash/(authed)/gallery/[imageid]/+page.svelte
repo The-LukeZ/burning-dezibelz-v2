@@ -9,6 +9,7 @@
     removeExtension,
   } from "$lib";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
+  import ExpandArrows from "$lib/assets/ExpandArrows.svelte";
   import Trashcan from "$lib/assets/Trashcan.svelte";
   import XIcon from "$lib/assets/XIcon.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts.js";
@@ -169,8 +170,11 @@
             class="h-full w-full object-contain"
           />
           <div class="absolute inset-0 top-0 right-0 bottom-0 left-0 grid place-items-center">
-            <button class="dy-btn dy-btn-primary" onclick={() => (imageOnFullDisplay = true)}>
-              View Full Image
+            <button
+              class="dy-btn dy-btn-ghost dy-btn-warning dy-btn-square dy-btn-xl"
+              onclick={() => (imageOnFullDisplay = true)}
+            >
+              <ExpandArrows class="size-full" />
             </button>
           </div>
         </div>
@@ -270,7 +274,7 @@
     <div class="big-image-container">
       <img src={buildImageUrl(image.r2_key, { quality: 80 })} alt={image.name} class="rounded-lg shadow-lg" />
       <button
-        class="dy-btn dy-btn-ghost dy-btn-warning dy-btn-square absolute top-2 right-2 text-white"
+        class="dy-btn dy-btn-ghost dy-btn-warning dy-btn-square absolute top-2 right-2"
         onclick={() => (imageOnFullDisplay = false)}
       >
         <XIcon />
@@ -282,7 +286,7 @@
 <style>
   .big-image-container {
     position: relative;
-    max-width: calc(100dvw * 0.9);
+    max-width: calc(100dvw * 0.95);
 
     img {
       max-width: 100%;
