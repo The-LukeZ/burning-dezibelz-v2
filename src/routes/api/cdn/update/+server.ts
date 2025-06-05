@@ -79,12 +79,12 @@ export async function POST({ request, locals: { supabase } }) {
         return JsonErrors.badRequest("Invalid folder name");
       }
 
-      const { data: folderData, error: folderError } = await supabase
+      const { error: folderError } = await supabase
         .from("images")
         .update({ folder: newFolder })
         .eq("id", imageId);
 
-      if (folderError || !folderData) {
+      if (folderError) {
         return JsonErrors.serverError("Failed to update folder");
       }
     }
