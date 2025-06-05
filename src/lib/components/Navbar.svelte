@@ -133,7 +133,7 @@
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <ul
           tabindex="0"
-          class="dy-dropdown-content dy-menu dy-menu-xl bg-base-200 rounded-box mobile-menu z-100 mt-3 p-2 drop-shadow-lg"
+          class="dy-dropdown-content dy-menu dy-menu-xl bg-base-300 rounded-box mobile-menu mt-3 p-2 drop-shadow-lg drop-shadow-white/15"
         >
           {@render navbarLinks()}
         </ul>
@@ -166,6 +166,7 @@
   .mobile-menu {
     width: calc(100vw - ((11 / 12) * 100%));
     gap: 0.5rem;
+    z-index: 100;
 
     li:not(:last-child) {
       padding-bottom: 5px;
@@ -173,6 +174,7 @@
 
     a,
     button {
+      background-color: color-mix(in oklab, var(--color-light-base-100) 60%, transparent);
       justify-content: center;
       width: 100%;
     }
