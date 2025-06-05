@@ -201,8 +201,7 @@ export async function loadFolderImages(
 
   if (folder === "Ohne Ordner") {
     query.is("folder", null);
-  }
-  if (folder !== "Alle Bilder" && folder !== "Ohne Ordner") {
+  } else if (folder !== "Alle Bilder") {
     query.eq("folder", folder);
   }
 
