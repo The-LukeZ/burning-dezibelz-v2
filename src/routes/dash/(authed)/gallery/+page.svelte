@@ -274,7 +274,7 @@
   />
 
   <section class="mx-auto flex w-full max-w-5xl flex-col items-center justify-center space-y-4">
-    <div class="flex items-center gap-4">
+    <div class="xs:flex-row xs:gap-4 flex flex-col items-center gap-2">
       <h2 class="text-2xl font-bold">
         {activeFolder === "Alle Bilder" ? "All uploaded files" : `Files in ${activeFolder}`}
       </h2>
@@ -399,9 +399,9 @@
 
 <style>
   .image-grid-item {
-    flex: 0 1 400px;
+    flex: 0 1 350px;
 
-    @media screen and (max-width: 600px) {
+    @media screen and (max-width: 640px) {
       flex: 0 1 100%;
     }
 
@@ -427,6 +427,8 @@
     display: grid;
     grid-template-columns: auto 1fr;
     margin-top: 1.5rem;
+    transition-delay: 500ms;
+    transition: grid-template-columns 200ms ease-in-out;
 
     @media screen and (max-width: 640px) {
       grid-template-columns: 1fr;
