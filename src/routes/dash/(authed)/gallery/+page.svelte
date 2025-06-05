@@ -62,6 +62,7 @@
       count: folder.image_count,
     })),
   ]);
+
   let currentImgs = $derived<DBImage[]>(
     activeFolder in imagesByFolder ? imagesByFolder[activeFolder] || [] : [],
   );
