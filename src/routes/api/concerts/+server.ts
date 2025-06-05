@@ -1,8 +1,9 @@
 import { JsonErrors } from "$lib/constants.js";
 import { generateConcertId } from "$lib/server/utils.js";
-import type { Database } from "$lib/supabase";
-import { ConcertCreateSchema } from "$lib/validators.js";
-import { fromError as FromZodError } from "zod-validation-error";
+import type { Database } from "$lib/supabase.js";
+import { ConcertCreateSchema } from "$lib/utils/assertions.js";
+import { ConcertCreateValidator } from "$lib/utils/validator";
+import { fromError as FromZodError, ValidationError } from "zod-validation-error";
 
 /*
 Available query parameters:
@@ -101,16 +102,15 @@ export async function POST({ request, locals: { supabase } }) {
   partialConcert.id = id;
 
   // Validate the concert data
-  const validation = ConcertCreateSchema.safeParse(partialConcert);
-  if (!validation.success) {
-    const validationError = FromZodError(validation.error);
-    console.error("Validation error:", validationError);
-    return JsonErrors.badRequest(validationError.message);
+  let finalConcert: ReturnType<typeof ConcertCreateValidator.validate>;
+  try {
+    finalConcert = ConcertCreateValidator.validate(partialConcert);
+  } catch (err: any) {
+    console.error("Validation error:", err);
+    return JsonErrors.badRequest(err?.message);
   }
 
-  const concert = validation.data as Database["public"]["Tables"]["concerts"]["Insert"];
-
-  const { data, error } = await supabase.from("concerts").insert([concert]).select().single();
+  const { data, error } = await supabase.from("concerts").insert([finalConcert]).select().single();
 
   if (error) {
     console.error("Error inserting concert:", error);
