@@ -3,8 +3,8 @@
 
   type Props = {
     folders: { name: string; count: number }[];
+    activeFolder?: string;
     onFolderClick?: (folder: string) => void;
-    folder?: string;
     innerWidth?: number;
     /**
      * Indicates if the component is being used on a mobile device.
@@ -15,7 +15,13 @@
     mobile?: boolean;
   };
 
-  let { folders, onFolderClick, innerWidth = $bindable(640), mobile }: Props = $props();
+  let {
+    folders,
+    onFolderClick,
+    innerWidth = $bindable(640),
+    mobile,
+    activeFolder = $bindable("Alle Bilder"),
+  }: Props = $props();
 </script>
 
 <svelte:window bind:innerWidth />
@@ -25,7 +31,14 @@
     <ul class="gallery-folder-list" transition:slide={{ duration: 200, axis: "x" }}>
       {#each folders as { name, count }}
         <li>
-          <button class="dy-btn dy-btn-soft dy-btn-primary" onclick={() => onFolderClick?.(name)}>
+          <button
+            class="dy-btn dy-btn-soft dy-btn-primary"
+            class:dy-btn-active={activeFolder === name}
+            onclick={() => {
+              activeFolder = name;
+              onFolderClick?.(name);
+            }}
+          >
             <span>{name}</span>
             <span class="dy-badge dy-badge-secondary dy-badge-sm" style="margin-left: 0.5rem;">
               {count}
