@@ -14,6 +14,7 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts.js";
   import { onMount } from "svelte";
+  import { fade, scale } from "svelte/transition";
 
   let { supabase } = page.data;
   let imageId = page.params.imageid;
@@ -164,11 +165,7 @@
       <!-- Image Preview -->
       <div class="flex w-full flex-col items-center lg:w-1/2">
         <div class="bg-base-200 dy-skeleton relative w-full max-w-lg overflow-hidden rounded-lg shadow-lg">
-          <img
-            src={buildImageUrl(image.r2_key, { quality: 40 })}
-            alt={image.name}
-            class="h-full w-full object-contain"
-          />
+          <img src={buildImageUrl(image.r2_key)} alt={image.name} class="h-full w-full object-contain" />
           <div class="absolute inset-0 top-0 right-0 bottom-0 left-0 grid place-items-center">
             <button
               class="dy-btn dy-btn-ghost dy-btn-warning dy-btn-square dy-btn-xl"
@@ -270,9 +267,9 @@
 
 <!-- Big ass popup which shows the image on full display when image is clicked -->
 {#if image && imageOnFullDisplay}
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-    <div class="big-image-container">
-      <img src={buildImageUrl(image.r2_key, { quality: 80 })} alt={image.name} class="rounded-lg shadow-lg" />
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70" transition:fade>
+    <div class="big-image-container" transition:scale>
+      <img src={buildImageUrl(image.r2_key)} alt={image.name} class="rounded-lg shadow-lg" />
       <button
         class="dy-btn dy-btn-ghost dy-btn-warning dy-btn-square absolute top-2 right-2"
         onclick={() => (imageOnFullDisplay = false)}
