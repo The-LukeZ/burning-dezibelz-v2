@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import sharp from "sharp";
 
 const Limiter = new RateLimiter({
-  points: 100, // 100 requests
+  points: 200, // 200 requests
   duration: 300, // 5 minutes
 });
 
@@ -143,14 +143,13 @@ export async function GET({ params, getClientAddress, url }) {
   // Check and perform daily cache clearing
   checkAndClearCache();
 
-  // --- Arcjet Rate Limiting ---
-  // Apply rate limiting: 200 requests per 10 minutes.
-  // Arcjet automatically tries to identify the client IP from the request.
+  // --- Rate Limiting ---
+  // Apply rate limiting: 200 requests per 5 minutes.
   const ip = getClientAddress() || "unknown-client";
   const decision = await Limiter.protect(ip, 1, { ip });
 
   if (decision.isDenied()) {
-    console.warn(`[Arcjet] Rate limit exceeded for image "${imageName}". IP: ${decision.data.ip}`);
+    console.warn(`[Ratelimiter] Rate limit exceeded for image "${imageName}". IP: ${decision.data.ip}`);
     return JsonErrors.tooManyRequests("Too Many Requests");
   }
 
