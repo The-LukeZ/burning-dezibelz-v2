@@ -4,7 +4,9 @@
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
   import GalleryFolderList from "$lib/components/GalleryFolderList.svelte";
   import Head from "$lib/components/Head.svelte";
+  import Modal from "$lib/components/Modal.svelte";
   import { onMount } from "svelte";
+  import { slide } from "svelte/transition";
 
   let { data: pageData } = $props();
   let { supabase } = page.data;
@@ -17,6 +19,8 @@
     })),
   );
   let activeFolder = $state<string>("Alle Bilder");
+  let innerWidth = $state<number>(640);
+  let folderModalOpen = $state(false);
   let imageCount = $derived(pageData.imageCount || 0);
   const IMAGE_LIMIT = 15;
 
@@ -75,7 +79,7 @@
 </p>
 
 <div class="gallery-grid">
-  <GalleryFolderList {folders} />
+  <GalleryFolderList {folders} bind:innerWidth mobile={false} />
 
   <div class="flex flex-col gap-2">
     <!-- Gallery Section -->
@@ -119,6 +123,31 @@
     </div>
   </div>
 </div>
+
+<div class="dy-toast dy-toast-right dy-toast-bottom">
+  {#if innerWidth < 640}
+    <button
+      class="dy-btn dy-btn-warning dy-btn-soft"
+      onclick={() => (folderModalOpen = true)}
+      transition:slide={{ duration: 200, axis: "x" }}
+    >
+      Ordner anzeigen
+    </button>
+  {/if}
+</div>
+
+<Modal title="Ordner" bind:open={folderModalOpen} closeOnBackdropClick={false}>
+  <div class="flex w-full justify-center">
+    <GalleryFolderList
+      {folders}
+      mobile={true}
+      onFolderClick={(folder) => {
+        folderModalOpen = false;
+        activeFolder = folder;
+      }}
+    />
+  </div>
+</Modal>
 
 <style>
   section {
