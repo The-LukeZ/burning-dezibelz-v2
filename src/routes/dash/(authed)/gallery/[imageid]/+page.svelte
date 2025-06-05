@@ -17,6 +17,7 @@
   import { fade, scale } from "svelte/transition";
 
   let { supabase } = page.data;
+  let { data: pageData } = $props();
   let imageId = page.params.imageid;
   let siteLoading = $state(false);
   let error = $state<string | null>(null);
@@ -31,6 +32,9 @@
     folder: "",
     mime_type: "image/webp",
   });
+  let folderIsValid = $derived.by(() =>
+    !updateData.folder ? true : /^[A-Za-z0-9_\-.öäüß ]+$/.test(updateData.folder),
+  );
   let copySuccess = $state(false);
   let imageOnFullDisplay = $state(false);
 
@@ -79,7 +83,10 @@
         throw new Error("Failed to update image");
       }
 
+      const updateJson = await response.json();
       image.name = updateData.name;
+      image.folder = updateJson.folder || null;
+      image.r2_key = updateJson.r2_key;
     } catch (err: any) {
       error = err.message;
       console.error("Update failed:", err);
@@ -160,7 +167,7 @@
   {/if}
 
   {#if image}
-    <div class="flex w-full flex-col items-center gap-6 lg:flex-row">
+    <div class="flex w-full flex-col items-start gap-6 md:flex-row">
       <!-- Image Preview -->
       <div class="flex w-full flex-col items-center lg:w-1/2">
         <div class="bg-base-200 dy-skeleton relative w-full max-w-lg overflow-hidden rounded-lg shadow-lg">
@@ -198,13 +205,13 @@
                   class="dy-input dy-validator w-full"
                   minlength="3"
                   maxlength="256"
-                  pattern="[A-Za-z0-9_\.\-]+"
+                  pattern="[A-Za-z0-9_-\.]+"
                   title="Letters, numbers, underscores, dots, and dashes only"
                   placeholder="Filename"
                   bind:value={updateData.name}
                 />
                 <p class="dy-validator-hint">
-                  Must be valid filename [A-Za-z0-9_.-] and between 3 and 256 characters
+                  Can only contain alphanumeric characters, underscores, dots, and dashes.
                 </p>
               </fieldset>
 
@@ -212,16 +219,26 @@
                 <legend class="dy-fieldset-legend">Folder</legend>
                 <input
                   type="text"
-                  class="dy-input dy-validator w-full"
+                  class="dy-input w-full"
+                  class:dy-input-error={!folderIsValid}
+                  class:dy-input-success={folderIsValid === true}
                   bind:value={updateData.folder}
                   placeholder="Folder"
-                  pattern="[A-Za-z0-9_\-öäüß ]+"
                   title="Alphanumeric characters, underscores, spaces and dashes only"
                   minlength="3"
                   maxlength="64"
+                  list="folder-list"
                 />
+                <datalist id="folder-list">
+                  {#each pageData.folders as folder}
+                    <option value={folder}></option>
+                  {/each}
+                </datalist>
                 <span>The name of the folder in which the image is grouped.</span>
-                <p class="dy-validator-hint">Only alphanumeric characters, underscores, spaces and dashes!</p>
+
+                <p class="text-error" class:hidden={folderIsValid}>
+                  Only alphanumeric characters, underscores, spaces and dashes!
+                </p>
               </fieldset>
 
               <div class="flex justify-end space-x-2">
