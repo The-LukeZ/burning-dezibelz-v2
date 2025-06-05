@@ -20,7 +20,6 @@
   let imageId = page.params.imageid;
   let siteLoading = $state(false);
   let error = $state<string | null>(null);
-  let success = $state<string | null>(null);
   let image = $state<DBImage | null>(null);
   /**
    * The data used to update the image.
@@ -267,11 +266,11 @@
 
 <!-- Big ass popup which shows the image on full display when image is clicked -->
 {#if image && imageOnFullDisplay}
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70" transition:fade>
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5" transition:fade>
     <div class="big-image-container" transition:scale>
       <img src={buildImageUrl(image.r2_key)} alt={image.name} class="rounded-lg shadow-lg" />
       <button
-        class="dy-btn dy-btn-ghost dy-btn-warning dy-btn-square absolute top-2 right-2"
+        class="dy-btn dy-btn-soft dy-btn-warning dy-btn-square absolute top-2 right-2"
         onclick={() => (imageOnFullDisplay = false)}
       >
         <XIcon />
@@ -283,11 +282,18 @@
 <style>
   .big-image-container {
     position: relative;
-    max-width: calc(100dvw * 0.95);
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     img {
+      max-height: 100%;
       max-width: 100%;
       height: auto;
+      width: auto;
+      object-fit: contain;
     }
   }
 </style>
