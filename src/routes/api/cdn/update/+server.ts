@@ -19,7 +19,7 @@ export async function POST({ request, locals: { supabase } }) {
     // Get current image record
     const { data: image, error: fetchError } = await supabase
       .from("images")
-      .select("r2_key")
+      .select("r2_key, name, folder, id")
       .eq("id", imageId)
       .maybeSingle();
 
@@ -28,12 +28,12 @@ export async function POST({ request, locals: { supabase } }) {
     }
 
     // Only update name if provided
-    let newKey = image.r2_key; // Default to current key
-    if (newName) {
+    let newKey = image.r2_key;
+    if (newName && newName !== image.name) {
       const oldKey = image.r2_key;
       // Replace the last part of the key with newName
       // Ex: "images/oldName.jpg" -> "images/newName.jpg"
-      newKey = oldKey.replace(/[^/]+$/, newName);
+      newKey = `images/${newName}`;
 
       // Copy object with new key
       const copyCommand = new CopyObjectCommand({
@@ -72,7 +72,7 @@ export async function POST({ request, locals: { supabase } }) {
       await S3.send(deleteOldCommand);
     }
 
-    if (newFolder) {
+    if (newFolder && newFolder !== image.folder) {
       newFolder = normalizeFolderName(newFolder);
 
       if (newFolder && !/^[a-zA-Z0-9-_. ]+$/.test(newFolder)) {
