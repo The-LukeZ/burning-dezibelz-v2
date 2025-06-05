@@ -117,6 +117,8 @@
   Du kannst die Bilder nach Ordnern filtern, um bestimmte Veranstaltungen zu finden.
 </p>
 
+<span class="dy-divider my-1"></span>
+
 <!-- 
 TODO:
 - Add disabled bindable to the gallery folder list component to disable the folder list when loading images
