@@ -180,3 +180,12 @@ export function filterConcerts(concerts: Concert[], options: FetchConcertOptions
 
 export const concertHref = (concertId: string, venueName: string | null = null) =>
   `/konzerte/k/${concertId}${venueName ? `#${normalizeName(venueName)}` : ""}` as const;
+
+export async function copyConcertLink(concertId: string, venueName: string | null = null) {
+  try {
+    await navigator.clipboard.writeText(`${window.location.origin}${concertHref(concertId, venueName)}`);
+    alert("✅ Konzert Link wurde in die Zwischenablage kopiert!");
+  } catch (error) {
+    console.error("Failed to copy concert link:", error);
+  }
+}
