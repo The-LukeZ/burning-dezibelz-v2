@@ -6,6 +6,7 @@ import { sequence } from "@sveltejs/kit/hooks";
 
 import { NODE_ENV, R2_ENDPOINT, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SENTRY_DSN, PUBLIC_SUPABASE_URL } from "$env/static/public";
+import wildcardMatch from "wildcard-match";
 
 Sentry.init({
   dsn: PUBLIC_SENTRY_DSN,
@@ -90,6 +91,83 @@ const userSessionMiddleware: Handle = async ({ event, resolve }) => {
   return resolve(event);
 };
 
+type APIRouteConfig = {
+  /**
+   * Whether the route requires authentication.
+   */
+  authRequired?: boolean;
+  /**
+   * Optional list of HTTP methods that the route supports.
+   *
+   * If not specified, the route applies to all methods.
+   */
+  methods?: string[];
+};
+
+/**
+ * Configuration for API routes that require authentication.
+ *
+ * **Note, that if you have a base route like `/api/foo/**` and you want to
+ * have a specific route like `/api/foo/bar`, you need to define
+ * `/api/foo/bar` before `/api/foo/**` in this object.**
+ *
+ * **Otherwise, the wildcard route will match first and prevent the specific
+ * route from being matched.**
+ */
+const AUTHED_ROUTES: Record<string, APIRouteConfig> = {
+  "/api/google-auth/**": { authRequired: false },
+  "/api/cdn/upload{,/**}": { authRequired: true },
+  "/api/cdn/**": { authRequired: true },
+};
+
+function matchesRoute(pattern: string, pathname: string): boolean {
+  console.debug(`[Route Matcher] Checking pattern "${pattern}" against pathname "${pathname}"`);
+
+  if (!pattern.includes("*")) {
+    const exactMatch = pathname === pattern;
+    console.debug(`[Route Matcher] Exact match result: ${exactMatch}`);
+    return exactMatch;
+  }
+
+  const isMatch = wildcardMatch(pattern, {
+    flags: "i",
+  });
+
+  const wildcardResult = isMatch(pathname);
+  console.debug(`[Route Matcher] Wildcard match result: ${wildcardResult}`);
+  return wildcardResult;
+}
+
+const apiAuthGuard: Handle = async ({ event, resolve }) => {
+  const pathname = event.url.pathname;
+
+  if (!pathname.startsWith("/api/")) {
+    return resolve(event); // Skip auth guard for non-API routes
+  }
+
+  console.debug("");
+  console.debug(`[Auth Guard] Checking pathname: ${pathname}`);
+
+  for (const [pattern, config] of Object.entries(AUTHED_ROUTES)) {
+    console.debug(`[Auth Guard] Checking route config for pattern: ${pattern}`, config);
+
+    if (matchesRoute(pattern, pathname)) {
+      console.debug(`[Auth Guard] Route matched! Pattern: ${pattern}, Config:`, config);
+
+      if (config.authRequired && !(event.locals.user && event.locals.session)) {
+        console.debug(`[Auth Guard] Authentication required but user not found. Returning 401.`);
+        return Response.json({ error: "Authentication required" }, { status: 401 });
+      }
+
+      console.debug(`[Auth Guard] Route matched and auth requirements satisfied`);
+      break;
+    }
+  }
+
+  console.debug(`[Auth Guard] Auth guard complete for ${pathname}`);
+  return resolve(event);
+};
+
 const authUserMiddleware: Handle = async ({ event, resolve }) => {
   // Authorize user role for API routes only
   const isUsersApiRoute = event.url.pathname.startsWith("/api/users");
@@ -112,6 +190,7 @@ export const handle = sequence(
   devToolsCheck,
   supabase,
   userSessionMiddleware,
+  apiAuthGuard,
   authUserMiddleware,
 );
 
