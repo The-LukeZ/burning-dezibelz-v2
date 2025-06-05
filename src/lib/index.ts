@@ -1,4 +1,6 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { allowedImageExtensions, allowedMimeTypes } from "./constants";
+import type { Database } from "./supabase";
 
 /**
  * Checks if the provided href matches the current page's pathname.
@@ -171,4 +173,42 @@ export function normalizeFolderName(folderName: string) {
 // Typeguards are goated
 export function isValidImageMimeType(mimeType: string): mimeType is (typeof allowedMimeTypes)[number] {
   return allowedMimeTypes.includes(mimeType as any);
+}
+
+type LoadFolderImgsOptions = {
+  limit?: number;
+  offset?: number;
+};
+
+export async function loadFolderImages(
+  supabase: SupabaseClient<Database>,
+  folder: string,
+  options: LoadFolderImgsOptions,
+) {
+  const opts = Object.assign(
+    {
+      limit: 15,
+      offset: 0,
+    },
+    options,
+  ) as Required<LoadFolderImgsOptions>;
+
+  const query = supabase
+    .from("images")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(opts.offset, opts.offset + (opts.limit || 15) - 1);
+
+  if (folder !== "Alle Bilder") {
+    query.eq("folder", folder);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error loading images:", error);
+    throw error;
+  }
+
+  return data || [];
 }
