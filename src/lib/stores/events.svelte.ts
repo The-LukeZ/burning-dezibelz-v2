@@ -1,6 +1,6 @@
 import { SvelteMap } from "svelte/reactivity";
 import { API_URL, UnknownVenue } from "../constants";
-import { filterConcerts } from "../utils/concerts";
+import { filterConcerts } from "../utils/concerts.js";
 
 interface EventStoreState {
   /**

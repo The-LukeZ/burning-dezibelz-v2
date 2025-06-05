@@ -3,7 +3,7 @@
   import XIcon from "$lib/assets/XIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import type { Database } from "$lib/supabase";
-  import { formatGermanDateTime } from "$lib/utils/concerts";
+  import { formatGermanDateTime } from "$lib/utils/concerts.js";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
 

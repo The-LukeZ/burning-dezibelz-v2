@@ -1,8 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { copyConcertLink } from "$lib";
   import { EventStore, fetchConcerts, serializeConcerts } from "$lib/stores/events.svelte.js";
-  import { formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
+  import { copyConcertLink, formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
   import { onMount } from "svelte";
   import { SvelteMap } from "svelte/reactivity";
 

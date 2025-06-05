@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { buildImageUrl } from "$lib";
-  import { concertHref } from "$lib/utils/concerts";
+  import { concertHref } from "$lib/utils/concerts.js";
   import JsonLd from "../JsonLd.svelte";
 
   type Props = {

@@ -1,11 +1,11 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import ChevronDown from "$lib/assets/ChevronDown.svelte";
-  import { EventMetadata, EventStore, getVenueById, serializeConcerts } from "$lib/stores/events.svelte.js";
-  import { formatGermanDateTime } from "$lib/utils/concerts";
   import type { SeoConfig } from "$lib/components/Head.svelte";
   import Head from "$lib/components/Head.svelte";
   import AboutSchemaOrg from "$lib/components/SchemaOrgs/About.svelte";
+  import { EventMetadata, EventStore, getVenueById, serializeConcerts } from "$lib/stores/events.svelte.js";
+  import { formatGermanDateTime } from "$lib/utils/concerts.js";
 
   let banner = $state<HTMLDivElement>();
   let firstSection = $state<HTMLElement>();

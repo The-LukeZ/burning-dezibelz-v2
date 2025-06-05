@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
   import { buildImageUrl } from "$lib";
   import Lock from "$lib/assets/Lock.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
   import Head from "$lib/components/Head.svelte";
   import SiteHeader from "$lib/components/SiteHeader.svelte";
   import { EventStore, fetchConcerts, serializeConcerts } from "$lib/stores/events.svelte";
-  import { concertHref, formatGermanDateTime } from "$lib/utils/concerts";
+  import { concertHref, formatGermanDateTime } from "$lib/utils/concerts.js";
   import { onMount } from "svelte";
   import { SvelteMap } from "svelte/reactivity";
 

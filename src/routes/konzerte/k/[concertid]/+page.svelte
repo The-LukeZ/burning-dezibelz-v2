@@ -1,12 +1,12 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { copyConcertLink, normalizeName } from "$lib";
+  import { normalizeName } from "$lib";
   import ArrowUpRight from "$lib/assets/ArrowUpRight.svelte";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
   import PlaceholderConcertImage from "$lib/assets/PlaceholderConcertImage.svelte";
   import ContentContainer from "$lib/components/ContentContainer.svelte";
   import Head from "$lib/components/Head.svelte";
-  import { buildConcertDescription, buildConcertTitle, formatGermanDateTime } from "$lib/utils/concerts";
+  import { buildConcertDescription, buildConcertTitle, copyConcertLink, formatGermanDateTime } from "$lib/utils/concerts.js";
   import { fade, slide } from "svelte/transition";
 
   let { data } = $props();

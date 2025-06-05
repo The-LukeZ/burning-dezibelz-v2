@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { copyConcertLink } from "$lib";
   import { EventMetadata, EventStore, serializeConcerts } from "$lib/stores/events.svelte.js";
+  import { copyConcertLink } from "$lib/utils/concerts.js";
   import { formatGermanDateTime, getConcertDisplayName } from "$lib/utils/concerts.js";
 
   let loading = $state(false);

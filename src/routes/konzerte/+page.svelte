@@ -5,7 +5,7 @@
   import Head from "$lib/components/Head.svelte";
   import SiteHeader from "$lib/components/SiteHeader.svelte";
   import { EventMetadata, EventStore, serializeConcerts } from "$lib/stores/events.svelte";
-  import { concertHref, filterConcerts, formatGermanDateTime } from "$lib/utils/concerts";
+  import { concertHref, filterConcerts, formatGermanDateTime } from "$lib/utils/concerts.js";
 
   const filteredConcerts = $derived<ConcertWithDetails[]>(
     filterConcerts(serializeConcerts(), {

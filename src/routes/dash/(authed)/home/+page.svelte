@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { page } from "$app/state";
-  import { formatGermanDateTime } from "$lib/utils/concerts";
-  import { navItems as _navitems } from "$lib/data/navigationData";
   import { goto } from "$app/navigation";
+  import { page } from "$app/state";
+  import { navItems as _navitems } from "$lib/data/navigationData";
+  import { formatGermanDateTime } from "$lib/utils/concerts.js";
   const navItems = _navitems.private;
 </script>
 
