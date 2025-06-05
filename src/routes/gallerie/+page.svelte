@@ -213,7 +213,6 @@ TODO:
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-top: 2rem;
     padding: 1rem;
     justify-content: center;
     align-items: center;
