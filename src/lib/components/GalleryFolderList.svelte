@@ -57,6 +57,7 @@
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    padding-top: 1rem;
   }
 
   .gallery-folder-list {
