@@ -53,7 +53,6 @@
 <style>
   .gallery-folder-wrapper {
     position: relative;
-    z-index: 1000;
     width: 10rem;
     height: 100%;
     overflow-y: auto;
