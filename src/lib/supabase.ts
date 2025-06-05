@@ -108,9 +108,9 @@ export type Database = {
           created_by: string | null;
           folder: string | null;
           id: string;
+          mime_type: Database["public"]["Enums"]["MimeType"];
           name: string;
           r2_key: string;
-          mime_type: Database["public"]["Enums"]["MimeType"];
           status: Database["public"]["Enums"]["ImageStatus"];
         };
         Insert: {
@@ -118,9 +118,9 @@ export type Database = {
           created_by?: string | null;
           folder?: string | null;
           id?: string;
+          mime_type?: Database["public"]["Enums"]["MimeType"];
           name: string;
           r2_key: string;
-          mime_type?: Database["public"]["Enums"]["MimeType"];
           status?: Database["public"]["Enums"]["ImageStatus"];
         };
         Update: {
@@ -128,9 +128,9 @@ export type Database = {
           created_by?: string | null;
           folder?: string | null;
           id?: string;
+          mime_type?: Database["public"]["Enums"]["MimeType"];
           name?: string;
           r2_key?: string;
-          mime_type?: Database["public"]["Enums"]["MimeType"];
           status?: Database["public"]["Enums"]["ImageStatus"];
         };
         Relationships: [];
@@ -202,6 +202,13 @@ export type Database = {
         Args: { p_target_email: string };
         Returns: undefined;
       };
+      get_folder_image_counts: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          folder_name: string;
+          image_count: number;
+        }[];
+      };
       get_full_concert: {
         Args: { p_concert_id: string };
         Returns: Database["public"]["CompositeTypes"]["concert_full_info"];
@@ -238,8 +245,8 @@ export type Database = {
     Enums: {
       ConcertType: "public" | "closed";
       ImageStatus: "pending" | "completed";
+      MimeType: "image/jpeg" | "image/png" | "image/webp" | "image/gif" | "image/avif";
       UserRole: "admin" | "editor" | "user";
-      MimeType: "image/jpeg" | "image/png" | "image/gif" | "image/webp" | "image/avif";
     };
     CompositeTypes: {
       concert_full_info: {
@@ -371,8 +378,8 @@ export const Constants = {
     Enums: {
       ConcertType: ["public", "closed"],
       ImageStatus: ["pending", "completed"],
+      MimeType: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"],
       UserRole: ["admin", "editor", "user"],
-      MimeType: ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"],
     },
   },
 } as const;
