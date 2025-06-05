@@ -13,12 +13,16 @@
   let loading = $state(true);
 
   let images = $state<DBImage[]>([]);
-  let folders = $derived(
-    pageData.folders.map((folder) => ({
+  let folders = $derived([
+    {
+      name: "Alle Bilder",
+      count: pageData.imageCount || 0,
+    },
+    ...pageData.folders.map((folder) => ({
       name: folder.folder_name,
       count: folder.image_count,
     })),
-  );
+  ]);
   let activeFolder = $state<string>("Alle Bilder");
   let innerWidth = $state<number>(640);
   let folderModalOpen = $state(false);
@@ -27,11 +31,18 @@
 
   async function loadMoreImages(e: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
     e.currentTarget.disabled = true;
-    const { data: _images, error } = await supabase
+
+    const query = supabase
       .from("images")
       .select("*")
       .order("created_at", { ascending: false })
       .range(images.length, images.length + IMAGE_LIMIT - 1);
+
+    if (activeFolder !== "Alle Bilder") {
+      query.eq("folder_name", activeFolder);
+    }
+
+    const { data: _images, error } = await query;
 
     if (error) {
       console.error("Error fetching more images:", error);
@@ -85,7 +96,9 @@
     bind:innerWidth
     bind:activeFolder
     onFolderClick={() => {
-      folderModalOpen = false;
+      setTimeout(() => {
+        folderModalOpen = false;
+      }, 200);
     }}
     mobile={false}
   />
@@ -152,7 +165,9 @@
       mobile={true}
       bind:activeFolder
       onFolderClick={() => {
-        folderModalOpen = false;
+        setTimeout(() => {
+          folderModalOpen = false;
+        }, 200);
       }}
     />
   </div>
