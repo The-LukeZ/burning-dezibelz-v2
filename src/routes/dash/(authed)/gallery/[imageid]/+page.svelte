@@ -1,18 +1,34 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import { buildImageUrl } from "$lib";
+  import {
+      buildImageUrl,
+      mimeTypeToExtension,
+      normalizeFolderName,
+      normalizeName,
+      removeExtension,
+  } from "$lib";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
   import Trashcan from "$lib/assets/Trashcan.svelte";
-  import { formatGermanDateTime } from "$lib/utils/concerts";
+  import { formatGermanDateTime } from "$lib/utils/concerts.js";
   import { onMount } from "svelte";
 
   let { supabase } = page.data;
   let imageId = page.params.imageid;
   let siteLoading = $state(false);
   let error = $state<string | null>(null);
+  let success = $state<string | null>(null);
   let image = $state<DBImage | null>(null);
-  let updateData = $state<{ name: string }>({ name: "" });
+  /**
+   * The data used to update the image.
+   *
+   * ### `name` doesn't include the file extension!
+   */
+  const updateData = $state<Pick<DBImage, "name" | "folder" | "mime_type">>({
+    name: "",
+    folder: "",
+    mime_type: "image/webp",
+  });
   let copySuccess = $state(false);
   let imageOnFullDisplay = $state(false);
 
@@ -31,7 +47,9 @@
     }
 
     image = data;
-    updateData.name = data.name;
+    updateData.name = removeExtension(data.name);
+    updateData.folder = data.folder || null;
+    updateData.mime_type = data.mime_type || "image/webp";
   }
 
   async function updateImage() {
@@ -44,10 +62,15 @@
       siteLoading = true;
       error = null;
 
+      const fullName =
+        `${normalizeName(updateData.name)}${mimeTypeToExtension(updateData.mime_type, true)}` as const;
+
+      const fullFolder = updateData.folder ? normalizeFolderName(updateData.folder) : null;
+
       const response = await fetch("/api/cdn/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageId: image.id, newName: updateData.name }),
+        body: JSON.stringify({ imageId: image.id, newName: fullName, newFolder: fullFolder }),
       });
 
       if (!response.ok) {
@@ -138,12 +161,17 @@
     <div class="flex w-full flex-col items-center gap-6 lg:flex-row">
       <!-- Image Preview -->
       <div class="flex w-full flex-col items-center lg:w-1/2">
-        <div class="bg-base-200 dy-skeleton w-full max-w-lg overflow-hidden rounded-lg shadow-lg">
+        <div class="bg-base-200 dy-skeleton relative w-full max-w-lg overflow-hidden rounded-lg shadow-lg">
           <img
             src={buildImageUrl(image.r2_key, { quality: 40 })}
             alt={image.name}
             class="h-full w-full object-contain"
           />
+          <div class="absolute inset-0 top-0 right-0 bottom-0 left-0 grid place-items-center">
+            <button class="dy-btn dy-btn-primary" onclick={() => (imageOnFullDisplay = true)}>
+              View Full Image
+            </button>
+          </div>
         </div>
         <p class="text-base-content/70 mt-2 text-sm">
           Uploaded: {formatGermanDateTime(image.created_at)}
@@ -160,7 +188,6 @@
                 e.preventDefault();
                 updateImage();
               }}
-              class="space-y-4"
             >
               <fieldset class="dy-fieldset">
                 <legend class="dy-fieldset-legend">Image name</legend>
@@ -175,13 +202,25 @@
                   placeholder="Filename"
                   bind:value={updateData.name}
                 />
-                <span
-                  >Note, that you <strong class="font-black">can</strong> remove the file extension, but it is
-                  recommended to keep it for clarity.</span
-                >
                 <p class="dy-validator-hint">
                   Must be valid filename [A-Za-z0-9_.-] and between 3 and 256 characters
                 </p>
+              </fieldset>
+
+              <fieldset class="dy-fieldset">
+                <legend class="dy-fieldset-legend">Folder</legend>
+                <input
+                  type="text"
+                  class="dy-input dy-validator w-full"
+                  bind:value={updateData.folder}
+                  placeholder="Folder"
+                  pattern="[A-Za-z0-9_\- ]+"
+                  title="Alphanumeric characters, underscores, and dashes only"
+                  minlength="1"
+                  maxlength="64"
+                />
+                <span>The name of the folder in which the image is grouped.</span>
+                <p class="dy-validator-hint">Only alphanumeric characters, underscores, and dashes</p>
               </fieldset>
 
               <div class="flex justify-end space-x-2">
