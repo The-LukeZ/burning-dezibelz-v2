@@ -2,14 +2,15 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import {
-      buildImageUrl,
-      mimeTypeToExtension,
-      normalizeFolderName,
-      normalizeName,
-      removeExtension,
+    buildImageUrl,
+    mimeTypeToExtension,
+    normalizeFolderName,
+    normalizeName,
+    removeExtension,
   } from "$lib";
   import ChevronLeft from "$lib/assets/ChevronLeft.svelte";
   import Trashcan from "$lib/assets/Trashcan.svelte";
+  import XIcon from "$lib/assets/XIcon.svelte";
   import { formatGermanDateTime } from "$lib/utils/concerts.js";
   import { onMount } from "svelte";
 
@@ -266,9 +267,26 @@
 <!-- Big ass popup which shows the image on full display when image is clicked -->
 {#if image && imageOnFullDisplay}
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-    <div class="relative max-w-3xl">
+    <div class="big-image-container">
       <img src={buildImageUrl(image.r2_key, { quality: 80 })} alt={image.name} class="rounded-lg shadow-lg" />
-      <button class="absolute top-2 right-2 text-white" onclick={() => (image = null)}> ✖ </button>
+      <button
+        class="dy-btn dy-btn-ghost dy-btn-warning dy-btn-square absolute top-2 right-2 text-white"
+        onclick={() => (imageOnFullDisplay = false)}
+      >
+        <XIcon />
+      </button>
     </div>
   </div>
 {/if}
+
+<style>
+  .big-image-container {
+    position: relative;
+    max-width: calc(100dvw * 0.9);
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+</style>
