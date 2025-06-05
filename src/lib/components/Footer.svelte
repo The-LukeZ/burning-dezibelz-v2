@@ -3,6 +3,8 @@
   import dayjs from "dayjs";
   import Instagram from "../assets/social/Instagram.svelte";
   import Youtube from "../assets/social/Youtube.svelte";
+  import { version } from "$app/environment";
+  console.log(version);
 
   const footerItems = [
     {
@@ -70,6 +72,9 @@
       <img src="/favicon.png" alt="Burning Dezibelz Logo" class="mb-4 size-16 drop-shadow-md" />
       <p>
         Copyright © {dayjs(page.data.currentISODate).year()} - Alle Rechte vorbehalten.
+      </p>
+      <p class="text-xs text-gray-500">
+        Version {version.replace(/"/gi, "")}
       </p>
     </aside>
   </footer>
