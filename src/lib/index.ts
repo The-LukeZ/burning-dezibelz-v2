@@ -127,6 +127,17 @@ export function mimeTypeToExtension(mimeType: string, withPeriod: boolean = true
   throw new Error(`Unsupported MIME type: ${mimeType}`);
 }
 
+/**
+ *
+ * @param name The name to normalize.
+ * This function normalizes a name by:
+ *  - Removing diacritics (accents)
+ *  - Replacing non-alphanumeric characters with dashes
+ *  - Replacing multiple dashes with a single dash
+ *  - Removing leading and trailing dashes
+ *  - Replacing multiple underscores with a single underscore
+ *  - Converting to lowercase
+ */
 export function normalizeName(name: string) {
   return name
     .normalize("NFD")
@@ -136,6 +147,26 @@ export function normalizeName(name: string) {
     .replace(/^-|-$/g, "") // Remove leading and trailing dashes
     .replace(/_+/g, "_") // Replace multiple underscores with a single underscore
     .toLowerCase();
+}
+
+/**
+ *
+ * @param folderName The folder name to normalize.
+ * This function normalizes a folder name by:
+ *  - Removing >1 spaces
+ *  - Replacing >1 dashes with a single dash
+ *  - Replacing >1 underscores with a single underscore
+ *  - Replacing >1 dots with a single dot
+ *  - Removing leading and trailing spaces, dashes, underscores, and dots
+ */
+export function normalizeFolderName(folderName: string) {
+  return folderName
+    .trim()
+    .replace(/\s+/g, " ") // Replace multiple spaces with a single space
+    .replace(/-+/g, "-") // Replace multiple dashes with a single dash
+    .replace(/_+/g, "_") // Replace multiple underscores with a single underscore
+    .replace(/\.+/g, ".") // Replace multiple dots with a single dot
+    .replace(/^[\s\-_.]+|[\s\-_.]+$/g, ""); // Remove leading and trailing spaces, dashes, underscores, and dots
 }
 
 export async function copyConcertLink(concertId: string, venueName: string | null = null) {
