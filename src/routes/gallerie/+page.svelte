@@ -18,7 +18,10 @@
   // Other $state variables
   let activeFolder = $state<string>("Alle Bilder");
   let innerWidth = $state<number>(640);
-  let folderModalOpen = $state(false);
+  let modalsOpen = $state({
+    folderModal: false,
+    addImageModal: false,
+  });
   let imagesByFolder = $state<Record<string, DBImage[]>>({
     "Alle Bilder": [],
   });
@@ -126,7 +129,7 @@ TODO:
     onFolderClick={async (newFolder) => {
       await switchFolder(newFolder);
       setTimeout(() => {
-        folderModalOpen = false;
+        modalsOpen.folderModal = false;
       }, 200);
     }}
     mobile={false}
@@ -185,7 +188,7 @@ TODO:
   {#if innerWidth < 640}
     <button
       class="dy-btn dy-btn-warning dy-btn-soft"
-      onclick={() => (folderModalOpen = true)}
+      onclick={() => (modalsOpen.folderModal = true)}
       transition:slide={{ duration: 200, axis: "x" }}
     >
       Ordner anzeigen
@@ -193,7 +196,7 @@ TODO:
   {/if}
 </div>
 
-<Modal title="Ordner" bind:open={folderModalOpen} closeOnBackdropClick={false}>
+<Modal title="Ordner" bind:open={modalsOpen.folderModal} closeOnBackdropClick={false}>
   <div class="flex w-full justify-center">
     <GalleryFolderList
       {folders}
@@ -201,7 +204,7 @@ TODO:
       onFolderClick={async (newFolder) => {
         await switchFolder(newFolder);
         setTimeout(() => {
-          folderModalOpen = false;
+          modalsOpen.folderModal = false;
         }, 200);
       }}
     />
