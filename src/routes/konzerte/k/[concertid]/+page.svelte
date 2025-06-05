@@ -59,7 +59,7 @@
             await copyConcertLink(concert.id, venue?.name ?? null);
           }}
         >
-          Share
+          Teilen
         </button>
       </div>
     {/if}
