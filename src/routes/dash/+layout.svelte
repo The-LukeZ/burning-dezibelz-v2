@@ -26,5 +26,6 @@
     padding: 1rem;
     max-width: 1280px;
     margin-inline: auto;
+    margin-bottom: 4rem;
   }
 </style>
