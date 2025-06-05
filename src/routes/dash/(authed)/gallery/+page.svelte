@@ -419,23 +419,27 @@
     </fieldset>
     <fieldset class="dy-fieldset border-base-300 rounded-box bg-base-200 w-full border p-4 text-center">
       <legend class="dy-fieldset-legend">Select Folder</legend>
-      <div class="flex flex-col justify-center gap-1">
-        <label class="dy-label w-full">
+      <div class="flex w-full flex-col justify-center gap-1">
+        <label class="dy-label">
           <input
             type="text"
             bind:value={upload.folder.value}
             placeholder="Select a folder or type a new one"
-            class="dy-input dy-input-accent w-full grow"
-            class:dy-input-error={!upload.folder.isValid && upload.folder.value.length > 0}
-            class:dy-input-success={upload.folder.isValid}
+            class="dy-input dy-input-accent w-full"
+            class:dy-input-error={!upload.folder.isValid === true && upload.folder.value.length > 0}
+            class:dy-input-success={upload.folder.isValid === true}
             minlength="3"
             maxlength="64"
             list="folder-list"
             oninput={(e) => {
               const value = e.currentTarget.value.trim();
               upload.folder.value = value;
-              upload.folder.isValid =
-                /^[A-Za-z0-9_\-.öäüß ]+$/.test(value) && value.length >= 3 && value.length <= 64;
+              if (!value) {
+                upload.folder.isValid = null;
+              } else {
+                upload.folder.isValid =
+                  /^[A-Za-z0-9_\-.öäüß ]+$/.test(value) && value.length >= 3 && value.length <= 64;
+              }
             }}
           />
           <datalist id="folder-list">
@@ -455,7 +459,9 @@
             <XIcon />
           </button>
         </label>
-        <p class="dy-validator-hint">Only alphanumeric characters, underscores, spaces and dashes!</p>
+        <p class="text-error" class:hidden={upload.folder.isValid === true || upload.folder.isValid === null}>
+          Only alphanumeric characters, underscores, spaces and dashes!
+        </p>
       </div>
     </fieldset>
     <div class="dy-join dy-join-vertical">
