@@ -97,15 +97,11 @@ declare global {
     fit?: "cover" | "contain" | "fill" | "inside" | "outside";
   }
 
-  type ImageMimeTypes =
-    | "image/jpg"
-    | "image/jpeg"
-    | "image/png"
-    | "image/webp"
-    | "image/gif"
-    | "image/avif"
-    | "image/bmp";
-  type ImageExtension = "jpg" | "jpeg" | "png" | "webp" | "gif" | "avif" | "bmp";
+  type ImageMimeType = Database["public"]["Enums"]["MimeType"];
+
+  type ImageExtension = "jpeg" | "png" | "webp" | "gif" | "avif";
+
+  type ImageExtensionWithDot = `.${ImageExtension}`;
 
   type SchemaOrgSchema = Graph | WithContext<Thing>;
 }
