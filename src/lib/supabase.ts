@@ -110,6 +110,7 @@ export type Database = {
           id: string;
           name: string;
           r2_key: string;
+          mime_type: Database["public"]["Enums"]["MimeType"];
           status: Database["public"]["Enums"]["ImageStatus"];
         };
         Insert: {
@@ -119,6 +120,7 @@ export type Database = {
           id?: string;
           name: string;
           r2_key: string;
+          mime_type?: Database["public"]["Enums"]["MimeType"];
           status?: Database["public"]["Enums"]["ImageStatus"];
         };
         Update: {
@@ -128,6 +130,7 @@ export type Database = {
           id?: string;
           name?: string;
           r2_key?: string;
+          mime_type?: Database["public"]["Enums"]["MimeType"];
           status?: Database["public"]["Enums"]["ImageStatus"];
         };
         Relationships: [];
@@ -236,6 +239,7 @@ export type Database = {
       ConcertType: "public" | "closed";
       ImageStatus: "pending" | "completed";
       UserRole: "admin" | "editor" | "user";
+      MimeType: "image/jpeg" | "image/png" | "image/gif" | "image/webp" | "image/avif";
     };
     CompositeTypes: {
       concert_full_info: {
@@ -368,6 +372,7 @@ export const Constants = {
       ConcertType: ["public", "closed"],
       ImageStatus: ["pending", "completed"],
       UserRole: ["admin", "editor", "user"],
+      MimeType: ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"],
     },
   },
 } as const;
