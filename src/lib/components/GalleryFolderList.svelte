@@ -5,17 +5,23 @@
     folders: { name: string; count: number }[];
     onFolderClick?: (folder: string) => void;
     folder?: string;
+    innerWidth?: number;
+    /**
+     * Indicates if the component is being used on a mobile device.
+     *
+     * - If true, the component will hide the folder list if the screen width is less than 640px.
+     * - If false, it will hide the folder list if the screen width is 640px or more.
+     */
+    mobile?: boolean;
   };
 
-  let { folders, onFolderClick }: Props = $props();
-
-  let innerWidth = $state(0);
+  let { folders, onFolderClick, innerWidth = $bindable(640), mobile }: Props = $props();
 </script>
 
 <svelte:window bind:innerWidth />
 
 <div class="gallery-folder-wrapper">
-  {#if innerWidth >= 640}
+  {#if (mobile && innerWidth < 640) || (!mobile && innerWidth >= 640)}
     <ul class="gallery-folder-list" transition:slide={{ duration: 200, axis: "x" }}>
       {#each folders as { name, count }}
         <li>
@@ -28,8 +34,6 @@
         </li>
       {/each}
     </ul>
-  {:else}
-    <!-- Button which opens a modal with the list -->
   {/if}
 </div>
 
