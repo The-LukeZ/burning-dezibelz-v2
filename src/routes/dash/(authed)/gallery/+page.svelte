@@ -394,7 +394,7 @@ Important note: we use goto() with { invalidateAll: true } to ensure that the pa
 <Modal
   title="Upload Images"
   bind:open={modalsOpen.uploadImage}
-  class="space-y-2"
+  class="space-y-2 max-w-4xl"
   onClose={() => upload.reset()}
 >
   <form class="mx-auto flex w-full max-w-sm flex-col gap-2" onsubmit={handleFileSubmit}>
@@ -411,6 +411,7 @@ Important note: we use goto() with { invalidateAll: true } to ensure that the pa
           class="dy-file-input dy-file-input-accent grow"
         />
         <button
+          type="button"
           class="dy-btn dy-btn-soft dy-btn-circle dy-btn-sm dy-btn-warning"
           class:hidden={!upload.files?.length}
           onclick={() => {
