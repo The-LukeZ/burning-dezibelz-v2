@@ -397,7 +397,7 @@ Important note: we use goto() with { invalidateAll: true } to ensure that the pa
   class="space-y-2 max-w-4xl"
   onClose={() => upload.reset()}
 >
-  <form class="mx-auto flex w-full max-w-sm flex-col gap-2" onsubmit={handleFileSubmit}>
+  <form class="mx-auto flex w-full max-w-lg flex-col gap-2" onsubmit={handleFileSubmit}>
     <fieldset class="dy-fieldset border-base-300 rounded-box bg-base-200 w-full border p-4 text-center">
       <legend class="dy-fieldset-legend">Pick images</legend>
       <label class="dy-label w-full items-center">
