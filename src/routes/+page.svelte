@@ -95,7 +95,7 @@
             {#each serializeConcerts() as concert}
               {@const venue = getVenueById(concert.venue_id, true)}
               <a
-                href={`/konzerte/${concert.id}`}
+                href={`/konzerte/k/${concert.id}`}
                 class="dy-card concert-card shadow-xl transition-all duration-200 hover:scale-105 hover:shadow-2xl"
               >
                 <!-- TODO: Add image display -->
