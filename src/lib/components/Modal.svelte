@@ -44,6 +44,9 @@
     if (!className.includes("max-w")) {
       className = `${className} max-w-[32rem]`;
     }
+    if (!className.includes("max-h")) {
+      className = `${className} max-h-[calc(100dvh-1rem)]`;
+    }
   });
 
   $effect(() => {
@@ -124,6 +127,7 @@
     padding-block: calc(var(--spacing) * 6);
     max-height: calc(100dvh - 1rem);
     overflow-x: clip;
+    overflow-y: auto;
     overscroll-behavior: contain;
     width: 98%;
     max-height: 100dvh;
