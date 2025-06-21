@@ -136,7 +136,7 @@ interface FetchConcertOptions {
 
 export function filterConcerts(concerts: Concert[], options: FetchConcertOptions = {}) {
   // Filter concerts based on the options
-  let filteredConcerts = structuredClone(concerts);
+  let filteredConcerts = [...concerts];
   if (options.before) {
     filteredConcerts = filteredConcerts.filter((concert) => new Date(concert.timestamp) < options.before!);
   }
