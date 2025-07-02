@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/sveltekit";
 import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
-import { type Handle } from "@sveltejs/kit";
+import { redirect, type Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
 import { NODE_ENV, R2_ENDPOINT, SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
@@ -25,10 +25,9 @@ export async function init() {
   console.debug("S3 Client endpoint:", R2_ENDPOINT);
 }
 
-const devToolsCheck: Handle = async ({ event, resolve }) => {
-  if (event.url.pathname.startsWith("/.well-known/appspecific/com.chrome.devtools")) {
-    console.debug("Serving empty DevTools response");
-    return new Response(null, { status: 204 }); // Return empty response with 204 No Content
+const baseHandle: Handle = async ({ event, resolve }) => {
+  if (event.url.pathname === "/about") {
+    redirect(301, "/ueber-uns");
   }
   return resolve(event);
 };
@@ -187,7 +186,7 @@ const authUserMiddleware: Handle = async ({ event, resolve }) => {
 
 export const handle = sequence(
   Sentry.sentryHandle(),
-  devToolsCheck,
+  baseHandle,
   supabase,
   userSessionMiddleware,
   apiAuthGuard,
