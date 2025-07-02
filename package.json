@@ -1,13 +1,12 @@
 {
   "name": "burning-dezibelz-v2",
   "private": true,
-  "version": "2.3.6",
+  "version": "2.3.7",
   "type": "module",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "vite dev",
     "build": "vite build",
-    "local": "node --env-file=./env/.env.local build/index.js",
-    "start": "node --env-file=./env/.env.production build/index.js",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -25,7 +24,6 @@
     "@tailwindcss/vite": "^4.1.7",
     "@testing-library/svelte": "^5.2.4",
     "@types/pikaday": "^1.7.9",
-    "cross-env": "^7.0.3",
     "daisyui": "^5.0.43",
     "jsdom": "^26.0.0",
     "prettier": "^3.5.3",
