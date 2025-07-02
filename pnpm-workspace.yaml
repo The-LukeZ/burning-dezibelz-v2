@@ -1,0 +1,9 @@
+packages:
+  - "." # We are in the root directory
+
+onlyBuiltDependencies:
+  - '@sentry/cli'
+  - '@tailwindcss/oxide'
+  - esbuild
+  - sharp
+  - supabase
