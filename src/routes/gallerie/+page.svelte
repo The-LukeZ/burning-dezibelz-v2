@@ -178,7 +178,9 @@ TODO:
           activeFolder === "Alle Bilder" ? totalImages : imagesByFolder[activeFolder]?.length || 0}
         {#if !loading && imageCount > currentImgs.length}
           <p class="text-gray-500">{currentImgs.length} von {imageCount} Bildern geladen</p>
-          <button class="dy-btn dy-btn-primary dy-btn-soft" onclick={loadMoreImages}>Mehr laden</button>
+          <button class="dy-btn dy-btn-primary dy-btn-soft" onclick={(e) => loadMoreImages(e)}>
+            Mehr laden
+          </button>
         {:else if !loading && currentImgs.length == imageCount}
           <p class="text-gray-500">Alle Bilder wurden geladen.</p>
         {/if}
