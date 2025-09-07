@@ -2,7 +2,7 @@ const navItems = {
   public: [
     { href: "/konzerte", label: "Konzerte" },
     { href: "/ueber-uns", label: "Über uns" },
-    { href: "/galerie", label: "Galerie" },
+    { href: "/gallerie", label: "Gallerie" },
     { href: "/kontakt", label: "Kontakt" },
   ],
   private: [
