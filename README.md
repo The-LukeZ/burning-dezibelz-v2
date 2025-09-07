@@ -2,7 +2,7 @@
 
 ## Links
 
-- [Supabase Types](https://supabase.com/dashboard/project/oboimzyiexjbewvrnxvx/api?page=tables-intro)
+- [Supabase Types](https://supabase.com/internboard/project/oboimzyiexjbewvrnxvx/api?page=tables-intro)
 - [Vercel](https://vercel.com/the-lukezs-projects/burning-dezibelz)
 
 ## TODO

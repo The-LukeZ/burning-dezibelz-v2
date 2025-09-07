@@ -111,7 +111,7 @@
         throw new Error("Failed to delete image");
       }
 
-      goto("/dash/gallery");
+      goto("/intern/gallery");
     } catch (err: any) {
       error = err.message;
       console.error("Delete failed:", err);
@@ -140,7 +140,7 @@
 
 <div class="mx-auto flex w-full max-w-4xl flex-col items-center justify-center space-y-6 p-4">
   <div class="grid w-full grid-cols-1 place-items-center gap-4 sm:grid-cols-3 sm:place-items-stretch">
-    <button class="dy-btn dy-btn-outline w-fit" onclick={() => goto("/dash/gallery")}>
+    <button class="dy-btn dy-btn-outline w-fit" onclick={() => goto("/intern/gallery")}>
       <ChevronLeft />
       Back to Gallery
     </button>

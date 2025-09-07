@@ -7,7 +7,7 @@
   let loading = $state(false);
 
   function showConcertDetails(concertId: string) {
-    goto(`/dash/concerts/edit/${concertId}`);
+    goto(`/intern/concerts/edit/${concertId}`);
   }
 
   async function handleDelete(concertId: string) {
@@ -29,10 +29,10 @@
 <div class="flex flex-col items-center justify-between gap-2 md:flex-row">
   <h1 class="text-2xl font-bold">Concert Management (Upcoming)</h1>
   <div class="ml-auto grid grid-cols-1 items-center gap-2 md:grid-cols-2">
-    <a href="/dash/concerts/archive" class="dy-btn dy-btn-soft dy-btn-success dy-btn-sm">
+    <a href="/intern/concerts/archive" class="dy-btn dy-btn-soft dy-btn-success dy-btn-sm">
       📦 Archived Concerts
     </a>
-    <a href="/dash/concerts/new" class="dy-btn dy-btn-soft">Add Concert</a>
+    <a href="/intern/concerts/new" class="dy-btn dy-btn-soft">Add Concert</a>
   </div>
 </div>
 

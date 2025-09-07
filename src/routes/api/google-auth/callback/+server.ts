@@ -32,7 +32,7 @@ export const GET = async ({ url, locals: { supabase } }) => {
           }
           // Email not in allowed list - sign them out and redirect to error page
           await supabase.auth.signOut({ scope: "global" });
-          redirect(303, "/dash/login?error=Email+not+authorized");
+          redirect(303, "/intern/login?error=Email+not+authorized");
         }
 
         // Email is allowed, continue with the authentication flow
@@ -40,11 +40,11 @@ export const GET = async ({ url, locals: { supabase } }) => {
       } else {
         // No email found on the user object
         await supabase.auth.signOut({ scope: "global" });
-        redirect(303, "/dash/login?error=Email+not+found");
+        redirect(303, "/internrn/login?error=Email+not+found");
       }
     }
   }
 
   // Something went wrong, redirect to homepage
-  redirect(303, "/dash/login?error=Authentication+failed");
+  redirect(303, "/internrn/login?error=Authentication+failed");
 };

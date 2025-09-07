@@ -1,9 +1,9 @@
 <script lang="ts">
+  import { version } from "$app/environment";
   import { page } from "$app/state";
   import dayjs from "dayjs";
   import Instagram from "../assets/social/Instagram.svelte";
   import Youtube from "../assets/social/Youtube.svelte";
-  import { version } from "$app/environment";
   console.log(version);
 
   const footerItems = [
@@ -16,7 +16,7 @@
         { label: "Kontakt", href: "/kontakt" },
         { label: "Gallerie", href: "/gallerie" },
         { label: "Setlist", href: "/setlist" },
-        { label: "Intern", href: "/dash/login" },
+        { label: "Intern", href: "/intern/login" },
       ],
     },
     {

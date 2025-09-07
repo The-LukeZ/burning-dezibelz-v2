@@ -17,7 +17,7 @@
 #  \______________________________/
 
 User-agent: *
-Disallow: /dash/
+Disallow: /intern/
 Disallow: /api/
 Allow: /
 

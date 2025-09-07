@@ -16,9 +16,9 @@
     if (banner && firstSection) {
       const firstSectionTop = firstSection.offsetTop - 100; // Adjust for some padding
       const opacity = 1 - Math.min(1, scrollY / firstSectionTop);
-      const translateY = scrollY * 0.5;
+      // const translateY = scrollY * 0.5;
       banner.style.opacity = opacity.toString();
-      banner.style.transform = `translateY(${translateY}px)`;
+      // banner.style.transform = `translateY(${translateY}px)`;
     }
   }
 

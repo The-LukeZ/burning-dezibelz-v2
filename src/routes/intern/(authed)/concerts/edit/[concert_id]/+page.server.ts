@@ -1,5 +1,5 @@
 export async function load({ params, locals: { supabase }, url }) {
-  const backUrl = url.searchParams.get("back") === "archive" ? "/dash/concerts/archive" : "/dash/concerts";
+  const backUrl = url.searchParams.get("back") === "archive" ? "/intern/concerts/archive" : "/intern/concerts";
   const { data: fullData, error: imageError } = await supabase.rpc("get_full_concert", {
     p_concert_id: params.concert_id,
   });

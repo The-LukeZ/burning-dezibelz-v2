@@ -123,7 +123,7 @@
       EventStore.concerts.set(newConcert.id, newConcert);
 
       // Navigate back to concerts list on success
-      goto("/dash/concerts");
+      goto("/intern/concerts");
     } catch (err: any) {
       error = err.message;
     } finally {
@@ -255,7 +255,7 @@
         </SelectVenue>
 
         <p class="dy-label">
-          Venue not here? <a href="/dash/venues/new" class="dy-link hover:text-slate-300">
+          Venue not here? <a href="/intern/venues/new" class="dy-link hover:text-slate-300">
             Add a new venue
           </a>
         </p>
@@ -404,7 +404,7 @@
     {/if}
 
     <div class="mt-2 flex flex-row justify-end gap-4">
-      <button class="dy-btn dy-btn-error" onclick={() => goto("/dash/concerts")}>Cancel</button>
+      <button class="dy-btn dy-btn-error" onclick={() => goto("/intern/concerts")}>Cancel</button>
       <button class="dy-btn dy-btn-primary" disabled={loading} onclick={handleSubmit}>
         {loading ? "Updating..." : "Update Concert"}
       </button>

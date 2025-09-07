@@ -3,7 +3,7 @@ import { fail, redirect } from "@sveltejs/kit";
 export async function load({ locals }) {
   if (locals.user && locals.session) {
     // User is already authenticated, redirect to home
-    redirect(303, "/dash/home");
+    redirect(303, "/intern/home");
   }
 
   return {};
@@ -15,7 +15,7 @@ export const actions = {
     const { data, error: err } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${url.origin}/api/google-auth/callback?next=${url.searchParams.get("next") || "/dash/home"}`,
+        redirectTo: `${url.origin}/api/google-auth/callback?next=${url.searchParams.get("next") || "/intern/home"}`,
         skipBrowserRedirect: true,
       },
     });

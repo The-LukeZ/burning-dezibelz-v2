@@ -51,7 +51,7 @@
       EventStore.venues.set(data.id, data);
 
       // Navigate back to concerts list on success
-      goto("/dash/venues");
+      goto("/intern/venues");
     } catch (err: any) {
       error = err.message;
     } finally {
@@ -62,7 +62,7 @@
 
 {#if venue}
   <div class="container mx-auto flex h-full max-w-xl flex-col gap-4">
-    <a href="/dash/venues" class="dy-btn dy-btn-soft dy-btn-sm dy-btn-info w-fit">
+    <a href="/intern/venues" class="dy-btn dy-btn-soft dy-btn-sm dy-btn-info w-fit">
       <ChevronLeft />
       Go back
     </a>
@@ -136,7 +136,7 @@
     </fieldset>
 
     <div class="mt-2 flex flex-row justify-end gap-4">
-      <button class="dy-btn dy-btn-error" onclick={() => goto("/dash/venues")}>Cancel</button>
+      <button class="dy-btn dy-btn-error" onclick={() => goto("/intern/venues")}>Cancel</button>
       <button class="dy-btn dy-btn-primary" disabled={loading} onclick={handleSubmit}>
         {loading ? "Updating..." : "Update Venue"}
       </button>

@@ -8,7 +8,7 @@
   import equal from "fast-deep-equal";
   import { onMount } from "svelte";
 
-  let isDashboard = $derived(page.url.pathname.startsWith("/dash"));
+  let isDashboard = $derived(page.url.pathname.startsWith("/intern"));
   let userIsAdmin = $derived(page.data.isAdmin);
   let oldItems: NavItem[] = [];
   let navItems = $state<NavItem[]>([]);
@@ -63,10 +63,10 @@
     </li>
   {/each}
 
-  {#if isDashboard && page.url.pathname !== "/dash/login"}
+  {#if isDashboard && page.url.pathname !== "/intern/login"}
     <button
       class="dy-btn dy-btn-error dy-btn-outline"
-      onclick={() => goto("/dash/logout")}
+      onclick={() => goto("/intern/logout")}
       aria-label="Logout"
     >
       <svg

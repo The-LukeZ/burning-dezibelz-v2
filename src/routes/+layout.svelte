@@ -1,16 +1,14 @@
 <script lang="ts">
-  import AdblockAlert from './AdblockAlert.svelte';
 
-  import "../app.css";
-  import { afterNavigate, beforeNavigate, goto, invalidateAll } from "$app/navigation";
-  import { onMount } from "svelte";
   import { browser } from "$app/environment";
+  import { afterNavigate, beforeNavigate, goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
+  import Footer from "$lib/components/Footer.svelte";
   import Navbar from "$lib/components/Navbar.svelte";
   import "$lib/stores/events.svelte.js";
-  import Footer from "$lib/components/Footer.svelte";
+  import { onMount } from "svelte";
   import { slide } from "svelte/transition";
-  import { testSentryConnection } from "$lib/utils/sentryDetect";
+  import "../app.css";
 
   let { data, children } = $props();
   let { supabase, session } = $derived(data);
@@ -75,7 +73,7 @@
   {/if}
 </div>
 
-{#if !page.url.pathname.startsWith("/dash")}
+{#if !page.url.pathname.startsWith("/intern")}
   <Footer />
 {/if}
 

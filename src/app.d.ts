@@ -79,8 +79,8 @@ declare global {
     requiresAdmin?: boolean;
     /**
      * This is used to determine how the path should be matched against the current URL.
-     * - "partial" means the path can be a substring of the current URL (e.g., "/dash" matches "/dash/concerts")
-     * - "exact" means the path must match the current URL exactly (e.g., "/dash" does not match "/dash/concerts")
+     * - "partial" means the path can be a substring of the current URL (e.g., "/intern" matches "/intern/concerts")
+     * - "exact" means the path must match the current URL exactly (e.g., "/internrn" does not match/interntern/concerts")
      *
      * This is useful for navigation items that should only be highlighted when the user is on a specific page.
      *
@@ -106,4 +106,5 @@ declare global {
   type SchemaOrgSchema = Graph | WithContext<Thing>;
 }
 
-export {};
+export { };
+

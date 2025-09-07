@@ -9,7 +9,7 @@
   let concerts = new SvelteMap<string, Concert>();
 
   function showConcertDetails(concertId: string) {
-    goto(`/dash/concerts/edit/${concertId}?back=archive`);
+    goto(`/intern/concerts/edit/${concertId}?back=archive`);
   }
 
   async function handleDelete(concertId: string) {
@@ -48,8 +48,8 @@
 <div class="flex flex-col items-center justify-between gap-2 md:flex-row">
   <h1 class="text-2xl font-bold">Concert Management (Archive)</h1>
   <div class="grid grid-cols-1 gap-2 md:grid-cols-2 items-center ml-auto">
-    <a href="/dash/concerts" class="dy-btn dy-btn-soft dy-btn-success dy-btn-sm"> 📅 Upcoming Concerts </a>
-    <a href="/dash/concerts/new?back=archive" class="dy-btn dy-btn-soft">Add Concert</a>
+    <a href="/intern/concerts" class="dy-btn dy-btn-soft dy-btn-success dy-btn-sm"> 📅 Upcoming Concerts </a>
+    <a href="/intern/concerts/new?back=archive" class="dy-btn dy-btn-soft">Add Concert</a>
   </div>
 </div>
 

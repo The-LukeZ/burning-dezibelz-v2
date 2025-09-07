@@ -32,7 +32,7 @@
 
   <form
     method="POST"
-    action="?/login&next={encodeURIComponent(page.url.searchParams.get('next') ?? '/dash/home')}"
+    action="?/login&next={encodeURIComponent(page.url.searchParams.get('next') ?? '/intern/home')}"
   >
     <button
       type="submit"

@@ -49,7 +49,7 @@
     {/each}
   </div>
 
-  <button class="dy-btn dy-btn-error dy-btn-outline w-full" onclick={() => goto("/dash/logout")}>
+  <button class="dy-btn dy-btn-error dy-btn-outline w-full" onclick={() => goto("/intern/logout")}>
     Logout
   </button>
 </section>

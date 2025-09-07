@@ -8,7 +8,7 @@
   seo_config={{
     title: "Dashboard | Burning Dezibelz",
     description: "Interner Bereich der Burning Dezibelz",
-    url: "https://burningdezibelz.de/dash",
+    url: "https://burningdezibelz.de/intern",
     author_name: "Burning Dezibelz",
     language: "de",
     twitter_card_type: "summary",

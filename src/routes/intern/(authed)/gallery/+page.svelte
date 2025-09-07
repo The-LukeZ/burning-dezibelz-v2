@@ -64,7 +64,7 @@ Important note: we use goto() with { invalidateAll: true } to ensure that the pa
   const IMAGE_LIMIT = 20;
 
   function viewImage(imageId: string) {
-    goto(`/dash/gallery/${imageId}`);
+    goto(`/intern/gallery/${imageId}`);
   }
 
   // New folder-related functions
@@ -394,7 +394,7 @@ Important note: we use goto() with { invalidateAll: true } to ensure that the pa
 <Modal
   title="Upload Images"
   bind:open={modalsOpen.uploadImage}
-  class="space-y-2 max-w-4xl"
+  class="max-w-4xl space-y-2"
   onClose={() => upload.reset()}
 >
   <form class="mx-auto flex w-full max-w-lg flex-col gap-2" onsubmit={handleFileSubmit}>

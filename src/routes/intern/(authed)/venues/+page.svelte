@@ -20,13 +20,13 @@
   }
 
   function showVenueDetails(venueId: string) {
-    goto(`/dash/venues/edit/${venueId}`);
+    goto(`/intern/venues/edit/${venueId}`);
   }
 </script>
 
 <div class="flex flex-row">
   <h1 class="mb-4 text-2xl font-bold">Venue Management</h1>
-  <a href="/dash/venues/new" class="dy-btn dy-btn-soft ml-auto">Add Venue</a>
+  <a href="/intern/venues/new" class="dy-btn dy-btn-soft ml-auto">Add Venue</a>
 </div>
 
 <div class="overflow-x-auto">
