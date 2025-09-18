@@ -33,16 +33,6 @@
       </a>
     </p>
   </article>
-  <span class="dy-divider"></span>
-  <article>
-    <h3>Verantwortlich für den Inhalt der Seiten:</h3>
-    <ul class="list-none">
-      <li class="mt-0 mb-0">Luca Hentschel</li>
-      <li class="mt-0 mb-0">Schneeberger Straße 31</li>
-      <li class="mt-0 mb-0">08112 Wilkau-Haßlau</li>
-      <li class="mt-0 mb-0">Deutschland</li>
-    </ul>
-  </article>
 </div>
 
 <style>

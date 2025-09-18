@@ -2,9 +2,7 @@
 
 Verantwortlich für die Datenverarbeitung auf dieser Website ist:
 
-**Luca Hentschel**
-Schneeberger Str. 31
-08112 Wilkau-Haßlau
+Burning Dezibelz
 E-Mail: [burningdezibelz@gmail.com](mailto:burningdezibelz@gmail.com)
 
 ## § 2 Rechtsgrundlagen der Datenverarbeitung
