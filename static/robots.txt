@@ -19,6 +19,9 @@
 User-agent: *
 Disallow: /intern/
 Disallow: /api/
+Disallow: /impressum
+Disallow: /datenschutz
+Disallow: /agb
 Allow: /
 
 Sitemap: https://burningdezibelz.de/sitemap.xml
