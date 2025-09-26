@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import { browser } from "$app/environment";
   import { afterNavigate, beforeNavigate, goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
@@ -13,7 +12,6 @@
   let { data, children } = $props();
   let { supabase, session } = $derived(data);
   let pageLoading = $state(false);
-  let showCookieBanner = $state(false);
 
   beforeNavigate(async () => {
     pageLoading = true;
@@ -50,10 +48,6 @@
       }
     });
 
-    if (browser) {
-      showCookieBanner = localStorage.getItem("cookie-banner-accepted") !== "true";
-    }
-
     return () => subscription.unsubscribe();
   });
 </script>
@@ -79,26 +73,6 @@
 
 <div class="dy-toast dy-toast-bottom dy-toast-center items-center">
   <!-- TODO: Add Adblock Alert (doesn't really work atm) -->
-  {#if showCookieBanner}
-    <div class="dy-alert dy-alert-info dy-alert-vertical w-fit" transition:slide={{ duration: 200 }}>
-      <div class="flex flex-col gap-1">
-        <h3 class="text-base font-semibold">Cookies</h3>
-        <p class="text-sm">
-          Diese Website verwendet nur notwendige Cookies.<br />
-          <a href="/datenschutz" class="dy-link">Datenschutzerklärung</a>
-        </p>
-      </div>
-      <button
-        class="dy-btn dy-btn-primary dy-btn-sm dy-btn-soft"
-        onclick={() => {
-          showCookieBanner = false;
-          localStorage.setItem("cookie-banner-accepted", "true");
-        }}
-      >
-        OK
-      </button>
-    </div>
-  {/if}
 </div>
 
 <style>

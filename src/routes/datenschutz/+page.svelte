@@ -51,22 +51,6 @@
     </section>
 
     <section>
-      <h3>Verwendung von Cookies</h3>
-      <p>
-        Diese Website verwendet Cookies ausschließlich für folgende Zwecke:
-      </p>
-      <ul class="list-inside list-disc">
-        <li>Authentifizierung und Aufrechterhaltung der Anmeldesitzung</li>
-        <li>Technische Abwicklung der Datenlöschung</li>
-      </ul>
-      <p>
-        Es werden keine Tracking- oder Marketing-Cookies verwendet. Die Cookies sind für die Funktionalität
-        der Anmeldung technisch erforderlich und werden nach dem Abmelden oder automatisch nach Ablauf
-        der Sitzung gelöscht.
-      </p>
-    </section>
-
-    <section>
       <h3>Zweck der Datenverarbeitung</h3>
       <p>
         Die erhobenen Daten dienen ausschließlich der Authentifizierung und dem internen Zugang zu geschützten
